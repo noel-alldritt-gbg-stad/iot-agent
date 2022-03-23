@@ -6,12 +6,33 @@ import (
 	"os"
 	"time"
 
+	"github.com/diwise/iot-agent/internal/pkg/presentation/api"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
 
 func main() {
 
+	go SetupAndRunMQTT()
+
+	SetupAndRunApi()
+}
+
+func SetupAndRunApi() {
+	r := chi.NewRouter()
+
+	a := api.NewApi(r)
+
+	port := os.Getenv("SERVICE_PORT")
+	if port == "" {
+		port = "8880"
+	}
+
+	a.Start(port)
+}
+
+func SetupAndRunMQTT() {
 	options := mqtt.NewClientOptions()
 	// broker IP and port
 
