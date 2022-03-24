@@ -21,7 +21,6 @@ type iotAgentApi struct {
 }
 
 func NewApi(r chi.Router) API {
-
 	a := newIotAgentApi(r)
 
 	return a
