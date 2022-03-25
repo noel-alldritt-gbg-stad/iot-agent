@@ -25,7 +25,7 @@ func main() {
 	mqttConfig, _ := mqtt.NewConfigFromEnvironment()
 	mqttClient, err := mqtt.NewClient(logger, mqttConfig)
 	if err != nil {
-		panic("failed to create mqtt client: " + err.Error()) // TODO: Use proper logging (will be handled in its own commit)
+		logger.Fatal().Err(err).Msg("failed to create mqtt client")
 	}
 	mqttClient.Start()
 	defer mqttClient.Stop()
