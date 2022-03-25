@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/diwise/iot-agent/internal/pkg/application"
+	"github.com/diwise/iot-agent/internal/pkg/application/iotagent"
 	"github.com/go-chi/chi/v5"
 	"github.com/matryer/is"
 )
@@ -34,11 +34,11 @@ func TestXxx(t *testing.T) {
 	is.Equal(len(app.MessageReceivedCalls()), 1)
 }
 
-func testSetup(t *testing.T) (*is.I, *api, *application.IoTAgentMock) {
+func testSetup(t *testing.T) (*is.I, *api, *iotagent.IoTAgentMock) {
 	is := is.New(t)
 	r := chi.NewRouter()
 
-	app := &application.IoTAgentMock{
+	app := &iotagent.IoTAgentMock{
 		MessageReceivedFunc: func(msg []byte) error {
 			return nil
 		},

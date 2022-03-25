@@ -1,14 +1,18 @@
-package application
+package iotagent
+
+import (
+	msgProcess "github.com/diwise/iot-agent/internal/pkg/application/messageprocessor"
+)
 
 type IoTAgent interface {
 	MessageReceived(msg []byte) error
 }
 
 type iotAgent struct {
-	mp MessageProcessor
+	mp msgProcess.MessageProcessor
 }
 
-func NewIoTAgent(mp MessageProcessor) IoTAgent {
+func NewIoTAgent(mp msgProcess.MessageProcessor) IoTAgent {
 	app := &iotAgent{
 		mp: mp,
 	}

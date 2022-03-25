@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/diwise/iot-agent/internal/pkg/application"
+	"github.com/diwise/iot-agent/internal/pkg/application/iotagent"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httplog"
@@ -20,16 +20,16 @@ type API interface {
 
 type api struct {
 	r   chi.Router
-	app application.IoTAgent
+	app iotagent.IoTAgent
 }
 
-func NewApi(r chi.Router, app application.IoTAgent) API {
+func NewApi(r chi.Router, app iotagent.IoTAgent) API {
 	a := newAPI(r, app)
 
 	return a
 }
 
-func newAPI(r chi.Router, app application.IoTAgent) *api {
+func newAPI(r chi.Router, app iotagent.IoTAgent) *api {
 	a := &api{
 		r:   r,
 		app: app,

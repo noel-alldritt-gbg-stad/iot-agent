@@ -3,7 +3,10 @@ package main
 import (
 	"os"
 
-	"github.com/diwise/iot-agent/internal/pkg/application"
+	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
+	"github.com/diwise/iot-agent/internal/pkg/application/events"
+	"github.com/diwise/iot-agent/internal/pkg/application/iotagent"
+	"github.com/diwise/iot-agent/internal/pkg/application/messageprocessor"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
 	"github.com/diwise/iot-agent/internal/pkg/infrastructure/services/mqtt"
 	"github.com/diwise/iot-agent/internal/pkg/presentation/api"
@@ -24,16 +27,16 @@ func main() {
 	SetupAndRunApi(app)
 }
 
-func SetupIoTAgent() application.IoTAgent {
+func SetupIoTAgent() iotagent.IoTAgent {
 	dmc := domain.NewDeviceManagementClient()
-	cr := application.NewConverterRegistry()
-	event := application.NewEventPublisher()
-	mp := application.MessageReceivedProcessor(dmc, cr, event)
+	cr := conversion.NewConverterRegistry()
+	event := events.NewEventPublisher()
+	mp := messageprocessor.NewMessageReceivedProcessor(dmc, cr, event)
 
-	return application.NewIoTAgent(mp)
+	return iotagent.NewIoTAgent(mp)
 }
 
-func SetupAndRunApi(app application.IoTAgent) {
+func SetupAndRunApi(app iotagent.IoTAgent) {
 	r := chi.NewRouter()
 
 	a := api.NewApi(r, app)
