@@ -22,17 +22,15 @@ type msgProcessor struct {
 }
 
 func NewMessageReceivedProcessor(dmc domain.DeviceManagementClient, conReg conversion.ConverterRegistry, event events.EventPublisher) MessageProcessor {
-	mp := &msgProcessor{
+	return &msgProcessor{
 		dmc:    dmc,
 		conReg: conReg,
 		event:  event,
 	}
-
-	return mp
 }
 
 func (mp *msgProcessor) ProcessMessage(msg []byte) error {
-	// extract and send devEUI to devicemanagementclient
+	// extract and send devEUI to device management client
 	// format is from mqtt, not device management client
 
 	dm := DeviceMessage{}
@@ -41,6 +39,8 @@ func (mp *msgProcessor) ProcessMessage(msg []byte) error {
 	if err == nil {
 		result, err := mp.dmc.FindDeviceFromDevEUI(dm.DevEUI)
 		if err == nil {
+			// response with internal id, type and gets passed to Converter registry
+			// converter registry returns the correct converters
 			messageConverter := mp.conReg.DesignateConverters(result)
 			if len(messageConverter) == 0 {
 				return fmt.Errorf("no matching converters for device")
@@ -57,9 +57,6 @@ func (mp *msgProcessor) ProcessMessage(msg []byte) error {
 			}
 		}
 	}
-
-	// response with internal id, type and gets passed to Converter registry
-	// converter registry returns the correct converters
 
 	return err
 }

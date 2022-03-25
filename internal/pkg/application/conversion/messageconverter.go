@@ -9,6 +9,10 @@ type MessageConverter interface {
 type msgConverter struct {
 }
 
+func NewMessageConverter() MessageConverter {
+	return &msgConverter{}
+}
+
 func (mc *msgConverter) ConvertPayload(msg []byte) (InternalMessageFormat, error) {
 	return InternalMessageFormat{}, nil
 }

@@ -10,9 +10,7 @@ type converterRegistry struct {
 }
 
 func NewConverterRegistry() ConverterRegistry {
-	cr := &converterRegistry{}
-
-	return cr
+	return &converterRegistry{}
 }
 
 // bestämt vilken converter som ska användas till ett visst meddelande

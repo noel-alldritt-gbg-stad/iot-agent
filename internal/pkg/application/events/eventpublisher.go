@@ -14,9 +14,7 @@ type eventPublisher struct {
 }
 
 func NewEventPublisher() EventPublisher {
-	event := &eventPublisher{}
-
-	return event
+	return &eventPublisher{}
 }
 
 //places a converted message on rabbit...

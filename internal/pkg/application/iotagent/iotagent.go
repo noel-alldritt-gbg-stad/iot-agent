@@ -13,11 +13,9 @@ type iotAgent struct {
 }
 
 func NewIoTAgent(mp msgProcess.MessageProcessor) IoTAgent {
-	app := &iotAgent{
+	return &iotAgent{
 		mp: mp,
 	}
-
-	return app
 }
 
 // this function is likely to be renamed
