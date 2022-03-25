@@ -7,10 +7,7 @@ type MessageConverter interface {
 //konvertera payload till internt format
 
 type msgConverter struct {
-}
-
-func NewMessageConverter() MessageConverter {
-	return &msgConverter{}
+	Type string
 }
 
 func (mc *msgConverter) ConvertPayload(msg []byte) (InternalMessageFormat, error) {
