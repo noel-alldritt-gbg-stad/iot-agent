@@ -13,9 +13,15 @@ import (
 func main() {
 	app := SetupIoTAgent()
 
-	go SetupAndRunApi(app)
+	mqttConfig, _ := mqtt.NewConfigFromEnvironment()
+	mqttClient, err := mqtt.NewClient(mqttConfig)
+	if err != nil {
+		panic("failed to create mqtt client: " + err.Error()) // TODO: Use proper logging (will be handled in its own commit)
+	}
+	mqttClient.Start()
+	defer mqttClient.Stop()
 
-	mqtt.SetupAndRunMQTT()
+	SetupAndRunApi(app)
 }
 
 func SetupIoTAgent() application.IoTAgent {
