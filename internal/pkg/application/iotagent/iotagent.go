@@ -1,7 +1,10 @@
 package iotagent
 
 import (
-	msgProcess "github.com/diwise/iot-agent/internal/pkg/application/messageprocessor"
+	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
+	"github.com/diwise/iot-agent/internal/pkg/application/events"
+	"github.com/diwise/iot-agent/internal/pkg/application/messageprocessor"
+	"github.com/diwise/iot-agent/internal/pkg/domain"
 )
 
 type IoTAgent interface {
@@ -9,12 +12,15 @@ type IoTAgent interface {
 }
 
 type iotAgent struct {
-	mp msgProcess.MessageProcessor
+	mp messageprocessor.MessageProcessor
 }
 
-func NewIoTAgent(mp msgProcess.MessageProcessor) IoTAgent {
+func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventPublisher) IoTAgent {
+	conreg := conversion.NewConverterRegistry()
+	msgprcs := messageprocessor.NewMessageReceivedProcessor(dmc, conreg, eventPub)
+
 	return &iotAgent{
-		mp: mp,
+		mp: msgprcs,
 	}
 }
 
