@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"runtime/debug"
 	"strings"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
@@ -15,9 +16,7 @@ import (
 )
 
 func main() {
-	serviceName := "iot-agent"
-
-	logger := log.With().Str("service", strings.ToLower(serviceName)).Logger()
+	logger := newLogger("iot-agent")
 	logger.Info().Msg("starting up ...")
 
 	app := SetupIoTAgent()
@@ -31,6 +30,30 @@ func main() {
 	defer mqttClient.Stop()
 
 	SetupAndRunApi(logger, app)
+}
+
+func newLogger(serviceName string) zerolog.Logger {
+	logger := log.With().Str("service", strings.ToLower(serviceName)).Logger()
+
+	buildInfo, ok := debug.ReadBuildInfo()
+	if ok {
+		buildSettings := buildInfo.Settings
+		infoMap := map[string]string{}
+		for _, s := range buildSettings {
+			infoMap[s.Key] = s.Value
+		}
+
+		sha := infoMap["vcs.revision"]
+		if infoMap["vcs.modified"] == "true" {
+			sha += "+"
+		}
+
+		logger = logger.With().Str("version", sha).Logger()
+	} else {
+		logger.Error().Msg("failed to extract build information")
+	}
+
+	return logger
 }
 
 func SetupIoTAgent() iotagent.IoTAgent {
