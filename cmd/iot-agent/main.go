@@ -12,6 +12,7 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/infrastructure/services/mqtt"
 	"github.com/diwise/iot-agent/internal/pkg/presentation/api"
 	"github.com/go-chi/chi/v5"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
@@ -31,7 +32,7 @@ func main() {
 	mqttClient.Start()
 	defer mqttClient.Stop()
 
-	SetupAndRunApi(app)
+	SetupAndRunApi(logger, app)
 }
 
 func SetupIoTAgent() iotagent.IoTAgent {
@@ -43,10 +44,10 @@ func SetupIoTAgent() iotagent.IoTAgent {
 	return iotagent.NewIoTAgent(mp)
 }
 
-func SetupAndRunApi(app iotagent.IoTAgent) {
+func SetupAndRunApi(logger zerolog.Logger, app iotagent.IoTAgent) {
 	r := chi.NewRouter()
 
-	a := api.NewApi(r, app)
+	a := api.NewApi(logger, r, app)
 
 	port := os.Getenv("SERVICE_PORT")
 	if port == "" {

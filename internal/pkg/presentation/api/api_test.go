@@ -11,6 +11,7 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/application/iotagent"
 	"github.com/go-chi/chi/v5"
 	"github.com/matryer/is"
+	"github.com/rs/zerolog"
 )
 
 func TestHealthEndpointReturns204StatusNoContent(t *testing.T) {
@@ -44,7 +45,7 @@ func testSetup(t *testing.T) (*is.I, *api, *iotagent.IoTAgentMock) {
 		},
 	}
 
-	a := newAPI(r, app)
+	a := newAPI(zerolog.Logger{}, r, app)
 
 	return is, a, app
 }

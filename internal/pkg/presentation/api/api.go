@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httplog"
 	"github.com/rs/cors"
-	"github.com/rs/zerolog/log"
+	"github.com/rs/zerolog"
 )
 
 type API interface {
@@ -19,18 +19,20 @@ type API interface {
 }
 
 type api struct {
+	log zerolog.Logger
 	r   chi.Router
 	app iotagent.IoTAgent
 }
 
-func NewApi(r chi.Router, app iotagent.IoTAgent) API {
-	a := newAPI(r, app)
+func NewApi(logger zerolog.Logger, r chi.Router, app iotagent.IoTAgent) API {
+	a := newAPI(logger, r, app)
 
 	return a
 }
 
-func newAPI(r chi.Router, app iotagent.IoTAgent) *api {
+func newAPI(logger zerolog.Logger, r chi.Router, app iotagent.IoTAgent) *api {
 	a := &api{
+		log: logger,
 		r:   r,
 		app: app,
 	}
@@ -44,10 +46,9 @@ func newAPI(r chi.Router, app iotagent.IoTAgent) *api {
 	compressor := middleware.NewCompressor(flate.DefaultCompression, "application/json", "application/ld+json")
 	r.Use(compressor.Handler)
 
-	logger := httplog.NewLogger("iot-agent", httplog.Options{
+	r.Use(httplog.RequestLogger(httplog.NewLogger("iot-agent", httplog.Options{
 		JSON: true,
-	})
-	r.Use(httplog.RequestLogger(logger))
+	})))
 
 	r.Get("/health", a.health)
 	r.Post("/newmsg", a.incomingMsg)
@@ -56,7 +57,7 @@ func newAPI(r chi.Router, app iotagent.IoTAgent) *api {
 }
 
 func (a *api) Start(port string) error {
-	log.Info().Str("port", port).Msg("starting to listen for connections")
+	a.log.Info().Str("port", port).Msg("starting to listen for connections")
 
 	return http.ListenAndServe(":"+port, a.r)
 }

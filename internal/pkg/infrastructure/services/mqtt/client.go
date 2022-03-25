@@ -26,7 +26,7 @@ func (c *mqttClient) Start() error {
 	options.Password = c.cfg.password
 
 	options.SetClientID("diwise/iot-agent/" + uuid.NewString())
-	options.SetDefaultPublishHandler(MessageHandler)
+	options.SetDefaultPublishHandler(NewMessageHandler(c.log))
 
 	options.OnConnect = func(mc mqtt.Client) {
 		c.log.Info().Msg("connected")
