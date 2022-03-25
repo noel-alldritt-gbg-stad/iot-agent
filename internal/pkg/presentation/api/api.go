@@ -69,7 +69,7 @@ func (a *api) incomingMsg(w http.ResponseWriter, r *http.Request) {
 	msg, _ := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 
-	err := a.app.NewMessage(msg)
+	err := a.app.MessageReceived(msg)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}

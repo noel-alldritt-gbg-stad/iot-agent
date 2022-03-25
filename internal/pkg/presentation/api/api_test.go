@@ -31,7 +31,7 @@ func TestXxx(t *testing.T) {
 
 	resp, _ := testRequest(is, server, http.MethodPost, "/newmsg", bytes.NewBuffer([]byte(msgfromMQTT)))
 	is.Equal(resp.StatusCode, http.StatusCreated)
-	is.Equal(len(app.NewMessageCalls()), 1)
+	is.Equal(len(app.MessageReceivedCalls()), 1)
 }
 
 func testSetup(t *testing.T) (*is.I, *api, *application.IoTAgentMock) {
@@ -39,7 +39,7 @@ func testSetup(t *testing.T) (*is.I, *api, *application.IoTAgentMock) {
 	r := chi.NewRouter()
 
 	app := &application.IoTAgentMock{
-		NewMessageFunc: func(msg []byte) error {
+		MessageReceivedFunc: func(msg []byte) error {
 			return nil
 		},
 	}

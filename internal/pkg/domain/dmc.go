@@ -1,7 +1,7 @@
 package domain
 
 type DeviceManagementClient interface {
-	FindDeviceFromDevEUI() error
+	FindDeviceFromDevEUI() (Result, error)
 }
 
 type devManagementClient struct {
@@ -12,7 +12,12 @@ func NewDeviceManagementClient() DeviceManagementClient {
 	return dmc
 }
 
-func (dmc *devManagementClient) FindDeviceFromDevEUI() error {
-	// this will be a request to diff service. return internal id, type, and payload?
-	return nil
+func (dmc *devManagementClient) FindDeviceFromDevEUI() (Result, error) {
+	// this will be a request to diff service. return internal id, type
+	return Result{}, nil
+}
+
+type Result struct {
+	InternalID string
+	Types      []string
 }

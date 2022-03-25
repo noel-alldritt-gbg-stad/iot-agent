@@ -22,7 +22,7 @@ func SetupIoTAgent() application.IoTAgent {
 	dmc := domain.NewDeviceManagementClient()
 	cr := application.NewConverterRegistry()
 	event := application.NewEventPublisher()
-	mp := application.NewMessageProcessor(dmc, cr, event)
+	mp := application.MessageReceivedProcessor(dmc, cr, event)
 
 	return application.NewIoTAgent(mp)
 }

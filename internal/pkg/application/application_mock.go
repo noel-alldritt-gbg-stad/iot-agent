@@ -17,8 +17,8 @@ var _ IoTAgent = &IoTAgentMock{}
 //
 // 		// make and configure a mocked IoTAgent
 // 		mockedIoTAgent := &IoTAgentMock{
-// 			NewMessageFunc: func(msg []byte) error {
-// 				panic("mock out the NewMessage method")
+// 			MessageReceivedFunc: func(msg []byte) error {
+// 				panic("mock out the MessageReceived method")
 // 			},
 // 		}
 //
@@ -27,47 +27,47 @@ var _ IoTAgent = &IoTAgentMock{}
 //
 // 	}
 type IoTAgentMock struct {
-	// NewMessageFunc mocks the NewMessage method.
-	NewMessageFunc func(msg []byte) error
+	// MessageReceivedFunc mocks the MessageReceived method.
+	MessageReceivedFunc func(msg []byte) error
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// NewMessage holds details about calls to the NewMessage method.
-		NewMessage []struct {
+		// MessageReceived holds details about calls to the MessageReceived method.
+		MessageReceived []struct {
 			// Msg is the msg argument value.
 			Msg []byte
 		}
 	}
-	lockNewMessage sync.RWMutex
+	lockMessageReceived sync.RWMutex
 }
 
-// NewMessage calls NewMessageFunc.
-func (mock *IoTAgentMock) NewMessage(msg []byte) error {
-	if mock.NewMessageFunc == nil {
-		panic("IoTAgentMock.NewMessageFunc: method is nil but IoTAgent.NewMessage was just called")
+// MessageReceived calls MessageReceivedFunc.
+func (mock *IoTAgentMock) MessageReceived(msg []byte) error {
+	if mock.MessageReceivedFunc == nil {
+		panic("IoTAgentMock.MessageReceivedFunc: method is nil but IoTAgent.MessageReceived was just called")
 	}
 	callInfo := struct {
 		Msg []byte
 	}{
 		Msg: msg,
 	}
-	mock.lockNewMessage.Lock()
-	mock.calls.NewMessage = append(mock.calls.NewMessage, callInfo)
-	mock.lockNewMessage.Unlock()
-	return mock.NewMessageFunc(msg)
+	mock.lockMessageReceived.Lock()
+	mock.calls.MessageReceived = append(mock.calls.MessageReceived, callInfo)
+	mock.lockMessageReceived.Unlock()
+	return mock.MessageReceivedFunc(msg)
 }
 
-// NewMessageCalls gets all the calls that were made to NewMessage.
+// MessageReceivedCalls gets all the calls that were made to MessageReceived.
 // Check the length with:
-//     len(mockedIoTAgent.NewMessageCalls())
-func (mock *IoTAgentMock) NewMessageCalls() []struct {
+//     len(mockedIoTAgent.MessageReceivedCalls())
+func (mock *IoTAgentMock) MessageReceivedCalls() []struct {
 	Msg []byte
 } {
 	var calls []struct {
 		Msg []byte
 	}
-	mock.lockNewMessage.RLock()
-	calls = mock.calls.NewMessage
-	mock.lockNewMessage.RUnlock()
+	mock.lockMessageReceived.RLock()
+	calls = mock.calls.MessageReceived
+	mock.lockMessageReceived.RUnlock()
 	return calls
 }

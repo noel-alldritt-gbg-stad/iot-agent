@@ -1,7 +1,7 @@
 package application
 
 type IoTAgent interface {
-	NewMessage(msg []byte) error
+	MessageReceived(msg []byte) error
 }
 
 type iotAgent struct {
@@ -17,7 +17,7 @@ func NewIoTAgent(mp MessageProcessor) IoTAgent {
 }
 
 // this function is likely to be renamed
-func (a *iotAgent) NewMessage(msg []byte) error {
+func (a *iotAgent) MessageReceived(msg []byte) error {
 	err := a.mp.ProcessMessage(msg)
 	if err != nil {
 		return err

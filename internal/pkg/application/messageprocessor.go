@@ -19,7 +19,7 @@ type msgProcessor struct {
 	event  EventPublisher
 }
 
-func NewMessageProcessor(dmc domain.DeviceManagementClient, conReg ConverterRegistry, event EventPublisher) MessageProcessor {
+func MessageReceivedProcessor(dmc domain.DeviceManagementClient, conReg ConverterRegistry, event EventPublisher) MessageProcessor {
 	mp := &msgProcessor{
 		dmc:    dmc,
 		conReg: conReg,
@@ -31,6 +31,7 @@ func NewMessageProcessor(dmc domain.DeviceManagementClient, conReg ConverterRegi
 
 func (mp *msgProcessor) ProcessMessage(msg []byte) error {
 	// extract and send devEUI to devicemanagementclient
+	// format is from mqtt, not device management client
 
 	dm := DeviceMessage{}
 
@@ -41,11 +42,13 @@ func (mp *msgProcessor) ProcessMessage(msg []byte) error {
 
 	mp.dmc.FindDeviceFromDevEUI()
 
-	// response with internal id, type and format gets passed to Converter registry
+	// response with internal id, type and gets passed to Converter registry
 
 	mp.conReg.Designate()
 
-	// converter registry returns msg payload in internal format
+	// converter registry returns the correct converter
+
+	// msg converter converts msg payload to internal format and returns it
 
 	// converted message gets sent to event publisher
 
