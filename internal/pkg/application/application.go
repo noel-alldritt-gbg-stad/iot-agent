@@ -1,13 +1,25 @@
 package application
 
-type Application interface {
+type IoTAgent interface {
+	NewMessage(msg []byte) error
 }
 
-type iotAgentApp struct {
+type iotAgent struct {
+	mp MessageProcessor
 }
 
-func NewApplication() Application {
-	app := &iotAgentApp{}
+func NewIoTAgent(mp MessageProcessor) IoTAgent {
+	app := &iotAgent{
+		mp: mp,
+	}
 
 	return app
+}
+
+func (a *iotAgent) NewMessage(msg []byte) error {
+	err := a.mp.ProcessMessage(msg)
+	if err != nil {
+		return err
+	}
+	return nil
 }

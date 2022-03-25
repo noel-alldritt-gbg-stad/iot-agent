@@ -2,8 +2,10 @@ package api
 
 import (
 	"compress/flate"
+	"io/ioutil"
 	"net/http"
 
+	"github.com/diwise/iot-agent/internal/pkg/application"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httplog"
@@ -16,19 +18,21 @@ type API interface {
 	health(w http.ResponseWriter, r *http.Request)
 }
 
-type iotAgentApi struct {
-	r chi.Router
+type api struct {
+	r   chi.Router
+	app application.IoTAgent
 }
 
-func NewApi(r chi.Router) API {
-	a := newIotAgentApi(r)
+func NewApi(r chi.Router, app application.IoTAgent) API {
+	a := newAPI(r, app)
 
 	return a
 }
 
-func newIotAgentApi(r chi.Router) *iotAgentApi {
-	a := &iotAgentApi{
-		r: r,
+func newAPI(r chi.Router, app application.IoTAgent) *api {
+	a := &api{
+		r:   r,
+		app: app,
 	}
 
 	r.Use(cors.New(cors.Options{
@@ -46,16 +50,29 @@ func newIotAgentApi(r chi.Router) *iotAgentApi {
 	r.Use(httplog.RequestLogger(logger))
 
 	r.Get("/health", a.health)
+	r.Post("/newmsg", a.incomingMsg)
 
 	return a
 }
 
-func (a *iotAgentApi) Start(port string) error {
+func (a *api) Start(port string) error {
 	log.Info().Str("port", port).Msg("starting to listen for connections")
 
 	return http.ListenAndServe(":"+port, a.r)
 }
 
-func (a *iotAgentApi) health(w http.ResponseWriter, r *http.Request) {
+func (a *api) health(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (a *api) incomingMsg(w http.ResponseWriter, r *http.Request) {
+	msg, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	err := a.app.NewMessage(msg)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	w.WriteHeader(http.StatusCreated)
 }
