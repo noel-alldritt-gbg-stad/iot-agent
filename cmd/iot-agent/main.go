@@ -5,7 +5,7 @@ import (
 
 	"github.com/diwise/iot-agent/internal/pkg/application"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
-	"github.com/diwise/iot-agent/internal/pkg/infrastructure/mqtt"
+	"github.com/diwise/iot-agent/internal/pkg/infrastructure/services/mqtt"
 	"github.com/diwise/iot-agent/internal/pkg/presentation/api"
 	"github.com/go-chi/chi/v5"
 )
