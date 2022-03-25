@@ -4,18 +4,27 @@ import (
 	"os"
 
 	"github.com/diwise/iot-agent/internal/pkg/application"
+	"github.com/diwise/iot-agent/internal/pkg/domain"
 	"github.com/diwise/iot-agent/internal/pkg/infrastructure/mqtt"
 	"github.com/diwise/iot-agent/internal/pkg/presentation/api"
 	"github.com/go-chi/chi/v5"
 )
 
 func main() {
-	mp := application.NewMessageProcessor()
-	app := application.NewIoTAgent(mp)
+	app := SetupIoTAgent()
 
 	go SetupAndRunApi(app)
 
 	mqtt.SetupAndRunMQTT()
+}
+
+func SetupIoTAgent() application.IoTAgent {
+	dmc := domain.NewDeviceManagementClient()
+	cr := application.NewConverterRegistry()
+	event := application.NewEventPublisher()
+	mp := application.NewMessageProcessor(dmc, cr, event)
+
+	return application.NewIoTAgent(mp)
 }
 
 func SetupAndRunApi(app application.IoTAgent) {

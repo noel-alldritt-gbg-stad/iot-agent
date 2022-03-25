@@ -16,6 +16,7 @@ func NewIoTAgent(mp MessageProcessor) IoTAgent {
 	return app
 }
 
+// this function is likely to be renamed
 func (a *iotAgent) NewMessage(msg []byte) error {
 	err := a.mp.ProcessMessage(msg)
 	if err != nil {
