@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strings"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
@@ -11,13 +12,19 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/infrastructure/services/mqtt"
 	"github.com/diwise/iot-agent/internal/pkg/presentation/api"
 	"github.com/go-chi/chi/v5"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
+	serviceName := "iot-agent"
+
+	logger := log.With().Str("service", strings.ToLower(serviceName)).Logger()
+	logger.Info().Msg("starting up ...")
+
 	app := SetupIoTAgent()
 
 	mqttConfig, _ := mqtt.NewConfigFromEnvironment()
-	mqttClient, err := mqtt.NewClient(mqttConfig)
+	mqttClient, err := mqtt.NewClient(logger, mqttConfig)
 	if err != nil {
 		panic("failed to create mqtt client: " + err.Error()) // TODO: Use proper logging (will be handled in its own commit)
 	}

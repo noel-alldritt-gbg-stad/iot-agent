@@ -1,6 +1,10 @@
 package mqtt
 
-import "os"
+import (
+	"os"
+
+	"github.com/rs/zerolog"
+)
 
 type Client interface {
 	Start() error
@@ -13,9 +17,10 @@ type Config struct {
 	password string
 }
 
-func NewClient(cfg Config) (Client, error) {
+func NewClient(logger zerolog.Logger, cfg Config) (Client, error) {
 	return &mqttClient{
 		cfg:    cfg,
+		log:    logger.With().Str("mqtt-host", cfg.host).Logger(),
 		topics: []string{"application/53/device/#"},
 	}, nil
 }
