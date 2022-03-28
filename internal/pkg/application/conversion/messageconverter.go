@@ -1,7 +1,9 @@
 package conversion
 
+import "context"
+
 type MessageConverter interface {
-	ConvertPayload(msg []byte) (InternalMessageFormat, error)
+	ConvertPayload(ctx context.Context, msg []byte) (InternalMessageFormat, error)
 }
 
 //konvertera payload till internt format
@@ -10,7 +12,7 @@ type msgConverter struct {
 	Type string
 }
 
-func (mc *msgConverter) ConvertPayload(msg []byte) (InternalMessageFormat, error) {
+func (mc *msgConverter) ConvertPayload(ctx context.Context, msg []byte) (InternalMessageFormat, error) {
 	return InternalMessageFormat{}, nil
 }
 

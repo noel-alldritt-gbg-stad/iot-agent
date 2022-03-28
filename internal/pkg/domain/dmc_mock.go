@@ -4,6 +4,7 @@
 package domain
 
 import (
+	"context"
 	"sync"
 )
 
@@ -17,7 +18,7 @@ var _ DeviceManagementClient = &DeviceManagementClientMock{}
 //
 // 		// make and configure a mocked DeviceManagementClient
 // 		mockedDeviceManagementClient := &DeviceManagementClientMock{
-// 			FindDeviceFromDevEUIFunc: func(devEUI string) (Result, error) {
+// 			FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (Result, error) {
 // 				panic("mock out the FindDeviceFromDevEUI method")
 // 			},
 // 		}
@@ -28,12 +29,14 @@ var _ DeviceManagementClient = &DeviceManagementClientMock{}
 // 	}
 type DeviceManagementClientMock struct {
 	// FindDeviceFromDevEUIFunc mocks the FindDeviceFromDevEUI method.
-	FindDeviceFromDevEUIFunc func(devEUI string) (Result, error)
+	FindDeviceFromDevEUIFunc func(ctx context.Context, devEUI string) (Result, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// FindDeviceFromDevEUI holds details about calls to the FindDeviceFromDevEUI method.
 		FindDeviceFromDevEUI []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
 			// DevEUI is the devEUI argument value.
 			DevEUI string
 		}
@@ -42,28 +45,32 @@ type DeviceManagementClientMock struct {
 }
 
 // FindDeviceFromDevEUI calls FindDeviceFromDevEUIFunc.
-func (mock *DeviceManagementClientMock) FindDeviceFromDevEUI(devEUI string) (Result, error) {
+func (mock *DeviceManagementClientMock) FindDeviceFromDevEUI(ctx context.Context, devEUI string) (Result, error) {
 	if mock.FindDeviceFromDevEUIFunc == nil {
 		panic("DeviceManagementClientMock.FindDeviceFromDevEUIFunc: method is nil but DeviceManagementClient.FindDeviceFromDevEUI was just called")
 	}
 	callInfo := struct {
+		Ctx    context.Context
 		DevEUI string
 	}{
+		Ctx:    ctx,
 		DevEUI: devEUI,
 	}
 	mock.lockFindDeviceFromDevEUI.Lock()
 	mock.calls.FindDeviceFromDevEUI = append(mock.calls.FindDeviceFromDevEUI, callInfo)
 	mock.lockFindDeviceFromDevEUI.Unlock()
-	return mock.FindDeviceFromDevEUIFunc(devEUI)
+	return mock.FindDeviceFromDevEUIFunc(ctx, devEUI)
 }
 
 // FindDeviceFromDevEUICalls gets all the calls that were made to FindDeviceFromDevEUI.
 // Check the length with:
 //     len(mockedDeviceManagementClient.FindDeviceFromDevEUICalls())
 func (mock *DeviceManagementClientMock) FindDeviceFromDevEUICalls() []struct {
+	Ctx    context.Context
 	DevEUI string
 } {
 	var calls []struct {
+		Ctx    context.Context
 		DevEUI string
 	}
 	mock.lockFindDeviceFromDevEUI.RLock()

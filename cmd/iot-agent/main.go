@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"os"
 	"runtime/debug"
 	"strings"
@@ -9,6 +11,7 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/application/iotagent"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
 	"github.com/diwise/iot-agent/internal/pkg/infrastructure/services/mqtt"
+	"github.com/diwise/iot-agent/internal/pkg/infrastructure/tracing"
 	"github.com/diwise/iot-agent/internal/pkg/presentation/api"
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog"
@@ -16,8 +19,19 @@ import (
 )
 
 func main() {
-	logger := newLogger("iot-agent")
+	serviceName := "iot-agent"
+	serviceVersion := version()
+
+	logger := newLogger(serviceName, serviceVersion)
 	logger.Info().Msg("starting up ...")
+
+	ctx := context.Background()
+
+	cleanup, err := tracing.Init(ctx, logger, serviceName, serviceVersion)
+	if err != nil {
+		logger.Fatal().Err(err).Msg("failed to init tracing")
+	}
+	defer cleanup()
 
 	app := SetupIoTAgent()
 
@@ -31,7 +45,8 @@ func main() {
 		logger.Fatal().Err(err).Msg("mqtt configuration error")
 	}
 
-	mqttClient, err := mqtt.NewClient(logger, mqttConfig, apiPort)
+	forwardingEndpoint := fmt.Sprintf("http://127.0.0.1:%s/newmsg", apiPort)
+	mqttClient, err := mqtt.NewClient(logger, mqttConfig, forwardingEndpoint)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("failed to create mqtt client")
 	}
@@ -41,28 +56,29 @@ func main() {
 	SetupAndRunApi(logger, app, apiPort)
 }
 
-func newLogger(serviceName string) zerolog.Logger {
-	logger := log.With().Str("service", strings.ToLower(serviceName)).Logger()
+func newLogger(serviceName, serviceVersion string) zerolog.Logger {
+	logger := log.With().Str("service", strings.ToLower(serviceName)).Str("version", serviceVersion).Logger()
+	return logger
+}
 
+func version() string {
 	buildInfo, ok := debug.ReadBuildInfo()
-	if ok {
-		buildSettings := buildInfo.Settings
-		infoMap := map[string]string{}
-		for _, s := range buildSettings {
-			infoMap[s.Key] = s.Value
-		}
-
-		sha := infoMap["vcs.revision"]
-		if infoMap["vcs.modified"] == "true" {
-			sha += "+"
-		}
-
-		logger = logger.With().Str("version", sha).Logger()
-	} else {
-		logger.Error().Msg("failed to extract build information")
+	if !ok {
+		return "unknown"
 	}
 
-	return logger
+	buildSettings := buildInfo.Settings
+	infoMap := map[string]string{}
+	for _, s := range buildSettings {
+		infoMap[s.Key] = s.Value
+	}
+
+	sha := infoMap["vcs.revision"]
+	if infoMap["vcs.modified"] == "true" {
+		sha += "+"
+	}
+
+	return sha
 }
 
 func SetupIoTAgent() iotagent.IoTAgent {

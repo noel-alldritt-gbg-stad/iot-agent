@@ -4,6 +4,7 @@
 package iotagent
 
 import (
+	"context"
 	"sync"
 )
 
@@ -17,7 +18,7 @@ var _ IoTAgent = &IoTAgentMock{}
 //
 // 		// make and configure a mocked IoTAgent
 // 		mockedIoTAgent := &IoTAgentMock{
-// 			MessageReceivedFunc: func(msg []byte) error {
+// 			MessageReceivedFunc: func(ctx context.Context, msg []byte) error {
 // 				panic("mock out the MessageReceived method")
 // 			},
 // 		}
@@ -28,12 +29,14 @@ var _ IoTAgent = &IoTAgentMock{}
 // 	}
 type IoTAgentMock struct {
 	// MessageReceivedFunc mocks the MessageReceived method.
-	MessageReceivedFunc func(msg []byte) error
+	MessageReceivedFunc func(ctx context.Context, msg []byte) error
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// MessageReceived holds details about calls to the MessageReceived method.
 		MessageReceived []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
 			// Msg is the msg argument value.
 			Msg []byte
 		}
@@ -42,28 +45,32 @@ type IoTAgentMock struct {
 }
 
 // MessageReceived calls MessageReceivedFunc.
-func (mock *IoTAgentMock) MessageReceived(msg []byte) error {
+func (mock *IoTAgentMock) MessageReceived(ctx context.Context, msg []byte) error {
 	if mock.MessageReceivedFunc == nil {
 		panic("IoTAgentMock.MessageReceivedFunc: method is nil but IoTAgent.MessageReceived was just called")
 	}
 	callInfo := struct {
+		Ctx context.Context
 		Msg []byte
 	}{
+		Ctx: ctx,
 		Msg: msg,
 	}
 	mock.lockMessageReceived.Lock()
 	mock.calls.MessageReceived = append(mock.calls.MessageReceived, callInfo)
 	mock.lockMessageReceived.Unlock()
-	return mock.MessageReceivedFunc(msg)
+	return mock.MessageReceivedFunc(ctx, msg)
 }
 
 // MessageReceivedCalls gets all the calls that were made to MessageReceived.
 // Check the length with:
 //     len(mockedIoTAgent.MessageReceivedCalls())
 func (mock *IoTAgentMock) MessageReceivedCalls() []struct {
+	Ctx context.Context
 	Msg []byte
 } {
 	var calls []struct {
+		Ctx context.Context
 		Msg []byte
 	}
 	mock.lockMessageReceived.RLock()

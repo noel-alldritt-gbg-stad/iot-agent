@@ -1,9 +1,13 @@
 package conversion
 
-import "github.com/diwise/iot-agent/internal/pkg/domain"
+import (
+	"context"
+
+	"github.com/diwise/iot-agent/internal/pkg/domain"
+)
 
 type ConverterRegistry interface {
-	DesignateConverters(domain.Result) []MessageConverter
+	DesignateConverters(context.Context, domain.Result) []MessageConverter
 }
 
 type converterRegistry struct {
@@ -15,6 +19,6 @@ func NewConverterRegistry() ConverterRegistry {
 
 // bestämt vilken converter som ska användas till ett visst meddelande
 
-func (c *converterRegistry) DesignateConverters(domain.Result) []MessageConverter {
+func (c *converterRegistry) DesignateConverters(context.Context, domain.Result) []MessageConverter {
 	return nil
 }
