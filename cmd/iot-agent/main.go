@@ -19,7 +19,7 @@ func main() {
 	logger := newLogger("iot-agent")
 	logger.Info().Msg("starting up ...")
 
-	app := SetupIoTAgent()
+	app := SetupIoTAgent(logger)
 
 	mqttConfig, _ := mqtt.NewConfigFromEnvironment()
 	mqttClient, err := mqtt.NewClient(logger, mqttConfig)
@@ -56,8 +56,12 @@ func newLogger(serviceName string) zerolog.Logger {
 	return logger
 }
 
-func SetupIoTAgent() iotagent.IoTAgent {
-	dmc := domain.NewDeviceManagementClient()
+func SetupIoTAgent(logger zerolog.Logger) iotagent.IoTAgent {
+	dmcUrl := os.Getenv("DMC_URL")
+	if dmcUrl == "" {
+		logger.Fatal().Msgf("DMC_URL must be set")
+	}
+	dmc := domain.NewDeviceManagementClient(dmcUrl, logger)
 	event := events.NewEventPublisher()
 
 	return iotagent.NewIoTAgent(dmc, event)

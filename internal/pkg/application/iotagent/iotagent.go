@@ -24,7 +24,6 @@ func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventPublish
 	}
 }
 
-// this function is likely to be renamed
 func (a *iotAgent) MessageReceived(msg []byte) error {
 	err := a.mp.ProcessMessage(msg)
 	if err != nil {
