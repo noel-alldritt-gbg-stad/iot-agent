@@ -22,7 +22,7 @@ type Config struct {
 	topics   []string
 }
 
-func NewClient(logger zerolog.Logger, cfg Config) (Client, error) {
+func NewClient(logger zerolog.Logger, cfg Config, apiPort string) (Client, error) {
 	options := mqtt.NewClientOptions()
 
 	connectionString := fmt.Sprintf("tls://%s:8883", cfg.host)
@@ -32,7 +32,7 @@ func NewClient(logger zerolog.Logger, cfg Config) (Client, error) {
 	options.Password = cfg.password
 
 	options.SetClientID("diwise/iot-agent/" + uuid.NewString())
-	options.SetDefaultPublishHandler(NewMessageHandler(logger))
+	options.SetDefaultPublishHandler(NewMessageHandler(logger, apiPort))
 
 	options.OnConnect = func(mc mqtt.Client) {
 		logger.Info().Msg("connected")

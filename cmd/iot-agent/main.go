@@ -21,19 +21,24 @@ func main() {
 
 	app := SetupIoTAgent()
 
+	apiPort := os.Getenv("SERVICE_PORT")
+	if apiPort == "" {
+		apiPort = "8080"
+	}
+
 	mqttConfig, err := mqtt.NewConfigFromEnvironment()
 	if err != nil {
 		logger.Fatal().Err(err).Msg("mqtt configuration error")
 	}
 
-	mqttClient, err := mqtt.NewClient(logger, mqttConfig)
+	mqttClient, err := mqtt.NewClient(logger, mqttConfig, apiPort)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("failed to create mqtt client")
 	}
 	mqttClient.Start()
 	defer mqttClient.Stop()
 
-	SetupAndRunApi(logger, app)
+	SetupAndRunApi(logger, app, apiPort)
 }
 
 func newLogger(serviceName string) zerolog.Logger {
@@ -67,15 +72,10 @@ func SetupIoTAgent() iotagent.IoTAgent {
 	return iotagent.NewIoTAgent(dmc, event)
 }
 
-func SetupAndRunApi(logger zerolog.Logger, app iotagent.IoTAgent) {
+func SetupAndRunApi(logger zerolog.Logger, app iotagent.IoTAgent, port string) {
 	r := chi.NewRouter()
 
 	a := api.NewApi(logger, r, app)
-
-	port := os.Getenv("SERVICE_PORT")
-	if port == "" {
-		port = "8880"
-	}
 
 	a.Start(port)
 }

@@ -1,13 +1,11 @@
 package api
 
 import (
-	"compress/flate"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/iotagent"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httplog"
 	"github.com/rs/cors"
 	"github.com/rs/zerolog"
@@ -43,9 +41,6 @@ func newAPI(logger zerolog.Logger, r chi.Router, app iotagent.IoTAgent) *api {
 		Debug:            false,
 	}).Handler)
 
-	compressor := middleware.NewCompressor(flate.DefaultCompression, "application/json", "application/ld+json")
-	r.Use(compressor.Handler)
-
 	r.Use(httplog.RequestLogger(httplog.NewLogger("iot-agent", httplog.Options{
 		JSON: true,
 	})))
@@ -73,6 +68,7 @@ func (a *api) incomingMsg(w http.ResponseWriter, r *http.Request) {
 	err := a.app.MessageReceived(msg)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
 	}
 
 	w.WriteHeader(http.StatusCreated)
