@@ -13,8 +13,16 @@ func NewConverterRegistry() ConverterRegistry {
 	return &converterRegistry{}
 }
 
-// bestämt vilken converter som ska användas till ett visst meddelande
+// bestämt vilken converter från en lista av converters, som ska användas till ett visst meddelande
 
 func (c *converterRegistry) DesignateConverters(domain.Result) []MessageConverter {
-	return nil
+	//converters used are decided on by data format (is it from LoRa/CoAP) and type of measurements return
+
+	return []MessageConverter{}
+}
+
+var RegisteredConverters []MessageConverter = []MessageConverter{
+	&msgConverter{
+		Type: "water",
+	},
 }
