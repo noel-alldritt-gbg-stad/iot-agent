@@ -58,11 +58,35 @@ func NewClient(logger zerolog.Logger, cfg Config) (Client, error) {
 }
 
 func NewConfigFromEnvironment() (Config, error) {
+
+	const topicEnvNamePattern string = "MQTT_TOPIC_%d"
+
 	cfg := Config{
 		host:     os.Getenv("MQTT_HOST"),
 		user:     os.Getenv("MQTT_USER"),
 		password: os.Getenv("MQTT_PASSWORD"),
-		topics:   []string{"application/8/device/#", "application/24/device/#", "application/53/device/#"},
+		topics: []string{
+			os.Getenv(fmt.Sprintf(topicEnvNamePattern, 0)),
+		},
+	}
+
+	if cfg.host == "" {
+		return cfg, fmt.Errorf("the mqtt host must be specified using the MQTT_HOST environment variable")
+	}
+
+	if cfg.topics[0] == "" {
+		return cfg, fmt.Errorf("at least one topic (MQTT_TOPIC_0) must be added to the configuration")
+	}
+
+	const maxTopicCount int = 10
+
+	for idx := 1; idx < maxTopicCount; idx++ {
+		varName := fmt.Sprintf(topicEnvNamePattern, idx)
+		value := os.Getenv(varName)
+
+		if value != "" {
+			cfg.topics = append(cfg.topics, value)
+		}
 	}
 
 	return cfg, nil

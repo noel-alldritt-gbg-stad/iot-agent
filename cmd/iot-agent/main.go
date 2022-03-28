@@ -21,7 +21,11 @@ func main() {
 
 	app := SetupIoTAgent()
 
-	mqttConfig, _ := mqtt.NewConfigFromEnvironment()
+	mqttConfig, err := mqtt.NewConfigFromEnvironment()
+	if err != nil {
+		logger.Fatal().Err(err).Msg("mqtt configuration error")
+	}
+
 	mqttClient, err := mqtt.NewClient(logger, mqttConfig)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("failed to create mqtt client")
