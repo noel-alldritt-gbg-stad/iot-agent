@@ -54,6 +54,8 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 				// msg converter converts msg payload to internal format and returns it
 				payload, err := mc.ConvertPayload(ctx, result.InternalID, msg)
 				if err == nil {
+					justlooking, _ := json.Marshal(payload) //will delete later with rest of comments
+					mp.log.Info().Msgf("successfully converted incoming message to internal format: %s", justlooking)
 					mp.event.Publish(ctx, payload)
 					// converted message gets sent to event publisher
 				}

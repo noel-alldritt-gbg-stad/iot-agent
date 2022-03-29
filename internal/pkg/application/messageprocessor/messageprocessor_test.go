@@ -12,22 +12,22 @@ import (
 )
 
 func TestFailsOnInvalidMessage(t *testing.T) {
-	is, dmc, cr, _, log := testSetup(t)
-	mp := NewMessageReceivedProcessor(dmc, cr, nil, log)
+	is, dmc, cr, ep, log := testSetup(t)
+	mp := NewMessageReceivedProcessor(dmc, cr, ep, log)
 
 	err := mp.ProcessMessage(context.Background(), []byte("msg"))
 	is.True(err != nil)
 }
 
 func TestProcessMessageWorksWithCorrectInput(t *testing.T) {
-	is, dmc, cr, _, log := testSetup(t)
-	mp := NewMessageReceivedProcessor(dmc, cr, nil, log)
+	is, dmc, cr, ep, log := testSetup(t)
+	mp := NewMessageReceivedProcessor(dmc, cr, ep, log)
 
 	err := mp.ProcessMessage(context.Background(), []byte(payload))
-	is.True(err != nil)
+	is.NoErr(err)
 }
 
-func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, conversion.ConverterRegistry, *events.EventPublisher, zerolog.Logger) {
+func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, conversion.ConverterRegistry, events.EventPublisher, zerolog.Logger) {
 	is := is.New(t)
 	dmc := &domain.DeviceManagementClientMock{
 		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (domain.Result, error) {
@@ -49,8 +49,13 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, convers
 			}
 		},
 	}
+	ep := &events.EventPublisherMock{
+		PublishFunc: func(ctx context.Context, msg conversion.InternalMessageFormat) error {
+			return nil
+		},
+	}
 
-	return is, dmc, cr, nil, zerolog.Logger{}
+	return is, dmc, cr, ep, zerolog.Logger{}
 }
 
 const payload string = `{"devEUI":"xxxxxxxxxxxxxx","object":{"externalTemperature":23.5}}`
