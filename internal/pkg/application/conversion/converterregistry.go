@@ -16,7 +16,7 @@ func NewConverterRegistry() ConverterRegistry {
 	return &converterRegistry{
 		registeredConverters: []map[string]MessageConverter{
 			{
-				"temperature": &msgConverter{
+				"urn:oma:lwm2m:ext:3303": &msgConverter{
 					Type: "urn:oma:lwm2m:ext:3303",
 				},
 			},
