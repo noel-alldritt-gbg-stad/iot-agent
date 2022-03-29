@@ -9,7 +9,7 @@ import (
 func TestThatConverterRegistryReturnsOnlyConvertersThatMatchType(t *testing.T) {
 	is, conReg := testSetup(t)
 
-	mcs := conReg.DesignateConverters(nil, []string{"temperature", "humidity"})
+	mcs := conReg.DesignateConverters(nil, []string{"urn:oma:lwm2m:ext:3303", "humidity"})
 	is.Equal(len(mcs), 1)
 }
 

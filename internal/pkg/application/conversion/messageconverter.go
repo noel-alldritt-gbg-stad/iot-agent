@@ -20,23 +20,18 @@ func (mc *msgConverter) ConvertPayload(ctx context.Context, internalID string, m
 		Type:       mc.Type,
 	}
 
-	var value float64
-
 	if mc.Type == "urn:oma:lwm2m:ext:3303" {
-		payload.Value = Value{
-			Temperature: value,
-		}
 	}
 
 	return payload, nil
 }
 
 type InternalMessageFormat struct {
-	InternalID string
-	Type       string
+	InternalID string `json:"internalID"`
+	Type       string `json:"type"`
 	Value      Value
 }
 
 type Value struct {
-	Temperature float64
+	Temperature float64 `json:"temperature"`
 }
