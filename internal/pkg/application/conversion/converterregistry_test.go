@@ -16,7 +16,7 @@ func TestThatConverterRegistryReturnsOnlyConvertersThatMatchType(t *testing.T) {
 func TestThatConverterRegistryReturnsEmptyIfNoTypesMatch(t *testing.T) {
 	is, conReg := testSetup(t)
 
-	mcs := conReg.DesignateConverters(nil, []string{"co2", "humidity"})
+	mcs := conReg.DesignateConverters(nil, []string{"co2"})
 	is.Equal(len(mcs), 0)
 }
 
