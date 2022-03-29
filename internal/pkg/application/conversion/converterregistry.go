@@ -2,31 +2,43 @@ package conversion
 
 import (
 	"context"
-
-	"github.com/diwise/iot-agent/internal/pkg/domain"
 )
 
 type ConverterRegistry interface {
-	DesignateConverters(ctx context.Context, result domain.Result) []MessageConverter
+	DesignateConverters(ctx context.Context, types []string) []MessageConverter
 }
 
 type converterRegistry struct {
+	registeredConverters []map[string]MessageConverter
 }
 
 func NewConverterRegistry() ConverterRegistry {
-	return &converterRegistry{}
+	return &converterRegistry{
+		registeredConverters: []map[string]MessageConverter{
+			{
+				"temperature": &msgConverter{
+					Type: "urn:oma:lwm2m:ext:3303",
+				},
+			},
+			{
+				"presence": &msgConverter{
+					Type: "presence", //this is just here because for now...
+				},
+			},
+		},
+	}
 }
 
-// bestämt vilken converter från en lista av converters, som ska användas till ett visst meddelande
+// bestäm vilken converter från en lista av converters som ska användas till ett visst meddelande
+func (c *converterRegistry) DesignateConverters(ctx context.Context, types []string) []MessageConverter {
+	converters := []MessageConverter{}
 
-func (c *converterRegistry) DesignateConverters(ctx context.Context, result domain.Result) []MessageConverter {
-	//converters used are decided on by data format (is it from LoRa/CoAP) and type of measurements return
+	for i, t := range types {
+		mc, exist := c.registeredConverters[i][t]
+		if exist {
+			converters = append(converters, mc)
+		}
+	}
 
-	return []MessageConverter{}
-}
-
-var RegisteredConverters []MessageConverter = []MessageConverter{
-	&msgConverter{
-		Type: "water",
-	},
+	return converters
 }

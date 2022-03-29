@@ -22,7 +22,7 @@ func TestXxx(t *testing.T) {
 	is, dmc, _, _ := testSetup(t)
 	mp := NewMessageReceivedProcessor(dmc, nil, nil)
 
-	err := mp.ProcessMessage(nil, []byte(payload))
+	err := mp.ProcessMessage(context.Background(), []byte(payload))
 	is.True(err != nil)
 
 }
@@ -33,7 +33,7 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *conver
 		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (domain.Result, error) {
 			return domain.Result{
 					InternalID: "internalID",
-					Types:      []string{"watertemp"},
+					Types:      []string{"temperature"},
 				},
 				nil
 		},

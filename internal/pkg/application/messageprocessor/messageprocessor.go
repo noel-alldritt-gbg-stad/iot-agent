@@ -42,19 +42,18 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 		if err == nil {
 			// response with internal id, type and gets passed to Converter registry
 			// converter registry returns the correct converters
-			messageConverter := mp.conReg.DesignateConverters(ctx, result)
+			messageConverter := mp.conReg.DesignateConverters(ctx, result.Types)
 			if len(messageConverter) == 0 {
 				return fmt.Errorf("no matching converters for device")
 			}
 
 			for _, mc := range messageConverter {
 				// msg converter converts msg payload to internal format and returns it
-				payload, err := mc.ConvertPayload(ctx, msg)
+				payload, err := mc.ConvertPayload(ctx, result.InternalID, msg)
 				if err == nil {
 					mp.event.Publish(ctx, payload)
 					// converted message gets sent to event publisher
 				}
-
 			}
 		}
 	}
