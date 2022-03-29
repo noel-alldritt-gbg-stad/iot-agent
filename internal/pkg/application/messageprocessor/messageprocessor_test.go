@@ -11,23 +11,23 @@ import (
 )
 
 func TestFailsOnInvalidMessage(t *testing.T) {
-	is, dmc, _, _ := testSetup(t)
-	mp := NewMessageReceivedProcessor(dmc, nil, nil)
+	is, dmc, cr, _ := testSetup(t)
+	mp := NewMessageReceivedProcessor(dmc, cr, nil)
 
 	err := mp.ProcessMessage(context.Background(), []byte("msg"))
 	is.True(err != nil)
 }
 
 func TestXxx(t *testing.T) {
-	is, dmc, _, _ := testSetup(t)
-	mp := NewMessageReceivedProcessor(dmc, nil, nil)
+	is, dmc, cr, _ := testSetup(t)
+	mp := NewMessageReceivedProcessor(dmc, cr, nil)
 
 	err := mp.ProcessMessage(context.Background(), []byte(payload))
 	is.True(err != nil)
 
 }
 
-func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *conversion.ConverterRegistry, *events.EventPublisher) {
+func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, conversion.ConverterRegistry, *events.EventPublisher) {
 	is := is.New(t)
 	dmc := &domain.DeviceManagementClientMock{
 		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (domain.Result, error) {
@@ -38,8 +38,13 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *conver
 				nil
 		},
 	}
+	cr := &conversion.ConverterRegistryMock{
+		DesignateConvertersFunc: func(ctx context.Context, types []string) []conversion.MessageConverter {
+			return []conversion.MessageConverter{}
+		},
+	}
 
-	return is, dmc, nil, nil
+	return is, dmc, cr, nil
 }
 
-const payload string = `{"level":"info","service":"iot-agent","version":"","mqtt-host":"iot.serva.net","timestamp":"2022-03-28T14:39:11.695538+02:00","message":"received payload: {\"applicationID\":\"8\",\"applicationName\":\"Water-Temperature\",\"deviceName\":\"sk-elt-temp-16\",\"deviceProfileName\":\"Elsys_Codec\",\"deviceProfileID\":\"xxxxxxxxxxxx\",\"devEUI\":\"xxxxxxxxxxxxxx\",\"rxInfo\":[{\"gatewayID\":\"xxxxxxxxxxx\",\"uplinkID\":\"xxxxxxxxxxx\",\"name\":\"SN-LGW-047\",\"time\":\"2022-03-28T12:40:40.653515637Z\",\"rssi\":-105,\"loRaSNR\":8.5,\"location\":{\"latitude\":62.36956091265246,\"longitude\":17.319844410529534,\"altitude\":0}}],\"txInfo\":{\"frequency\":867700000,\"dr\":5},\"adr\":true,\"fCnt\":10301,\"fPort\":5,\"data\":\"Bw2KDADB\",\"object\":{\"externalTemperature\":19.3,\"vdd\":3466},\"tags\":{\"Location\":\"Vangen\"}}"}`
+const payload string = `{"applicationID":"8","applicationName":"Water-Temperature","deviceName":"sk-elt-temp-16","deviceProfileName":"Elsys_Codec","deviceProfileID":"xxxxxxxxxxxx","devEUI":"xxxxxxxxxxxxxx"}`
