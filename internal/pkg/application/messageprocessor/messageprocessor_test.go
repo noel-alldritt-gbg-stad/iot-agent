@@ -1,6 +1,7 @@
 package messageprocessor
 
 import (
+	"context"
 	"testing"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
@@ -13,7 +14,7 @@ func TestFailsOnInvalidMessage(t *testing.T) {
 	is, dmc, _, _ := testSetup(t)
 	mp := NewMessageReceivedProcessor(dmc, nil, nil)
 
-	err := mp.ProcessMessage([]byte("msg"))
+	err := mp.ProcessMessage(context.Background(), []byte("msg"))
 	is.True(err != nil)
 }
 
@@ -21,7 +22,7 @@ func TestXxx(t *testing.T) {
 	is, dmc, _, _ := testSetup(t)
 	mp := NewMessageReceivedProcessor(dmc, nil, nil)
 
-	err := mp.ProcessMessage([]byte(payload))
+	err := mp.ProcessMessage(nil, []byte(payload))
 	is.True(err != nil)
 
 }
@@ -29,7 +30,7 @@ func TestXxx(t *testing.T) {
 func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *conversion.ConverterRegistry, *events.EventPublisher) {
 	is := is.New(t)
 	dmc := &domain.DeviceManagementClientMock{
-		FindDeviceFromDevEUIFunc: func(devEUI string) (domain.Result, error) {
+		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (domain.Result, error) {
 			return domain.Result{
 					InternalID: "internalID",
 					Types:      []string{"watertemp"},

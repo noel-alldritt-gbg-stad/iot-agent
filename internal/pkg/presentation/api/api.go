@@ -1,17 +1,18 @@
 package api
 
 import (
-	"compress/flate"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/iotagent"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/httplog"
+	"github.com/riandyrn/otelchi"
 	"github.com/rs/cors"
 	"github.com/rs/zerolog"
+	"go.opentelemetry.io/otel"
 )
+
+var tracer = otel.Tracer("iot-agent/api")
 
 type API interface {
 	Start(port string) error
@@ -43,12 +44,9 @@ func newAPI(logger zerolog.Logger, r chi.Router, app iotagent.IoTAgent) *api {
 		Debug:            false,
 	}).Handler)
 
-	compressor := middleware.NewCompressor(flate.DefaultCompression, "application/json", "application/ld+json")
-	r.Use(compressor.Handler)
+	serviceName := "iot-agent"
 
-	r.Use(httplog.RequestLogger(httplog.NewLogger("iot-agent", httplog.Options{
-		JSON: true,
-	})))
+	r.Use(otelchi.Middleware(serviceName, otelchi.WithChiRoutes(r)))
 
 	r.Get("/health", a.health)
 	r.Post("/newmsg", a.incomingMsg)
@@ -67,12 +65,27 @@ func (a *api) health(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *api) incomingMsg(w http.ResponseWriter, r *http.Request) {
+	var err error
+	ctx := r.Context()
+
+	ctx, span := tracer.Start(ctx, "newmsg")
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+		}
+		span.End()
+	}()
+
 	msg, _ := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 
-	err := a.app.MessageReceived(msg)
+	err = a.app.MessageReceived(ctx, msg)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+
+		a.log.Error().Err(err).Msg("failed to handle message")
+		return
 	}
 
 	w.WriteHeader(http.StatusCreated)

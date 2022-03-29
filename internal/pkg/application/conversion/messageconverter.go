@@ -1,11 +1,12 @@
 package conversion
 
 import (
+	"context"
 	"encoding/json"
 )
 
 type MessageConverter interface {
-	ConvertPayload(msg []byte) (InternalMessageFormat, error)
+	ConvertPayload(ctx context.Context, msg []byte) (InternalMessageFormat, error)
 }
 
 //konvertera payload till internt format
@@ -14,7 +15,7 @@ type msgConverter struct {
 	Type string //determines what type of data we're converting, i.e. water or air temperature etc.
 }
 
-func (mc *msgConverter) ConvertPayload(msg []byte) (InternalMessageFormat, error) {
+func (mc *msgConverter) ConvertPayload(ctx context.Context, msg []byte) (InternalMessageFormat, error) {
 	imf := InternalMessageFormat{}
 
 	err := json.Unmarshal(msg, &imf)

@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -40,7 +41,7 @@ func testSetup(t *testing.T) (*is.I, *api, *iotagent.IoTAgentMock) {
 	r := chi.NewRouter()
 
 	app := &iotagent.IoTAgentMock{
-		MessageReceivedFunc: func(msg []byte) error {
+		MessageReceivedFunc: func(ctx context.Context, msg []byte) error {
 			return nil
 		},
 	}

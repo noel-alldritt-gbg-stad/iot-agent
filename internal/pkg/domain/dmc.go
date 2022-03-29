@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -9,7 +10,7 @@ import (
 )
 
 type DeviceManagementClient interface {
-	FindDeviceFromDevEUI(devEUI string) (Result, error)
+	FindDeviceFromDevEUI(ctx context.Context, devEUI string) (Result, error)
 }
 
 type devManagementClient struct {
@@ -25,7 +26,7 @@ func NewDeviceManagementClient(dmcurl string, log zerolog.Logger) DeviceManageme
 	return dmc
 }
 
-func (dmc *devManagementClient) FindDeviceFromDevEUI(devEUI string) (Result, error) {
+func (dmc *devManagementClient) FindDeviceFromDevEUI(ctx context.Context, devEUI string) (Result, error) {
 	// this will be a http request to diff service.
 	result := Result{}
 

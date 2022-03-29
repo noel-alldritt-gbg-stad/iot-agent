@@ -1,6 +1,8 @@
 package iotagent
 
 import (
+	"context"
+
 	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/application/messageprocessor"
@@ -8,7 +10,7 @@ import (
 )
 
 type IoTAgent interface {
-	MessageReceived(msg []byte) error
+	MessageReceived(ctx context.Context, msg []byte) error
 }
 
 type iotAgent struct {
@@ -24,8 +26,9 @@ func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventPublish
 	}
 }
 
-func (a *iotAgent) MessageReceived(msg []byte) error {
-	err := a.mp.ProcessMessage(msg)
+// this function is likely to be renamed
+func (a *iotAgent) MessageReceived(ctx context.Context, msg []byte) error {
+	err := a.mp.ProcessMessage(ctx, msg)
 	if err != nil {
 		return err
 	}
