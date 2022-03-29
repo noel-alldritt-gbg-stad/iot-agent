@@ -2,9 +2,6 @@ package domain
 
 import (
 	"context"
-	"encoding/json"
-	"io/ioutil"
-	"net/http"
 
 	"github.com/rs/zerolog"
 )
@@ -28,16 +25,19 @@ func NewDeviceManagementClient(dmcurl string, log zerolog.Logger) DeviceManageme
 
 func (dmc *devManagementClient) FindDeviceFromDevEUI(ctx context.Context, devEUI string) (Result, error) {
 	// this will be a http request to diff service.
-	result := Result{}
-
-	resp, err := http.Get(dmc.url + "/" + devEUI)
-	if resp.StatusCode != http.StatusOK {
-		dmc.log.Error().Msgf("request failed with status code %d", resp.StatusCode)
-		return result, nil
+	result := Result{
+		InternalID: "internalID",
+		Types:      []string{"urn:oma:lwm2m:ext:3303"},
 	}
+
+	/*resp, err := http.Get(dmc.url + "/" + devEUI)
 	if err != nil {
 		dmc.log.Error().Msgf("failed to retrieve device information from devEUI: %s", err.Error())
 		return result, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		dmc.log.Error().Msgf("request failed with status code %d", resp.StatusCode)
+		return result, nil
 	}
 
 	respBody, err := ioutil.ReadAll(resp.Body)
@@ -50,7 +50,7 @@ func (dmc *devManagementClient) FindDeviceFromDevEUI(ctx context.Context, devEUI
 	if err != nil {
 		dmc.log.Error().Msgf("failed to unmarshal response body: %s", err.Error())
 		return result, err
-	}
+	}*/
 
 	return result, nil
 }
