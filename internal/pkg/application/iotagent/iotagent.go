@@ -7,6 +7,7 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/application/messageprocessor"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
+	"github.com/rs/zerolog"
 )
 
 type IoTAgent interface {
@@ -17,9 +18,9 @@ type iotAgent struct {
 	mp messageprocessor.MessageProcessor
 }
 
-func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventPublisher) IoTAgent {
+func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventPublisher, log zerolog.Logger) IoTAgent {
 	conreg := conversion.NewConverterRegistry()
-	msgprcs := messageprocessor.NewMessageReceivedProcessor(dmc, conreg, eventPub)
+	msgprcs := messageprocessor.NewMessageReceivedProcessor(dmc, conreg, eventPub, log)
 
 	return &iotAgent{
 		mp: msgprcs,

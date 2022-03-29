@@ -8,6 +8,7 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
+	"github.com/rs/zerolog"
 )
 
 type MessageProcessor interface {
@@ -20,13 +21,15 @@ type msgProcessor struct {
 	dmc    domain.DeviceManagementClient
 	conReg conversion.ConverterRegistry
 	event  events.EventPublisher
+	log    zerolog.Logger
 }
 
-func NewMessageReceivedProcessor(dmc domain.DeviceManagementClient, conReg conversion.ConverterRegistry, event events.EventPublisher) MessageProcessor {
+func NewMessageReceivedProcessor(dmc domain.DeviceManagementClient, conReg conversion.ConverterRegistry, event events.EventPublisher, log zerolog.Logger) MessageProcessor {
 	return &msgProcessor{
 		dmc:    dmc,
 		conReg: conReg,
 		event:  event,
+		log:    log,
 	}
 }
 
@@ -57,8 +60,6 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 			}
 		}
 	}
-
-	fmt.Printf("error: %s", err.Error())
 
 	return err
 }

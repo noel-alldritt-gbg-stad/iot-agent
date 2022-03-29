@@ -15,16 +15,28 @@ type msgConverter struct {
 }
 
 func (mc *msgConverter) ConvertPayload(ctx context.Context, internalID string, msg []byte) (InternalMessageFormat, error) {
-	imf := InternalMessageFormat{
+	payload := InternalMessageFormat{
 		InternalID: internalID,
 		Type:       mc.Type,
 	}
 
-	return imf, nil
+	var value float64
+
+	if mc.Type == "urn:oma:lwm2m:ext:3303" {
+		payload.Value = Value{
+			Temperature: value,
+		}
+	}
+
+	return payload, nil
 }
 
 type InternalMessageFormat struct {
 	InternalID string
 	Type       string
-	Value      string
+	Value      Value
+}
+
+type Value struct {
+	Temperature float64
 }

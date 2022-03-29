@@ -80,6 +80,7 @@ func (a *api) incomingMsg(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	err = a.app.MessageReceived(ctx, msg)
+	a.log.Info().Msg("attempting to process message")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
