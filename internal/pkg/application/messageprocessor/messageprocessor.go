@@ -52,7 +52,7 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 
 			for _, mc := range messageConverters {
 				// msg converter converts msg payload to internal format and returns it
-				payload, err := mc.ConvertPayload(ctx, result.InternalID, msg)
+				payload, err := mc.ConvertPayload(ctx, mp.log, result.InternalID, msg)
 				if err == nil {
 					justlooking, _ := json.Marshal(payload) //will delete later with rest of comments
 					mp.log.Info().Msgf("successfully converted incoming message to internal format: %s", justlooking)

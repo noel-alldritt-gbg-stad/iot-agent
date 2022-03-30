@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/rs/zerolog"
 )
@@ -26,8 +27,9 @@ func NewDeviceManagementClient(dmcurl string, log zerolog.Logger) DeviceManageme
 func (dmc *devManagementClient) FindDeviceFromDevEUI(ctx context.Context, devEUI string) (Result, error) {
 	// this will be a http request to diff service.
 	result := Result{
-		InternalID: "internalID",
-		Types:      []string{"urn:oma:lwm2m:ext:3303"},
+		InternalID: fmt.Sprintf(
+			"internalID:%s", devEUI),
+		Types: []string{"urn:oma:lwm2m:ext:3303"},
 	}
 
 	/*resp, err := http.Get(dmc.url + "/" + devEUI)

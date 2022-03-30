@@ -5,6 +5,7 @@ package conversion
 
 import (
 	"context"
+	"github.com/rs/zerolog"
 	"sync"
 )
 
@@ -18,7 +19,7 @@ var _ MessageConverter = &MessageConverterMock{}
 //
 // 		// make and configure a mocked MessageConverter
 // 		mockedMessageConverter := &MessageConverterMock{
-// 			ConvertPayloadFunc: func(ctx context.Context, internalID string, msg []byte) (InternalMessageFormat, error) {
+// 			ConvertPayloadFunc: func(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (InternalMessageFormat, error) {
 // 				panic("mock out the ConvertPayload method")
 // 			},
 // 		}
@@ -29,7 +30,7 @@ var _ MessageConverter = &MessageConverterMock{}
 // 	}
 type MessageConverterMock struct {
 	// ConvertPayloadFunc mocks the ConvertPayload method.
-	ConvertPayloadFunc func(ctx context.Context, internalID string, msg []byte) (InternalMessageFormat, error)
+	ConvertPayloadFunc func(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (InternalMessageFormat, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -37,6 +38,8 @@ type MessageConverterMock struct {
 		ConvertPayload []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
+			// Log is the log argument value.
+			Log zerolog.Logger
 			// InternalID is the internalID argument value.
 			InternalID string
 			// Msg is the msg argument value.
@@ -47,23 +50,25 @@ type MessageConverterMock struct {
 }
 
 // ConvertPayload calls ConvertPayloadFunc.
-func (mock *MessageConverterMock) ConvertPayload(ctx context.Context, internalID string, msg []byte) (InternalMessageFormat, error) {
+func (mock *MessageConverterMock) ConvertPayload(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (InternalMessageFormat, error) {
 	if mock.ConvertPayloadFunc == nil {
 		panic("MessageConverterMock.ConvertPayloadFunc: method is nil but MessageConverter.ConvertPayload was just called")
 	}
 	callInfo := struct {
 		Ctx        context.Context
+		Log        zerolog.Logger
 		InternalID string
 		Msg        []byte
 	}{
 		Ctx:        ctx,
+		Log:        log,
 		InternalID: internalID,
 		Msg:        msg,
 	}
 	mock.lockConvertPayload.Lock()
 	mock.calls.ConvertPayload = append(mock.calls.ConvertPayload, callInfo)
 	mock.lockConvertPayload.Unlock()
-	return mock.ConvertPayloadFunc(ctx, internalID, msg)
+	return mock.ConvertPayloadFunc(ctx, log, internalID, msg)
 }
 
 // ConvertPayloadCalls gets all the calls that were made to ConvertPayload.
@@ -71,11 +76,13 @@ func (mock *MessageConverterMock) ConvertPayload(ctx context.Context, internalID
 //     len(mockedMessageConverter.ConvertPayloadCalls())
 func (mock *MessageConverterMock) ConvertPayloadCalls() []struct {
 	Ctx        context.Context
+	Log        zerolog.Logger
 	InternalID string
 	Msg        []byte
 } {
 	var calls []struct {
 		Ctx        context.Context
+		Log        zerolog.Logger
 		InternalID string
 		Msg        []byte
 	}

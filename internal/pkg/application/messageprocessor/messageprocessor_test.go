@@ -42,7 +42,7 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, convers
 		DesignateConvertersFunc: func(ctx context.Context, types []string) []conversion.MessageConverter {
 			return []conversion.MessageConverter{
 				&conversion.MessageConverterMock{
-					ConvertPayloadFunc: func(ctx context.Context, internalID string, msg []byte) (conversion.InternalMessageFormat, error) {
+					ConvertPayloadFunc: func(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (conversion.InternalMessageFormat, error) {
 						return conversion.InternalMessageFormat{}, nil
 					},
 				},
