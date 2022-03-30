@@ -2,6 +2,7 @@ package messageprocessor
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
@@ -17,6 +18,22 @@ func TestFailsOnInvalidMessage(t *testing.T) {
 
 	err := mp.ProcessMessage(context.Background(), []byte("msg"))
 	is.True(err != nil)
+}
+
+func TestFailsOnInvalidType(t *testing.T) {
+	is, _, cr, ep, log := testSetup(t)
+
+	dmc := &domain.DeviceManagementClientMock{
+		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (domain.Result, error) {
+			return domain.Result{}, errors.New("devEUI does not belong to a sensor of any valid types")
+		},
+	}
+
+	mp := NewMessageReceivedProcessor(dmc, cr, ep, log)
+
+	err := mp.ProcessMessage(context.Background(), []byte(payload))
+	is.True(err != nil)
+	is.Equal(err.Error(), "")
 }
 
 func TestProcessMessageWorksWithValidTemperatureInput(t *testing.T) {

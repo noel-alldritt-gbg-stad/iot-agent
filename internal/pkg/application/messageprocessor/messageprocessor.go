@@ -70,6 +70,8 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 				}
 			}
 		}
+
+		return err
 	}
 
 	return err
