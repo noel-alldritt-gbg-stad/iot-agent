@@ -40,7 +40,8 @@ func (e *eventPublisher) Publish(ctx context.Context, msg conversion.InternalMes
 		return err
 	}
 
-	return nil
+	e.logger.Info().Msg("publishing message on topic " + msg.TopicName())
+	return e.rmqMessenger.PublishOnTopic(ctx, msg)
 }
 
 func (e *eventPublisher) Start() error {

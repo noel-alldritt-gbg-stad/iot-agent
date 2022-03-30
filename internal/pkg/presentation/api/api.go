@@ -79,8 +79,8 @@ func (a *api) incomingMsg(w http.ResponseWriter, r *http.Request) {
 	msg, _ := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 
-	err = a.app.MessageReceived(ctx, msg)
 	a.log.Info().Msg("attempting to process message")
+	err = a.app.MessageReceived(ctx, msg)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
