@@ -22,6 +22,12 @@ var _ EventPublisher = &EventPublisherMock{}
 // 			PublishFunc: func(ctx context.Context, msg conversion.InternalMessageFormat) error {
 // 				panic("mock out the Publish method")
 // 			},
+// 			StartFunc: func() error {
+// 				panic("mock out the Start method")
+// 			},
+// 			StopFunc: func() error {
+// 				panic("mock out the Stop method")
+// 			},
 // 		}
 //
 // 		// use mockedEventPublisher in code that requires EventPublisher
@@ -32,6 +38,12 @@ type EventPublisherMock struct {
 	// PublishFunc mocks the Publish method.
 	PublishFunc func(ctx context.Context, msg conversion.InternalMessageFormat) error
 
+	// StartFunc mocks the Start method.
+	StartFunc func() error
+
+	// StopFunc mocks the Stop method.
+	StopFunc func() error
+
 	// calls tracks calls to the methods.
 	calls struct {
 		// Publish holds details about calls to the Publish method.
@@ -41,8 +53,16 @@ type EventPublisherMock struct {
 			// Msg is the msg argument value.
 			Msg conversion.InternalMessageFormat
 		}
+		// Start holds details about calls to the Start method.
+		Start []struct {
+		}
+		// Stop holds details about calls to the Stop method.
+		Stop []struct {
+		}
 	}
 	lockPublish sync.RWMutex
+	lockStart   sync.RWMutex
+	lockStop    sync.RWMutex
 }
 
 // Publish calls PublishFunc.
@@ -77,5 +97,57 @@ func (mock *EventPublisherMock) PublishCalls() []struct {
 	mock.lockPublish.RLock()
 	calls = mock.calls.Publish
 	mock.lockPublish.RUnlock()
+	return calls
+}
+
+// Start calls StartFunc.
+func (mock *EventPublisherMock) Start() error {
+	if mock.StartFunc == nil {
+		panic("EventPublisherMock.StartFunc: method is nil but EventPublisher.Start was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockStart.Lock()
+	mock.calls.Start = append(mock.calls.Start, callInfo)
+	mock.lockStart.Unlock()
+	return mock.StartFunc()
+}
+
+// StartCalls gets all the calls that were made to Start.
+// Check the length with:
+//     len(mockedEventPublisher.StartCalls())
+func (mock *EventPublisherMock) StartCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockStart.RLock()
+	calls = mock.calls.Start
+	mock.lockStart.RUnlock()
+	return calls
+}
+
+// Stop calls StopFunc.
+func (mock *EventPublisherMock) Stop() error {
+	if mock.StopFunc == nil {
+		panic("EventPublisherMock.StopFunc: method is nil but EventPublisher.Stop was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockStop.Lock()
+	mock.calls.Stop = append(mock.calls.Stop, callInfo)
+	mock.lockStop.Unlock()
+	return mock.StopFunc()
+}
+
+// StopCalls gets all the calls that were made to Stop.
+// Check the length with:
+//     len(mockedEventPublisher.StopCalls())
+func (mock *EventPublisherMock) StopCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockStop.RLock()
+	calls = mock.calls.Stop
+	mock.lockStop.RUnlock()
 	return calls
 }

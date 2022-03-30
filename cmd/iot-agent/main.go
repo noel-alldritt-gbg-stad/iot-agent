@@ -33,7 +33,7 @@ func main() {
 	}
 	defer cleanup()
 
-	app := SetupIoTAgent(logger)
+	app := SetupIoTAgent(serviceName, logger)
 
 	apiPort := os.Getenv("SERVICE_PORT")
 	if apiPort == "" {
@@ -81,13 +81,11 @@ func version() string {
 	return sha
 }
 
-func SetupIoTAgent(logger zerolog.Logger) iotagent.IoTAgent {
-	dmcUrl := os.Getenv("DMC_URL")
-	if dmcUrl == "" {
-		logger.Fatal().Msgf("DMC_URL must be set")
-	}
+func SetupIoTAgent(serviceName string, logger zerolog.Logger) iotagent.IoTAgent {
+	dmcUrl := "notyet"
 	dmc := domain.NewDeviceManagementClient(dmcUrl, logger)
-	event := events.NewEventPublisher()
+	event := events.NewEventPublisher(serviceName, logger)
+	event.Start()
 
 	return iotagent.NewIoTAgent(dmc, event, logger)
 }

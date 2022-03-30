@@ -3,6 +3,7 @@ module github.com/diwise/iot-agent
 go 1.18
 
 require (
+	github.com/diwise/messaging-golang v0.0.0-20220330092044-1e008f2e4f03
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/google/uuid v1.3.0
@@ -25,6 +26,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
+	github.com/rabbitmq/amqp091-go v1.3.2 // indirect
 	go.opentelemetry.io/contrib v1.0.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.6.1 // indirect
 	go.opentelemetry.io/otel/metric v0.28.0 // indirect
