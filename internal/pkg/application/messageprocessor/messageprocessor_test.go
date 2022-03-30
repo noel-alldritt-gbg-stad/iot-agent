@@ -42,8 +42,12 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, convers
 		DesignateConvertersFunc: func(ctx context.Context, types []string) []conversion.MessageConverter {
 			return []conversion.MessageConverter{
 				&conversion.MessageConverterMock{
-					ConvertPayloadFunc: func(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (conversion.InternalMessage, error) {
-						return conversion.InternalMessage{}, nil
+					ConvertPayloadFunc: func(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (*conversion.InternalMessage, error) {
+						return &conversion.InternalMessage{
+							InternalID:  "internalID",
+							Type:        "urn:oma:lwm2m:ext:3303",
+							SensorValue: 0.0,
+						}, nil
 					},
 				},
 			}
