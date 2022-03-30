@@ -27,15 +27,23 @@ func TestProcessMessageWorksWithCorrectInput(t *testing.T) {
 	is.NoErr(err)
 }
 
+func TestThatAllNecessaryFunctionsAreCalledOnAsIntended(t *testing.T) {
+	is, dmc, cr, ep, log := testSetup(t)
+	mp := NewMessageReceivedProcessor(dmc, cr, ep, log)
+
+	err := mp.ProcessMessage(context.Background(), []byte(payload))
+	is.NoErr(err)
+	is.Equal(len(dmc.FindDeviceFromDevEUICalls()), 1)
+}
+
 func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, conversion.ConverterRegistry, events.EventPublisher, zerolog.Logger) {
 	is := is.New(t)
 	dmc := &domain.DeviceManagementClientMock{
 		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (domain.Result, error) {
 			return domain.Result{
-					InternalID: "internalID",
-					Types:      []string{"urn:oma:lwm2m:ext:3303"},
-				},
-				nil
+				InternalID: "internalID",
+				Types:      []string{"urn:oma:lwm2m:ext:3303"},
+			}, nil
 		},
 	}
 	cr := &conversion.ConverterRegistryMock{
