@@ -37,10 +37,14 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 	// extract and send devEUI to device management client
 	// format is from mqtt, not device management client
 
-	dm := DeviceMessage{}
+	dm := struct {
+		DevEUI string `json:"devEUI"`
+	}{}
 
 	err := json.Unmarshal(msg, &dm)
 	if err == nil {
+		mp.log.Info().Msgf("received payload from %s: %s", dm.DevEUI, string(msg))
+
 		result, err := mp.dmc.FindDeviceFromDevEUI(ctx, dm.DevEUI)
 		if err == nil {
 			// response with internal id, type and gets passed to Converter registry
@@ -53,21 +57,20 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 			for _, convert := range messageConverters {
 				// msg converter converts msg payload to internal format and returns it
 				payload, err := convert(ctx, mp.log, result.InternalID, msg)
-				if err == nil {
-					justlooking, _ := json.Marshal(payload) //will delete later with rest of comments
-					mp.log.Info().Msgf("successfully converted incoming message to internal format: %s", justlooking)
-					err = mp.event.Publish(ctx, *payload)
-					if err != nil {
-						mp.log.Error().Err(err).Msg("failed to publish event")
-					}
+				if err != nil {
+					mp.log.Error().Err(err).Msg("conversion failed")
+					continue
+				}
+
+				justlooking, _ := json.Marshal(payload) //will delete later with rest of comments
+				mp.log.Info().Msgf("successfully converted incoming message to internal format: %s", justlooking)
+				err = mp.event.Publish(ctx, *payload)
+				if err != nil {
+					mp.log.Error().Err(err).Msg("failed to publish event")
 				}
 			}
 		}
 	}
 
 	return err
-}
-
-type DeviceMessage struct {
-	DevEUI string `json:"devEUI"`
 }

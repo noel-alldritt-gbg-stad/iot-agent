@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/rs/zerolog"
+	"go.opentelemetry.io/otel"
 )
 
 type DeviceManagementClient interface {
@@ -16,6 +17,8 @@ type devManagementClient struct {
 	log zerolog.Logger
 }
 
+var tracer = otel.Tracer("dmc-client")
+
 func NewDeviceManagementClient(dmcurl string, log zerolog.Logger) DeviceManagementClient {
 	dmc := &devManagementClient{
 		url: dmcurl,
@@ -25,6 +28,12 @@ func NewDeviceManagementClient(dmcurl string, log zerolog.Logger) DeviceManageme
 }
 
 func (dmc *devManagementClient) FindDeviceFromDevEUI(ctx context.Context, devEUI string) (Result, error) {
+
+	ctx, span := tracer.Start(ctx, "find-device")
+	defer span.End()
+
+	dmc.log.Info().Msgf("looking up internal id and types for devEUI %s", devEUI)
+
 	// this will be a http request to diff service.
 	result := Result{
 		InternalID: fmt.Sprintf(
