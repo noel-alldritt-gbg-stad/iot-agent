@@ -18,7 +18,7 @@ var _ ConverterRegistry = &ConverterRegistryMock{}
 //
 // 		// make and configure a mocked ConverterRegistry
 // 		mockedConverterRegistry := &ConverterRegistryMock{
-// 			DesignateConvertersFunc: func(ctx context.Context, types []string) []MessageConverter {
+// 			DesignateConvertersFunc: func(ctx context.Context, types []string) []MessageConverterFunc {
 // 				panic("mock out the DesignateConverters method")
 // 			},
 // 		}
@@ -29,7 +29,7 @@ var _ ConverterRegistry = &ConverterRegistryMock{}
 // 	}
 type ConverterRegistryMock struct {
 	// DesignateConvertersFunc mocks the DesignateConverters method.
-	DesignateConvertersFunc func(ctx context.Context, types []string) []MessageConverter
+	DesignateConvertersFunc func(ctx context.Context, types []string) []MessageConverterFunc
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -45,7 +45,7 @@ type ConverterRegistryMock struct {
 }
 
 // DesignateConverters calls DesignateConvertersFunc.
-func (mock *ConverterRegistryMock) DesignateConverters(ctx context.Context, types []string) []MessageConverter {
+func (mock *ConverterRegistryMock) DesignateConverters(ctx context.Context, types []string) []MessageConverterFunc {
 	if mock.DesignateConvertersFunc == nil {
 		panic("ConverterRegistryMock.DesignateConvertersFunc: method is nil but ConverterRegistry.DesignateConverters was just called")
 	}

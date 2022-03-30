@@ -12,6 +12,8 @@ type MessageConverter interface {
 	ConvertPayload(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (*InternalMessage, error)
 }
 
+type MessageConverterFunc func(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (*InternalMessage, error)
+
 // konvertera payload till internt format.
 
 type msgConverter struct {

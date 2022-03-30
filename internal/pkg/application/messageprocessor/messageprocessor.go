@@ -50,9 +50,9 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 				return fmt.Errorf("no matching converters for device")
 			}
 
-			for _, mc := range messageConverters {
+			for _, convert := range messageConverters {
 				// msg converter converts msg payload to internal format and returns it
-				payload, err := mc.ConvertPayload(ctx, mp.log, result.InternalID, msg)
+				payload, err := convert(ctx, mp.log, result.InternalID, msg)
 				if err == nil {
 					justlooking, _ := json.Marshal(payload) //will delete later with rest of comments
 					mp.log.Info().Msgf("successfully converted incoming message to internal format: %s", justlooking)
