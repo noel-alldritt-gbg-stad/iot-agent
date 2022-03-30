@@ -11,7 +11,7 @@ import (
 
 type EventPublisher interface {
 	Start() error
-	Publish(ctx context.Context, msg conversion.InternalMessageFormat) error
+	Publish(ctx context.Context, msg conversion.InternalMessage) error
 	Stop() error
 }
 
@@ -31,7 +31,7 @@ func NewEventPublisher(serviceName string, logger zerolog.Logger) EventPublisher
 }
 
 //places a converted message on rabbit...
-func (e *eventPublisher) Publish(ctx context.Context, msg conversion.InternalMessageFormat) error {
+func (e *eventPublisher) Publish(ctx context.Context, msg conversion.InternalMessage) error {
 	e.logger.Error().Msg("publishing to queue is not yet implemented.")
 	return nil
 }

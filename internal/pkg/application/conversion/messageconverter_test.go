@@ -19,7 +19,7 @@ func TestThatConvertPayloadGetsTemperatureValueCorrectly(t *testing.T) {
 
 	msg, err := mc.ConvertPayload(context.Background(), log, "internalID", []byte(payload))
 	is.NoErr(err)
-	is.Equal(msg.Value, 22.2)
+	is.Equal(msg.SensorValue, 22.2)
 }
 
 func mcmTestSetup(t *testing.T) (*is.I, zerolog.Logger) {

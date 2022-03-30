@@ -42,15 +42,15 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, convers
 		DesignateConvertersFunc: func(ctx context.Context, types []string) []conversion.MessageConverter {
 			return []conversion.MessageConverter{
 				&conversion.MessageConverterMock{
-					ConvertPayloadFunc: func(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (conversion.InternalMessageFormat, error) {
-						return conversion.InternalMessageFormat{}, nil
+					ConvertPayloadFunc: func(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (conversion.InternalMessage, error) {
+						return conversion.InternalMessage{}, nil
 					},
 				},
 			}
 		},
 	}
 	ep := &events.EventPublisherMock{
-		PublishFunc: func(ctx context.Context, msg conversion.InternalMessageFormat) error {
+		PublishFunc: func(ctx context.Context, msg conversion.InternalMessage) error {
 			return nil
 		},
 	}

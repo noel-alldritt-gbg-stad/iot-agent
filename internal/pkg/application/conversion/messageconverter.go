@@ -3,12 +3,13 @@ package conversion
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/rs/zerolog"
 )
 
 type MessageConverter interface {
-	ConvertPayload(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (InternalMessageFormat, error)
+	ConvertPayload(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (*InternalMessage, error)
 }
 
 // konvertera payload till internt format.
@@ -17,34 +18,32 @@ type msgConverter struct {
 	Type string // determines what type of data we're converting, i.e. water or air temperature etc.
 }
 
-func (mc *msgConverter) ConvertPayload(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (InternalMessageFormat, error) {
-	dm := &DeviceMessage{}
-	err := json.Unmarshal(msg, dm)
-	if err == nil {
-		if mc.Type == "urn:oma:lwm2m:ext:3303" {
-			payload := InternalMessageFormat{
-				InternalID: internalID,
-				Type:       mc.Type,
-				Value:      dm.Object.ExternalTemperature,
-			}
-			return payload, nil
+func (mc *msgConverter) ConvertPayload(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (*InternalMessage, error) {
+	if mc.Type == "urn:oma:lwm2m:ext:3303" {
+		dm := struct {
+			Object struct {
+				Temperature float64 `json:"externalTemperature"`
+			} `json:"object"`
+		}{}
+
+		err := json.Unmarshal(msg, &dm)
+		if err != nil {
+			return nil, err
 		}
+
+		payload := &InternalMessage{
+			InternalID:  internalID,
+			Type:        mc.Type,
+			SensorValue: dm.Object.Temperature,
+		}
+		return payload, nil
 	}
 
-	return InternalMessageFormat{}, err
+	return nil, fmt.Errorf("failed to convert payload, type %s is unknown", mc.Type)
 }
 
-type InternalMessageFormat struct {
-	InternalID string  `json:"internalID"`
-	Type       string  `json:"type"`
-	Value      float64 `json:"value"`
-}
-
-type DeviceMessage struct {
-	DevEUI string `json:"devEUI"`
-	Object Object `json:"object"`
-}
-
-type Object struct {
-	ExternalTemperature float64 `json:"externalTemperature"`
+type InternalMessage struct {
+	InternalID  string  `json:"internalID"`
+	Type        string  `json:"type"`
+	SensorValue float64 `json:"sensorValue"`
 }

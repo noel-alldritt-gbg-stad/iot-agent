@@ -19,7 +19,7 @@ var _ MessageConverter = &MessageConverterMock{}
 //
 // 		// make and configure a mocked MessageConverter
 // 		mockedMessageConverter := &MessageConverterMock{
-// 			ConvertPayloadFunc: func(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (InternalMessageFormat, error) {
+// 			ConvertPayloadFunc: func(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (*InternalMessage, error) {
 // 				panic("mock out the ConvertPayload method")
 // 			},
 // 		}
@@ -30,7 +30,7 @@ var _ MessageConverter = &MessageConverterMock{}
 // 	}
 type MessageConverterMock struct {
 	// ConvertPayloadFunc mocks the ConvertPayload method.
-	ConvertPayloadFunc func(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (InternalMessageFormat, error)
+	ConvertPayloadFunc func(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (*InternalMessage, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -50,7 +50,7 @@ type MessageConverterMock struct {
 }
 
 // ConvertPayload calls ConvertPayloadFunc.
-func (mock *MessageConverterMock) ConvertPayload(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (InternalMessageFormat, error) {
+func (mock *MessageConverterMock) ConvertPayload(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (*InternalMessage, error) {
 	if mock.ConvertPayloadFunc == nil {
 		panic("MessageConverterMock.ConvertPayloadFunc: method is nil but MessageConverter.ConvertPayload was just called")
 	}

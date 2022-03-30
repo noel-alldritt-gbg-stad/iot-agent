@@ -19,7 +19,7 @@ var _ EventPublisher = &EventPublisherMock{}
 //
 // 		// make and configure a mocked EventPublisher
 // 		mockedEventPublisher := &EventPublisherMock{
-// 			PublishFunc: func(ctx context.Context, msg conversion.InternalMessageFormat) error {
+// 			PublishFunc: func(ctx context.Context, msg conversion.InternalMessage) error {
 // 				panic("mock out the Publish method")
 // 			},
 // 			StartFunc: func() error {
@@ -36,7 +36,7 @@ var _ EventPublisher = &EventPublisherMock{}
 // 	}
 type EventPublisherMock struct {
 	// PublishFunc mocks the Publish method.
-	PublishFunc func(ctx context.Context, msg conversion.InternalMessageFormat) error
+	PublishFunc func(ctx context.Context, msg conversion.InternalMessage) error
 
 	// StartFunc mocks the Start method.
 	StartFunc func() error
@@ -51,7 +51,7 @@ type EventPublisherMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Msg is the msg argument value.
-			Msg conversion.InternalMessageFormat
+			Msg conversion.InternalMessage
 		}
 		// Start holds details about calls to the Start method.
 		Start []struct {
@@ -66,13 +66,13 @@ type EventPublisherMock struct {
 }
 
 // Publish calls PublishFunc.
-func (mock *EventPublisherMock) Publish(ctx context.Context, msg conversion.InternalMessageFormat) error {
+func (mock *EventPublisherMock) Publish(ctx context.Context, msg conversion.InternalMessage) error {
 	if mock.PublishFunc == nil {
 		panic("EventPublisherMock.PublishFunc: method is nil but EventPublisher.Publish was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
-		Msg conversion.InternalMessageFormat
+		Msg conversion.InternalMessage
 	}{
 		Ctx: ctx,
 		Msg: msg,
@@ -88,11 +88,11 @@ func (mock *EventPublisherMock) Publish(ctx context.Context, msg conversion.Inte
 //     len(mockedEventPublisher.PublishCalls())
 func (mock *EventPublisherMock) PublishCalls() []struct {
 	Ctx context.Context
-	Msg conversion.InternalMessageFormat
+	Msg conversion.InternalMessage
 } {
 	var calls []struct {
 		Ctx context.Context
-		Msg conversion.InternalMessageFormat
+		Msg conversion.InternalMessage
 	}
 	mock.lockPublish.RLock()
 	calls = mock.calls.Publish
