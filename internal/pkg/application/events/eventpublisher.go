@@ -2,6 +2,7 @@ package events
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
 	"github.com/rs/zerolog"
@@ -19,6 +20,7 @@ type eventPublisher struct {
 	logger       zerolog.Logger
 	rmqConfig    messaging.Config
 	rmqMessenger messaging.MsgContext
+	started      bool
 }
 
 func NewEventPublisher(serviceName string, logger zerolog.Logger) EventPublisher {
@@ -32,13 +34,22 @@ func NewEventPublisher(serviceName string, logger zerolog.Logger) EventPublisher
 
 //places a converted message on rabbit...
 func (e *eventPublisher) Publish(ctx context.Context, msg conversion.InternalMessage) error {
-	e.logger.Error().Msg("publishing to queue is not yet implemented.")
-	return nil
+	if !e.started {
+		err := fmt.Errorf("attempt to publish before start")
+		e.logger.Error().Err(err).Msg("publish failed")
+		return err
+	}
+
+	e.logger.Info().Msg("publishing message on topic " + msg.TopicName())
+	return e.rmqMessenger.PublishOnTopic(ctx, msg)
 }
 
 func (e *eventPublisher) Start() error {
 	var err error
 	e.rmqMessenger, err = messaging.Initialize(e.rmqConfig)
+	if err == nil {
+		e.started = true
+	}
 	return err
 }
 

@@ -47,3 +47,11 @@ type InternalMessage struct {
 	Type        string  `json:"type"`
 	SensorValue float64 `json:"sensorValue"`
 }
+
+func (im InternalMessage) ContentType() string {
+	return "application/json" // TODO: Decide a proper content type here
+}
+
+func (im InternalMessage) TopicName() string {
+	return "temperature"
+}
