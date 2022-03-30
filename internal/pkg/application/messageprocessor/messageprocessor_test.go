@@ -19,21 +19,12 @@ func TestFailsOnInvalidMessage(t *testing.T) {
 	is.True(err != nil)
 }
 
-func TestProcessMessageWorksWithCorrectInput(t *testing.T) {
+func TestProcessMessageWorksWithValidTemperatureInput(t *testing.T) {
 	is, dmc, cr, ep, log := testSetup(t)
 	mp := NewMessageReceivedProcessor(dmc, cr, ep, log)
 
 	err := mp.ProcessMessage(context.Background(), []byte(payload))
 	is.NoErr(err)
-}
-
-func TestThatAllNecessaryFunctionsAreCalledOnAsIntended(t *testing.T) {
-	is, dmc, cr, ep, log := testSetup(t)
-	mp := NewMessageReceivedProcessor(dmc, cr, ep, log)
-
-	err := mp.ProcessMessage(context.Background(), []byte(payload))
-	is.NoErr(err)
-	is.Equal(len(dmc.FindDeviceFromDevEUICalls()), 1)
 }
 
 func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, conversion.ConverterRegistry, events.EventPublisher, zerolog.Logger) {
