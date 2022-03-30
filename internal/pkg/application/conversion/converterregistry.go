@@ -2,9 +2,6 @@ package conversion
 
 import (
 	"context"
-	"encoding/json"
-
-	"github.com/rs/zerolog"
 )
 
 type ConverterRegistry interface {
@@ -17,28 +14,8 @@ type converterRegistry struct {
 
 func NewConverterRegistry() ConverterRegistry {
 
-	var f MessageConverterFunc = func(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (*InternalMessage, error) {
-		dm := struct {
-			Object struct {
-				Temperature float64 `json:"externalTemperature"`
-			} `json:"object"`
-		}{}
-
-		err := json.Unmarshal(msg, &dm)
-		if err != nil {
-			return nil, err
-		}
-
-		payload := &InternalMessage{
-			InternalID:  internalID,
-			Type:        "urn:oma:lwm2m:ext:3303",
-			SensorValue: dm.Object.Temperature,
-		}
-		return payload, nil
-	}
-
 	converters := map[string]MessageConverterFunc{
-		"urn:oma:lwm2m:ext:3303": f,
+		"urn:oma:lwm2m:ext:3303": Temperature,
 	}
 
 	return &converterRegistry{
