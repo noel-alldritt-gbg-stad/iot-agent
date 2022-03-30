@@ -29,7 +29,7 @@ var _ DeviceManagementClient = &DeviceManagementClientMock{}
 // 	}
 type DeviceManagementClientMock struct {
 	// FindDeviceFromDevEUIFunc mocks the FindDeviceFromDevEUI method.
-	FindDeviceFromDevEUIFunc func(ctx context.Context, devEUI string) (Result, error)
+	FindDeviceFromDevEUIFunc func(ctx context.Context, devEUI string) (*Result, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -45,7 +45,7 @@ type DeviceManagementClientMock struct {
 }
 
 // FindDeviceFromDevEUI calls FindDeviceFromDevEUIFunc.
-func (mock *DeviceManagementClientMock) FindDeviceFromDevEUI(ctx context.Context, devEUI string) (Result, error) {
+func (mock *DeviceManagementClientMock) FindDeviceFromDevEUI(ctx context.Context, devEUI string) (*Result, error) {
 	if mock.FindDeviceFromDevEUIFunc == nil {
 		panic("DeviceManagementClientMock.FindDeviceFromDevEUIFunc: method is nil but DeviceManagementClient.FindDeviceFromDevEUI was just called")
 	}

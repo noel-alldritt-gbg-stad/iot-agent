@@ -3,13 +3,14 @@ package domain
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/rs/zerolog"
 	"go.opentelemetry.io/otel"
 )
 
 type DeviceManagementClient interface {
-	FindDeviceFromDevEUI(ctx context.Context, devEUI string) (Result, error)
+	FindDeviceFromDevEUI(ctx context.Context, devEUI string) (*Result, error)
 }
 
 type devManagementClient struct {
@@ -27,18 +28,20 @@ func NewDeviceManagementClient(dmcurl string, log zerolog.Logger) DeviceManageme
 	return dmc
 }
 
-func (dmc *devManagementClient) FindDeviceFromDevEUI(ctx context.Context, devEUI string) (Result, error) {
+func (dmc *devManagementClient) FindDeviceFromDevEUI(ctx context.Context, devEUI string) (*Result, error) {
 
 	ctx, span := tracer.Start(ctx, "find-device")
 	defer span.End()
 
 	dmc.log.Info().Msgf("looking up internal id and types for devEUI %s", devEUI)
 
-	// this will be a http request to diff service.
-	result := Result{
-		InternalID: fmt.Sprintf(
-			"internalID:%s", devEUI),
-		Types: []string{"urn:oma:lwm2m:ext:3303"},
+	// TODO: Replace ifs with delegation to external service
+	if strings.HasPrefix(devEUI, "a81758ff") {
+		return &Result{
+			InternalID: fmt.Sprintf(
+				"internalID:%s", devEUI),
+			Types: []string{"urn:oma:lwm2m:ext:3303"},
+		}, nil
 	}
 
 	/*resp, err := http.Get(dmc.url + "/" + devEUI)
@@ -63,7 +66,7 @@ func (dmc *devManagementClient) FindDeviceFromDevEUI(ctx context.Context, devEUI
 		return result, err
 	}*/
 
-	return result, nil
+	return nil, fmt.Errorf("unknown device: %s", devEUI)
 }
 
 type Result struct {

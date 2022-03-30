@@ -47,8 +47,8 @@ func TestProcessMessageWorksWithValidTemperatureInput(t *testing.T) {
 func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, conversion.ConverterRegistry, events.EventPublisher, zerolog.Logger) {
 	is := is.New(t)
 	dmc := &domain.DeviceManagementClientMock{
-		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (domain.Result, error) {
-			return domain.Result{
+		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (*domain.Result, error) {
+			return &domain.Result{
 				InternalID: "internalID",
 				Types:      []string{"urn:oma:lwm2m:ext:3303"},
 			}, nil

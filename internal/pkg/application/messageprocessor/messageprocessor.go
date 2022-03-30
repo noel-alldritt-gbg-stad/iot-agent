@@ -39,6 +39,8 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 
 	dm := struct {
 		DevEUI string `json:"devEUI"`
+		Error  string `json:"error"`
+		Type   string `json:"type"`
 	}{}
 
 	err := json.Unmarshal(msg, &dm)
@@ -46,28 +48,36 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 		mp.log.Info().Msgf("received payload from %s: %s", dm.DevEUI, string(msg))
 
 		result, err := mp.dmc.FindDeviceFromDevEUI(ctx, dm.DevEUI)
-		if err == nil {
-			// response with internal id, type and gets passed to Converter registry
-			// converter registry returns the correct converters
-			messageConverters := mp.conReg.DesignateConverters(ctx, result.Types)
-			if len(messageConverters) == 0 {
-				return fmt.Errorf("no matching converters for device")
+		if err != nil {
+			mp.log.Error().Err(err).Msg("device lookup failure")
+			return err
+		}
+
+		if dm.Error != "" {
+			mp.log.Info().Msg("ignoring payload due to device error")
+			return nil
+		}
+
+		// response with internal id, type and gets passed to Converter registry
+		// converter registry returns the correct converters
+		messageConverters := mp.conReg.DesignateConverters(ctx, result.Types)
+		if len(messageConverters) == 0 {
+			return fmt.Errorf("no matching converters for device")
+		}
+
+		for _, convert := range messageConverters {
+			// msg converter converts msg payload to internal format and returns it
+			payload, err := convert(ctx, mp.log, result.InternalID, msg)
+			if err != nil {
+				mp.log.Error().Err(err).Msg("conversion failed")
+				continue
 			}
 
-			for _, convert := range messageConverters {
-				// msg converter converts msg payload to internal format and returns it
-				payload, err := convert(ctx, mp.log, result.InternalID, msg)
-				if err != nil {
-					mp.log.Error().Err(err).Msg("conversion failed")
-					continue
-				}
-
-				justlooking, _ := json.Marshal(payload) //will delete later with rest of comments
-				mp.log.Info().Msgf("successfully converted incoming message to internal format: %s", justlooking)
-				err = mp.event.Publish(ctx, *payload)
-				if err != nil {
-					mp.log.Error().Err(err).Msg("failed to publish event")
-				}
+			justlooking, _ := json.Marshal(payload) //will delete later with rest of comments
+			mp.log.Info().Msgf("successfully converted incoming message to internal format: %s", justlooking)
+			err = mp.event.Publish(ctx, *payload)
+			if err != nil {
+				mp.log.Error().Err(err).Msg("failed to publish event")
 			}
 		}
 
