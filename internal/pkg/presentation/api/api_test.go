@@ -25,7 +25,7 @@ func TestHealthEndpointReturns204StatusNoContent(t *testing.T) {
 	is.Equal(resp.StatusCode, http.StatusNoContent)
 }
 
-func TestXxx(t *testing.T) {
+func TestThatApiCallsMessageReceivedProperlyOnValidMessageFromMQTT(t *testing.T) {
 	is, api, app := testSetup(t)
 
 	server := httptest.NewServer(api.r)
