@@ -70,6 +70,6 @@ func (dmc *devManagementClient) FindDeviceFromDevEUI(ctx context.Context, devEUI
 }
 
 type Result struct {
-	InternalID string   `json:"internalID"`
+	InternalID string   `json:"id"`
 	Types      []string `json:"types"`
 }
