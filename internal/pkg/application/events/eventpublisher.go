@@ -32,7 +32,6 @@ func NewEventPublisher(serviceName string, logger zerolog.Logger) EventPublisher
 	return publisher
 }
 
-//places a converted message on rabbit...
 func (e *eventPublisher) Publish(ctx context.Context, msg conversion.InternalMessage) error {
 	if !e.started {
 		err := fmt.Errorf("attempt to publish before start")

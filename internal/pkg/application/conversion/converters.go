@@ -10,8 +10,6 @@ import (
 
 type MessageConverterFunc func(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (*InternalMessage, error)
 
-// konvertera payload till internt format.
-
 func Temperature(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (*InternalMessage, error) {
 	dm := struct {
 		Object struct {

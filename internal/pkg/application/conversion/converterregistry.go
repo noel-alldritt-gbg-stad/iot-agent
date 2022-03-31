@@ -23,7 +23,6 @@ func NewConverterRegistry() ConverterRegistry {
 	}
 }
 
-// bestäm vilken converter från en lista av converters som ska användas till ett visst meddelande
 func (c *converterRegistry) DesignateConverters(ctx context.Context, types []string) []MessageConverterFunc {
 	converters := []MessageConverterFunc{}
 
