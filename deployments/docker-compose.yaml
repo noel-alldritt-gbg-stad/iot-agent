@@ -21,6 +21,12 @@ services:
       - '8080'
 
 
+  iot-core:
+    image: 'ghcr.io/diwise/iot-core@sha256:1907446b181214983989e6cd376248b948a7d93ddd168fc440d17ec582349053'
+    environment:
+      RABBITMQ_HOST: 'rabbitmq'
+
+
   iot-device-mgmt:
     image: 'ghcr.io/diwise/iot-device-mgmt@sha256:b22be97b6b15e74d77b952a8a00d80ffb23fa7522c54d0b599d8d55317cb887c'
     ports:
@@ -28,7 +34,8 @@ services:
 
 
   rabbitmq: 
-    image: 'arm64v8/rabbitmq:3.8'
+    image: 'rabbitmq:3.8'
+    #image: 'arm64v8/rabbitmq:3.8'
     environment:
       RABBITMQ_DEFAULT_USER: 'user'
       RABBITMQ_DEFAULT_PASS: 'bitnami'
