@@ -20,11 +20,11 @@ type MessageProcessor interface {
 type msgProcessor struct {
 	dmc    domain.DeviceManagementClient
 	conReg conversion.ConverterRegistry
-	event  events.EventPublisher
+	event  events.EventSender
 	log    zerolog.Logger
 }
 
-func NewMessageReceivedProcessor(dmc domain.DeviceManagementClient, conReg conversion.ConverterRegistry, event events.EventPublisher, log zerolog.Logger) MessageProcessor {
+func NewMessageReceivedProcessor(dmc domain.DeviceManagementClient, conReg conversion.ConverterRegistry, event events.EventSender, log zerolog.Logger) MessageProcessor {
 	return &msgProcessor{
 		dmc:    dmc,
 		conReg: conReg,
@@ -69,9 +69,9 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 
 			justlooking, _ := json.Marshal(payload)
 			mp.log.Info().Msgf("successfully converted incoming message to internal format: %s", justlooking)
-			err = mp.event.Publish(ctx, *payload)
+			err = mp.event.Send(ctx, *payload)
 			if err != nil {
-				mp.log.Error().Err(err).Msg("failed to publish event")
+				mp.log.Error().Err(err).Msg("failed to send event")
 			}
 		}
 

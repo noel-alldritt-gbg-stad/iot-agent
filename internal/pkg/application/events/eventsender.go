@@ -10,32 +10,32 @@ import (
 	"github.com/diwise/messaging-golang/pkg/messaging"
 )
 
-type EventPublisher interface {
+type EventSender interface {
 	Start() error
-	Publish(ctx context.Context, msg conversion.InternalMessage) error
+	Send(ctx context.Context, msg conversion.InternalMessage) error
 	Stop() error
 }
 
-type eventPublisher struct {
+type eventSender struct {
 	logger       zerolog.Logger
 	rmqConfig    messaging.Config
 	rmqMessenger messaging.MsgContext
 	started      bool
 }
 
-func NewEventPublisher(serviceName string, logger zerolog.Logger) EventPublisher {
-	publisher := &eventPublisher{
+func NewEventSender(serviceName string, logger zerolog.Logger) EventSender {
+	sender := &eventSender{
 		logger:    logger,
 		rmqConfig: messaging.LoadConfiguration(serviceName, logger),
 	}
 
-	return publisher
+	return sender
 }
 
-func (e *eventPublisher) Publish(ctx context.Context, msg conversion.InternalMessage) error {
+func (e *eventSender) Send(ctx context.Context, msg conversion.InternalMessage) error {
 	if !e.started {
-		err := fmt.Errorf("attempt to publish before start")
-		e.logger.Error().Err(err).Msg("publish failed")
+		err := fmt.Errorf("attempt to send before start")
+		e.logger.Error().Err(err).Msg("send failed")
 		return err
 	}
 
@@ -43,7 +43,7 @@ func (e *eventPublisher) Publish(ctx context.Context, msg conversion.InternalMes
 	return e.rmqMessenger.PublishOnTopic(ctx, msg)
 }
 
-func (e *eventPublisher) Start() error {
+func (e *eventSender) Start() error {
 	var err error
 	e.rmqMessenger, err = messaging.Initialize(e.rmqConfig)
 	if err == nil {
@@ -52,7 +52,7 @@ func (e *eventPublisher) Start() error {
 	return err
 }
 
-func (e *eventPublisher) Stop() error {
+func (e *eventSender) Stop() error {
 	e.rmqMessenger.Close()
 	return nil
 }

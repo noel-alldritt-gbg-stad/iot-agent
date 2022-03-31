@@ -44,7 +44,7 @@ func TestProcessMessageWorksWithValidTemperatureInput(t *testing.T) {
 	is.NoErr(err)
 }
 
-func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, conversion.ConverterRegistry, events.EventPublisher, zerolog.Logger) {
+func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, conversion.ConverterRegistry, events.EventSender, zerolog.Logger) {
 	is := is.New(t)
 	dmc := &domain.DeviceManagementClientMock{
 		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (*domain.Result, error) {
@@ -67,8 +67,8 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, convers
 			}
 		},
 	}
-	ep := &events.EventPublisherMock{
-		PublishFunc: func(ctx context.Context, msg conversion.InternalMessage) error {
+	ep := &events.EventSenderMock{
+		SendFunc: func(ctx context.Context, msg conversion.InternalMessage) error {
 			return nil
 		},
 	}
