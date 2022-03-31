@@ -8,6 +8,8 @@ services:
     restart: always
     depends_on:
       - rabbitmq
+      - iot-core
+      - iot-device-mgmt
     environment:
       MQTT_HOST: $MQTT_HOST
       MQTT_PORT: $MQTT_PORT
@@ -23,18 +25,20 @@ services:
 
   iot-core:
     image: 'ghcr.io/diwise/iot-core@sha256:cca31199fb33503e109094b26d56a5a32561d037f94e085d75f9fe1889e66d8a'
+    restart: always
     environment:
       RABBITMQ_HOST: 'rabbitmq'
 
 
   iot-device-mgmt:
     image: 'ghcr.io/diwise/iot-device-mgmt@sha256:b22be97b6b15e74d77b952a8a00d80ffb23fa7522c54d0b599d8d55317cb887c'
+    restart: always
     ports:
       - '8080'
 
 
   rabbitmq: 
-    image: 'rabbitmq:3.8'
+    image: 'bitnami/rabbitmq:3.8'
     #image: 'arm64v8/rabbitmq:3.8'
     environment:
       RABBITMQ_DEFAULT_USER: 'user'
