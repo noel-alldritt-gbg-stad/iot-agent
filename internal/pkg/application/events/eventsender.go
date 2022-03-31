@@ -39,7 +39,7 @@ func (e *eventSender) Send(ctx context.Context, msg conversion.InternalMessage) 
 		return err
 	}
 
-	e.logger.Info().Msgf("sending command to %s queue", msg.TopicName())
+	e.logger.Info().Msg("sending command to iot-core queue")
 	return e.rmqMessenger.SendCommandTo(ctx, msg, "iot-core")
 }
 
