@@ -40,7 +40,7 @@ func (e *eventSender) Send(ctx context.Context, msg conversion.InternalMessage) 
 	}
 
 	e.logger.Info().Msgf("sending command to %s queue", msg.TopicName())
-	return e.rmqMessenger.SendCommandTo(ctx, msg, "msg.rcvd")
+	return e.rmqMessenger.SendCommandTo(ctx, msg, "iot-core")
 }
 
 func (e *eventSender) Start() error {
