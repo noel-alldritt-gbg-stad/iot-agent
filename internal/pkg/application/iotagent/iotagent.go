@@ -18,7 +18,7 @@ type iotAgent struct {
 	mp messageprocessor.MessageProcessor
 }
 
-func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventPublisher, log zerolog.Logger) IoTAgent {
+func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventSender, log zerolog.Logger) IoTAgent {
 	conreg := conversion.NewConverterRegistry()
 	msgprcs := messageprocessor.NewMessageReceivedProcessor(dmc, conreg, eventPub, log)
 

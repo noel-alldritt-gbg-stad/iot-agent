@@ -9,18 +9,18 @@ import (
 	"sync"
 )
 
-// Ensure, that EventPublisherMock does implement EventPublisher.
+// Ensure, that EventSenderMock does implement EventSender.
 // If this is not the case, regenerate this file with moq.
-var _ EventPublisher = &EventPublisherMock{}
+var _ EventSender = &EventSenderMock{}
 
-// EventPublisherMock is a mock implementation of EventPublisher.
+// EventSenderMock is a mock implementation of EventSender.
 //
-// 	func TestSomethingThatUsesEventPublisher(t *testing.T) {
+// 	func TestSomethingThatUsesEventSender(t *testing.T) {
 //
-// 		// make and configure a mocked EventPublisher
-// 		mockedEventPublisher := &EventPublisherMock{
-// 			PublishFunc: func(ctx context.Context, msg conversion.InternalMessage) error {
-// 				panic("mock out the Publish method")
+// 		// make and configure a mocked EventSender
+// 		mockedEventSender := &EventSenderMock{
+// 			SendFunc: func(ctx context.Context, msg conversion.InternalMessage) error {
+// 				panic("mock out the Send method")
 // 			},
 // 			StartFunc: func() error {
 // 				panic("mock out the Start method")
@@ -30,13 +30,13 @@ var _ EventPublisher = &EventPublisherMock{}
 // 			},
 // 		}
 //
-// 		// use mockedEventPublisher in code that requires EventPublisher
+// 		// use mockedEventSender in code that requires EventSender
 // 		// and then make assertions.
 //
 // 	}
-type EventPublisherMock struct {
-	// PublishFunc mocks the Publish method.
-	PublishFunc func(ctx context.Context, msg conversion.InternalMessage) error
+type EventSenderMock struct {
+	// SendFunc mocks the Send method.
+	SendFunc func(ctx context.Context, msg conversion.InternalMessage) error
 
 	// StartFunc mocks the Start method.
 	StartFunc func() error
@@ -46,8 +46,8 @@ type EventPublisherMock struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// Publish holds details about calls to the Publish method.
-		Publish []struct {
+		// Send holds details about calls to the Send method.
+		Send []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Msg is the msg argument value.
@@ -60,15 +60,15 @@ type EventPublisherMock struct {
 		Stop []struct {
 		}
 	}
-	lockPublish sync.RWMutex
-	lockStart   sync.RWMutex
-	lockStop    sync.RWMutex
+	lockSend  sync.RWMutex
+	lockStart sync.RWMutex
+	lockStop  sync.RWMutex
 }
 
-// Publish calls PublishFunc.
-func (mock *EventPublisherMock) Publish(ctx context.Context, msg conversion.InternalMessage) error {
-	if mock.PublishFunc == nil {
-		panic("EventPublisherMock.PublishFunc: method is nil but EventPublisher.Publish was just called")
+// Send calls SendFunc.
+func (mock *EventSenderMock) Send(ctx context.Context, msg conversion.InternalMessage) error {
+	if mock.SendFunc == nil {
+		panic("EventSenderMock.SendFunc: method is nil but EventSender.Send was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -77,16 +77,16 @@ func (mock *EventPublisherMock) Publish(ctx context.Context, msg conversion.Inte
 		Ctx: ctx,
 		Msg: msg,
 	}
-	mock.lockPublish.Lock()
-	mock.calls.Publish = append(mock.calls.Publish, callInfo)
-	mock.lockPublish.Unlock()
-	return mock.PublishFunc(ctx, msg)
+	mock.lockSend.Lock()
+	mock.calls.Send = append(mock.calls.Send, callInfo)
+	mock.lockSend.Unlock()
+	return mock.SendFunc(ctx, msg)
 }
 
-// PublishCalls gets all the calls that were made to Publish.
+// SendCalls gets all the calls that were made to Send.
 // Check the length with:
-//     len(mockedEventPublisher.PublishCalls())
-func (mock *EventPublisherMock) PublishCalls() []struct {
+//     len(mockedEventSender.SendCalls())
+func (mock *EventSenderMock) SendCalls() []struct {
 	Ctx context.Context
 	Msg conversion.InternalMessage
 } {
@@ -94,16 +94,16 @@ func (mock *EventPublisherMock) PublishCalls() []struct {
 		Ctx context.Context
 		Msg conversion.InternalMessage
 	}
-	mock.lockPublish.RLock()
-	calls = mock.calls.Publish
-	mock.lockPublish.RUnlock()
+	mock.lockSend.RLock()
+	calls = mock.calls.Send
+	mock.lockSend.RUnlock()
 	return calls
 }
 
 // Start calls StartFunc.
-func (mock *EventPublisherMock) Start() error {
+func (mock *EventSenderMock) Start() error {
 	if mock.StartFunc == nil {
-		panic("EventPublisherMock.StartFunc: method is nil but EventPublisher.Start was just called")
+		panic("EventSenderMock.StartFunc: method is nil but EventSender.Start was just called")
 	}
 	callInfo := struct {
 	}{}
@@ -115,8 +115,8 @@ func (mock *EventPublisherMock) Start() error {
 
 // StartCalls gets all the calls that were made to Start.
 // Check the length with:
-//     len(mockedEventPublisher.StartCalls())
-func (mock *EventPublisherMock) StartCalls() []struct {
+//     len(mockedEventSender.StartCalls())
+func (mock *EventSenderMock) StartCalls() []struct {
 } {
 	var calls []struct {
 	}
@@ -127,9 +127,9 @@ func (mock *EventPublisherMock) StartCalls() []struct {
 }
 
 // Stop calls StopFunc.
-func (mock *EventPublisherMock) Stop() error {
+func (mock *EventSenderMock) Stop() error {
 	if mock.StopFunc == nil {
-		panic("EventPublisherMock.StopFunc: method is nil but EventPublisher.Stop was just called")
+		panic("EventSenderMock.StopFunc: method is nil but EventSender.Stop was just called")
 	}
 	callInfo := struct {
 	}{}
@@ -141,8 +141,8 @@ func (mock *EventPublisherMock) Stop() error {
 
 // StopCalls gets all the calls that were made to Stop.
 // Check the length with:
-//     len(mockedEventPublisher.StopCalls())
-func (mock *EventPublisherMock) StopCalls() []struct {
+//     len(mockedEventSender.StopCalls())
+func (mock *EventSenderMock) StopCalls() []struct {
 } {
 	var calls []struct {
 	}

@@ -2,10 +2,13 @@ package domain
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"strings"
+	"io/ioutil"
+	"net/http"
 
 	"github.com/rs/zerolog"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 )
 
@@ -20,56 +23,66 @@ type devManagementClient struct {
 
 var tracer = otel.Tracer("dmc-client")
 
-func NewDeviceManagementClient(dmcurl string, log zerolog.Logger) DeviceManagementClient {
+func NewDeviceManagementClient(devMgmtUrl string, log zerolog.Logger) DeviceManagementClient {
 	dmc := &devManagementClient{
-		url: dmcurl,
+		url: devMgmtUrl,
 		log: log,
 	}
 	return dmc
 }
 
 func (dmc *devManagementClient) FindDeviceFromDevEUI(ctx context.Context, devEUI string) (*Result, error) {
-
+	var err error
 	ctx, span := tracer.Start(ctx, "find-device")
-	defer span.End()
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+		}
+		span.End()
+	}()
 
 	dmc.log.Info().Msgf("looking up internal id and types for devEUI %s", devEUI)
 
-	// TODO: Replace ifs with delegation to external service
-	if strings.HasPrefix(devEUI, "a81758ff") {
-		return &Result{
-			InternalID: fmt.Sprintf(
-				"internalID:%s", devEUI),
-			Types: []string{"urn:oma:lwm2m:ext:3303"},
-		}, nil
+	httpClient := http.Client{
+		Transport: otelhttp.NewTransport(http.DefaultTransport),
 	}
 
-	/*resp, err := http.Get(dmc.url + "/" + devEUI)
+	url := dmc.url + "/api/v0/devices/" + devEUI
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		dmc.log.Error().Err(err).Msg("failed to create http request")
+		return nil, err
+	}
+
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		dmc.log.Error().Msgf("failed to retrieve device information from devEUI: %s", err.Error())
-		return result, err
+		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
 		dmc.log.Error().Msgf("request failed with status code %d", resp.StatusCode)
-		return result, nil
+		return nil, fmt.Errorf("request failed, no device found")
 	}
 
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		dmc.log.Error().Msgf("failed to read response body: %s", err.Error())
-		return result, err
+		return nil, err
 	}
 
-	err = json.Unmarshal(respBody, &result)
+	result := &Result{}
+
+	err = json.Unmarshal(respBody, result)
 	if err != nil {
 		dmc.log.Error().Msgf("failed to unmarshal response body: %s", err.Error())
-		return result, err
-	}*/
+		return nil, err
+	}
 
-	return nil, fmt.Errorf("unknown device: %s", devEUI)
+	return result, nil
 }
 
 type Result struct {
-	InternalID string   `json:"internalID"`
+	InternalID string   `json:"id"`
 	Types      []string `json:"types"`
 }
