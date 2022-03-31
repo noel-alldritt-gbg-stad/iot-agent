@@ -1,0 +1,35 @@
+version: '3'
+services:
+  iot-agent:
+    image: 'diwise/iot-agent:latest'
+    build:
+      context: ..
+      dockerfile: ./deployments/Dockerfile
+    restart: always
+    depends_on:
+      - rabbitmq
+    environment:
+      MQTT_HOST: $MQTT_HOST
+      MQTT_PORT: $MQTT_PORT
+      MQTT_TOPIC_0: $MQTT_TOPIC
+      MQTT_USER: $MQTT_USER
+      MQTT_PASSWORD: $MQTT_PASSWORD
+      RABBITMQ_HOST: 'rabbitmq'
+    ports:
+      - '8080'
+
+
+  rabbitmq: 
+    image: 'bitnami/rabbitmq:3.8'
+    ports:
+      - '4369'
+      - '5672'
+      - '25672'
+      - '15672'
+    volumes:
+      - 'rabbitmq_data:/bitnami'
+
+
+volumes:
+  rabbitmq_data:
+    driver: local

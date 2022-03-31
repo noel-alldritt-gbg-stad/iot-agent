@@ -1,54 +1,99 @@
 package main
 
 import (
-	"crypto/tls"
+	"context"
 	"fmt"
 	"os"
-	"time"
+	"runtime/debug"
+	"strings"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/google/uuid"
+	"github.com/diwise/iot-agent/internal/pkg/application/events"
+	"github.com/diwise/iot-agent/internal/pkg/application/iotagent"
+	"github.com/diwise/iot-agent/internal/pkg/domain"
+	"github.com/diwise/iot-agent/internal/pkg/infrastructure/services/mqtt"
+	"github.com/diwise/iot-agent/internal/pkg/infrastructure/tracing"
+	"github.com/diwise/iot-agent/internal/pkg/presentation/api"
+	"github.com/go-chi/chi/v5"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
+	serviceName := "iot-agent"
+	serviceVersion := version()
 
-	options := mqtt.NewClientOptions()
-	// broker IP and port
+	logger := newLogger(serviceName, serviceVersion)
+	logger.Info().Msg("starting up ...")
 
-	connectionString := fmt.Sprintf("tls://%s:8883", os.Getenv("MQTT_HOST"))
-	options.AddBroker(connectionString)
+	ctx := context.Background()
 
-	options.Username = os.Getenv("MQTT_USER")
-	options.Password = os.Getenv("MQTT_PASSWORD")
+	cleanup, err := tracing.Init(ctx, logger, serviceName, serviceVersion)
+	if err != nil {
+		logger.Fatal().Err(err).Msg("failed to init tracing")
+	}
+	defer cleanup()
 
-	options.SetClientID("diwise/iot-agent" + uuid.NewString())
-	options.SetDefaultPublishHandler(MessageHandler)
+	app := SetupIoTAgent(serviceName, logger)
 
-	options.OnConnect = func(c mqtt.Client) {
-		fmt.Println("connected!")
-		c.Subscribe("application/53/device/#", 0, nil)
+	apiPort := os.Getenv("SERVICE_PORT")
+	if apiPort == "" {
+		apiPort = "8080"
 	}
 
-	options.OnConnectionLost = func(c mqtt.Client, err error) {
-		panic(fmt.Sprintf("connection lost: %s\n", err.Error()))
+	mqttConfig, err := mqtt.NewConfigFromEnvironment()
+	if err != nil {
+		logger.Fatal().Err(err).Msg("mqtt configuration error")
 	}
 
-	options.TLSConfig = &tls.Config{
-		InsecureSkipVerify: true,
+	forwardingEndpoint := fmt.Sprintf("http://127.0.0.1:%s/newmsg", apiPort)
+	mqttClient, err := mqtt.NewClient(logger, mqttConfig, forwardingEndpoint)
+	if err != nil {
+		logger.Fatal().Err(err).Msg("failed to create mqtt client")
 	}
+	mqttClient.Start()
+	defer mqttClient.Stop()
 
-	client := mqtt.NewClient(options)
-	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		panic(token.Error())
-	}
-
-	for {
-		time.Sleep(1 * time.Second)
-	}
+	SetupAndRunApi(logger, app, apiPort)
 }
 
-func MessageHandler(client mqtt.Client, msg mqtt.Message) {
-	payload := msg.Payload()
-	fmt.Printf("received payload %s", string(payload))
-	msg.Ack()
+func newLogger(serviceName, serviceVersion string) zerolog.Logger {
+	logger := log.With().Str("service", strings.ToLower(serviceName)).Str("version", serviceVersion).Logger()
+	return logger
+}
+
+func version() string {
+	buildInfo, ok := debug.ReadBuildInfo()
+	if !ok {
+		return "unknown"
+	}
+
+	buildSettings := buildInfo.Settings
+	infoMap := map[string]string{}
+	for _, s := range buildSettings {
+		infoMap[s.Key] = s.Value
+	}
+
+	sha := infoMap["vcs.revision"]
+	if infoMap["vcs.modified"] == "true" {
+		sha += "+"
+	}
+
+	return sha
+}
+
+func SetupIoTAgent(serviceName string, logger zerolog.Logger) iotagent.IoTAgent {
+	dmcUrl := "notyet"
+	dmc := domain.NewDeviceManagementClient(dmcUrl, logger)
+	event := events.NewEventPublisher(serviceName, logger)
+	event.Start()
+
+	return iotagent.NewIoTAgent(dmc, event, logger)
+}
+
+func SetupAndRunApi(logger zerolog.Logger, app iotagent.IoTAgent, port string) {
+	r := chi.NewRouter()
+
+	a := api.NewApi(logger, r, app)
+
+	a.Start(port)
 }
