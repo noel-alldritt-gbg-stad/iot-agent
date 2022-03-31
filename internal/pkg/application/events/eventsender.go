@@ -39,7 +39,7 @@ func (e *eventSender) Send(ctx context.Context, msg conversion.InternalMessage) 
 		return err
 	}
 
-	e.logger.Info().Msg("publishing message on topic " + msg.TopicName())
+	e.logger.Info().Msgf("sending command to %s queue", msg.TopicName())
 	return e.rmqMessenger.SendCommandTo(ctx, msg, "msg.rcvd")
 }
 
