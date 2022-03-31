@@ -82,7 +82,7 @@ func version() string {
 }
 
 func SetupIoTAgent(serviceName string, logger zerolog.Logger) iotagent.IoTAgent {
-	dmcUrl := "notyet"
+	dmcUrl := os.Getenv("DEV_MGMT_URL")
 	dmc := domain.NewDeviceManagementClient(dmcUrl, logger)
 	event := events.NewEventPublisher(serviceName, logger)
 	event.Start()
