@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/rs/zerolog"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 )
 
@@ -42,7 +43,19 @@ func (dmc *devManagementClient) FindDeviceFromDevEUI(ctx context.Context, devEUI
 
 	dmc.log.Info().Msgf("looking up internal id and types for devEUI %s", devEUI)
 
-	resp, err := http.Get(dmc.url + "/api/v0/devices/" + devEUI)
+	httpClient := http.Client{
+		Transport: otelhttp.NewTransport(http.DefaultTransport),
+	}
+
+	url := dmc.url + "/api/v0/devices/" + devEUI
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		dmc.log.Error().Err(err).Msg("failed to create http request")
+		return nil, err
+	}
+
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		dmc.log.Error().Msgf("failed to retrieve device information from devEUI: %s", err.Error())
 		return nil, err
