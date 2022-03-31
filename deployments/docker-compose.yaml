@@ -19,6 +19,12 @@ services:
       - '8080'
 
 
+  iot-device-mgmt:
+    image: 'ghcr.io/diwise/iot-device-mgmt@sha256:f7ebb43e577584142c1f97ed84b941465ab1d3e368d1ef3b89a87bf7a361aa30'
+    ports:
+      - '8080'
+
+
   rabbitmq: 
     image: 'bitnami/rabbitmq:3.8'
     ports:
