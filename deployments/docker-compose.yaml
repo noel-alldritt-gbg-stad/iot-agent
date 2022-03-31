@@ -20,7 +20,7 @@ services:
 
 
   iot-device-mgmt:
-    image: 'ghcr.io/diwise/iot-device-mgmt@sha256:f7ebb43e577584142c1f97ed84b941465ab1d3e368d1ef3b89a87bf7a361aa30'
+    image: 'ghcr.io/diwise/iot-device-mgmt@sha256:b22be97b6b15e74d77b952a8a00d80ffb23fa7522c54d0b599d8d55317cb887c'
     ports:
       - '8080'
 
