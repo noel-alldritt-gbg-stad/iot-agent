@@ -19,6 +19,7 @@ services:
       MQTT_PASSWORD: $MQTT_PASSWORD
       RABBITMQ_HOST: 'rabbitmq'
       DEV_MGMT_URL: 'http://iot-device-mgmt:8080'
+      #OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4318'
     ports:
       - '8080'
 
@@ -28,11 +29,15 @@ services:
     restart: always
     environment:
       RABBITMQ_HOST: 'rabbitmq'
+      #OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4318'
 
 
   iot-device-mgmt:
     image: 'ghcr.io/diwise/iot-device-mgmt@sha256:b22be97b6b15e74d77b952a8a00d80ffb23fa7522c54d0b599d8d55317cb887c'
     restart: always
+    environment:
+      RABBITMQ_HOST: 'rabbitmq'
+      #OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4318'
     ports:
       - '8080'
 
