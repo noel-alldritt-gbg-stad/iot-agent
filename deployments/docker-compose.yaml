@@ -33,7 +33,7 @@ services:
 
 
   iot-device-mgmt:
-    image: 'ghcr.io/diwise/iot-device-mgmt@sha256:b22be97b6b15e74d77b952a8a00d80ffb23fa7522c54d0b599d8d55317cb887c'
+    image: 'ghcr.io/diwise/iot-device-mgmt@sha256:74a4042e76cab9c4b3e75c8e4360f63cbc0cabf6251ce84aab0dbe74ea6ca1a8'
     restart: always
     environment:
       RABBITMQ_HOST: 'rabbitmq'
