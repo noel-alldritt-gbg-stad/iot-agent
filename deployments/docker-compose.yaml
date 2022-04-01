@@ -25,7 +25,7 @@ services:
 
 
   iot-core:
-    image: 'ghcr.io/diwise/iot-core@sha256:cca31199fb33503e109094b26d56a5a32561d037f94e085d75f9fe1889e66d8a'
+    image: 'ghcr.io/diwise/iot-core@sha256:c4b69010e44f12a1043749244ed52d43ae8a298e9955a0b4480c7b778b53491b'
     restart: always
     environment:
       RABBITMQ_HOST: 'rabbitmq'
