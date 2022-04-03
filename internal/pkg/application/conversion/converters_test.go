@@ -4,20 +4,21 @@ import (
 	"context"
 	"testing"
 
+	"github.com/diwise/iot-agent/internal/pkg/infrastructure/logging"
 	"github.com/matryer/is"
-	"github.com/rs/zerolog"
 )
 
 func TestThatTemperatureDecodesValueCorrectly(t *testing.T) {
-	is, log := mcmTestSetup(t)
+	is, ctx := mcmTestSetup(t)
 	payload := `{"devEUI":"ncaknlclkdanklcd","object":{"externalTemperature":22.2}}`
 
-	msg, err := Temperature(context.Background(), log, "internalID", []byte(payload))
+	msg, err := Temperature(ctx, "internalID", []byte(payload))
 
 	is.NoErr(err)
 	is.Equal(msg.SensorValue, 22.2)
 }
 
-func mcmTestSetup(t *testing.T) (*is.I, zerolog.Logger) {
-	return is.New(t), zerolog.Logger{}
+func mcmTestSetup(t *testing.T) (*is.I, context.Context) {
+	ctx, _ := logging.NewLogger(context.Background(), "test", "")
+	return is.New(t), ctx
 }

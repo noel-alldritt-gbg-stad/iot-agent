@@ -32,18 +32,25 @@ func NewMessageHandler(logger zerolog.Logger, forwardingEndpoint string) func(mq
 			span.End()
 		}()
 
+		log := logger
+
+		traceID := span.SpanContext().TraceID()
+		if traceID.IsValid() {
+			log = logger.With().Str("traceID", traceID.String()).Logger()
+		}
+
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, forwardingEndpoint, bytes.NewBuffer(payload))
 		if err != nil {
-			logger.Error().Err(err).Msg("failed to create http request")
+			log.Error().Err(err).Msg("failed to create http request")
 			return
 		}
 
 		req.Header.Add("Content-Type", "application/json")
 
-		logger.Info().Msgf("forwarding received payload to %s", forwardingEndpoint)
+		log.Info().Msgf("forwarding received payload to %s", forwardingEndpoint)
 		_, err = httpClient.Do(req)
 		if err != nil {
-			logger.Error().Err(err).Msg("failed to forward message")
+			log.Error().Err(err).Msg("failed to forward message")
 		}
 
 		msg.Ack()

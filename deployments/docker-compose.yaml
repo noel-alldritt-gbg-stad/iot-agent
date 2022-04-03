@@ -24,14 +24,14 @@ services:
       - '8080'
 
   iot-core:
-    image: 'ghcr.io/diwise/iot-core@sha256:c4b69010e44f12a1043749244ed52d43ae8a298e9955a0b4480c7b778b53491b'
+    image: 'ghcr.io/diwise/iot-core@sha256:da59fddb6d06995eeb2d31802a12749162b0b55a937bc6be85b665d7f76238b2'
     restart: always
     environment:
       RABBITMQ_HOST: 'rabbitmq'
       OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4318'
 
   iot-device-mgmt:
-    image: 'ghcr.io/diwise/iot-device-mgmt@sha256:74a4042e76cab9c4b3e75c8e4360f63cbc0cabf6251ce84aab0dbe74ea6ca1a8'
+    image: 'ghcr.io/diwise/iot-device-mgmt@sha256:00302e43e60323692e1c94d1979cacd2b4f38d44f920e8a232040e7b8d5e002c'
     restart: always
     environment:
       RABBITMQ_HOST: 'rabbitmq'

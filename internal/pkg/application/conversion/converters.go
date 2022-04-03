@@ -4,13 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
-	"github.com/rs/zerolog"
 )
 
-type MessageConverterFunc func(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (*InternalMessage, error)
+type MessageConverterFunc func(ctx context.Context, internalID string, msg []byte) (*InternalMessage, error)
 
-func Temperature(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (*InternalMessage, error) {
+func Temperature(ctx context.Context, internalID string, msg []byte) (*InternalMessage, error) {
 	dm := struct {
 		Object struct {
 			ExtTemp *float64 `json:"externalTemperature"`

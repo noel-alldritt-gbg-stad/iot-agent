@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
+	"github.com/diwise/iot-agent/internal/pkg/infrastructure/logging"
 	"github.com/rs/zerolog"
 
 	"github.com/diwise/messaging-golang/pkg/messaging"
@@ -17,7 +18,6 @@ type EventSender interface {
 }
 
 type eventSender struct {
-	logger       zerolog.Logger
 	rmqConfig    messaging.Config
 	rmqMessenger messaging.MsgContext
 	started      bool
@@ -25,7 +25,6 @@ type eventSender struct {
 
 func NewEventSender(serviceName string, logger zerolog.Logger) EventSender {
 	sender := &eventSender{
-		logger:    logger,
 		rmqConfig: messaging.LoadConfiguration(serviceName, logger),
 	}
 
@@ -33,13 +32,15 @@ func NewEventSender(serviceName string, logger zerolog.Logger) EventSender {
 }
 
 func (e *eventSender) Send(ctx context.Context, msg conversion.InternalMessage) error {
+	log := logging.GetLoggerFromContext(ctx)
+
 	if !e.started {
 		err := fmt.Errorf("attempt to send before start")
-		e.logger.Error().Err(err).Msg("send failed")
+		log.Error().Err(err).Msg("send failed")
 		return err
 	}
 
-	e.logger.Info().Msg("sending command to iot-core queue")
+	log.Info().Msg("sending command to iot-core queue")
 	return e.rmqMessenger.SendCommandTo(ctx, msg, "iot-core")
 }
 

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/iotagent"
+	"github.com/diwise/iot-agent/internal/pkg/infrastructure/logging"
 	"github.com/go-chi/chi/v5"
 	"github.com/riandyrn/otelchi"
 	"github.com/rs/cors"
@@ -66,9 +67,8 @@ func (a *api) health(w http.ResponseWriter, r *http.Request) {
 
 func (a *api) incomingMsg(w http.ResponseWriter, r *http.Request) {
 	var err error
-	ctx := r.Context()
 
-	ctx, span := tracer.Start(ctx, "newmsg")
+	ctx, span := tracer.Start(r.Context(), "newmsg")
 	defer func() {
 		if err != nil {
 			span.RecordError(err)
@@ -76,16 +76,25 @@ func (a *api) incomingMsg(w http.ResponseWriter, r *http.Request) {
 		span.End()
 	}()
 
+	log := a.log
+
+	traceID := span.SpanContext().TraceID()
+	if traceID.IsValid() {
+		log = log.With().Str("traceID", traceID.String()).Logger()
+	}
+
+	ctx = logging.NewContextWithLogger(ctx, log)
+
 	msg, _ := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 
-	a.log.Info().Msg("attempting to process message")
+	log.Info().Msg("attempting to process message")
 	err = a.app.MessageReceived(ctx, msg)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 
-		a.log.Error().Err(err).Msg("failed to handle message")
+		log.Error().Err(err).Msg("failed to handle message")
 		return
 	}
 
