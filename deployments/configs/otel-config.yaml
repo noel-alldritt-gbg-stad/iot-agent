@@ -6,7 +6,7 @@ receivers:
 
 exporters:
   logging:
-    loglevel: 'debug'
+    loglevel: 'info'
   otlp:
     endpoint: 'tempo:4317'
     tls:
