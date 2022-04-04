@@ -3,13 +3,15 @@ receivers:
     protocols:
       grpc:
       http:
+
 exporters:
   logging:
-    loglevel: "debug"
+    loglevel: 'debug'
   otlp:
-    endpoint: "tempo:4317"
+    endpoint: 'tempo:4317'
     tls:
       insecure: true
+
 service:
   pipelines:
     traces:
