@@ -57,7 +57,7 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, convers
 	cr := &conversion.ConverterRegistryMock{
 		DesignateConvertersFunc: func(ctx context.Context, types []string) []conversion.MessageConverterFunc {
 			return []conversion.MessageConverterFunc{
-				func(ctx context.Context, log zerolog.Logger, internalID string, msg []byte) (*conversion.InternalMessage, error) {
+				func(ctx context.Context, internalID string, msg []byte) (*conversion.InternalMessage, error) {
 					return &conversion.InternalMessage{
 						InternalID:  "internalID",
 						Type:        "urn:oma:lwm2m:ext:3303",

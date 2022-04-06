@@ -19,27 +19,29 @@ services:
       MQTT_PASSWORD: $MQTT_PASSWORD
       RABBITMQ_HOST: 'rabbitmq'
       DEV_MGMT_URL: 'http://iot-device-mgmt:8080'
+      OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4318'
     ports:
       - '8080'
 
-
   iot-core:
-    image: 'ghcr.io/diwise/iot-core@sha256:cca31199fb33503e109094b26d56a5a32561d037f94e085d75f9fe1889e66d8a'
+    image: 'ghcr.io/diwise/iot-core@sha256:70d53cf8d4ff83dfad58e954163b809d658407aaf9c1d55003a76c4c335b8cd5'
     restart: always
     environment:
       RABBITMQ_HOST: 'rabbitmq'
-
+      OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4318'
 
   iot-device-mgmt:
-    image: 'ghcr.io/diwise/iot-device-mgmt@sha256:b22be97b6b15e74d77b952a8a00d80ffb23fa7522c54d0b599d8d55317cb887c'
+    image: 'ghcr.io/diwise/iot-device-mgmt@sha256:00302e43e60323692e1c94d1979cacd2b4f38d44f920e8a232040e7b8d5e002c'
     restart: always
+    environment:
+      RABBITMQ_HOST: 'rabbitmq'
+      OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4318'
     ports:
       - '8080'
 
-
   rabbitmq: 
-    image: 'bitnami/rabbitmq:3.8'
-    #image: 'arm64v8/rabbitmq:3.8'
+    #image: 'bitnami/rabbitmq:3.8'
+    image: 'arm64v8/rabbitmq:3.8'
     environment:
       RABBITMQ_DEFAULT_USER: 'user'
       RABBITMQ_DEFAULT_PASS: 'bitnami'
@@ -51,7 +53,39 @@ services:
     volumes:
       - 'rabbitmq_data:/bitnami'
 
+  otel-collector:
+    image: 'otel/opentelemetry-collector:0.48.0'
+    command: '--config /etc/otel-config.yaml'
+    volumes:
+     - ./configs/otel-config.yaml:/etc/otel-config.yaml
+    restart: always
+    ports:
+      - '4318' 
+
+  tempo:
+    image: grafana/tempo:latest
+    command: [ '-config.file=/etc/tempo.yaml' ]
+    volumes:
+      - ./configs/tempo/tempo-local.yaml:/etc/tempo.yaml
+      - ./tempo-data/:/tmp/tempo
+    ports:
+      - '14268'  # jaeger ingest
+      - '3200'   # tempo
+      - '4317'  # otlp grpc
+      - '4318'  # otlp http
+      - '9411'   # zipkin
+
+  
+  grafana:
+    image: grafana/grafana:8.4.5
+    volumes:
+      - ./configs/grafana/datasources:/etc/grafana/provisioning/datasources
+      - grafana-data:/var/lib/grafana
+    ports: 
+      - '3000:3000'
 
 volumes:
   rabbitmq_data:
     driver: local
+  grafana-data:
+    

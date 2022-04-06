@@ -8,6 +8,7 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
+	"github.com/diwise/iot-agent/internal/pkg/infrastructure/logging"
 	"github.com/rs/zerolog"
 )
 
@@ -21,7 +22,6 @@ type msgProcessor struct {
 	dmc    domain.DeviceManagementClient
 	conReg conversion.ConverterRegistry
 	event  events.EventSender
-	log    zerolog.Logger
 }
 
 func NewMessageReceivedProcessor(dmc domain.DeviceManagementClient, conReg conversion.ConverterRegistry, event events.EventSender, log zerolog.Logger) MessageProcessor {
@@ -29,7 +29,6 @@ func NewMessageReceivedProcessor(dmc domain.DeviceManagementClient, conReg conve
 		dmc:    dmc,
 		conReg: conReg,
 		event:  event,
-		log:    log,
 	}
 }
 
@@ -40,42 +39,42 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 		Type   string `json:"type"`
 	}{}
 
+	log := logging.GetLoggerFromContext(ctx)
+
 	err := json.Unmarshal(msg, &dm)
-	if err == nil {
-		mp.log.Info().Msgf("received payload from %s: %s", dm.DevEUI, string(msg))
-
-		result, err := mp.dmc.FindDeviceFromDevEUI(ctx, dm.DevEUI)
-		if err != nil {
-			mp.log.Error().Err(err).Msg("device lookup failure")
-			return err
-		}
-
-		if dm.Error != "" {
-			mp.log.Info().Msg("ignoring payload due to device error")
-			return nil
-		}
-
-		messageConverters := mp.conReg.DesignateConverters(ctx, result.Types)
-		if len(messageConverters) == 0 {
-			return fmt.Errorf("no matching converters for device")
-		}
-
-		for _, convert := range messageConverters {
-			payload, err := convert(ctx, mp.log, result.InternalID, msg)
-			if err != nil {
-				mp.log.Error().Err(err).Msg("conversion failed")
-				continue
-			}
-
-			justlooking, _ := json.Marshal(payload)
-			mp.log.Info().Msgf("successfully converted incoming message to internal format: %s", justlooking)
-			err = mp.event.Send(ctx, *payload)
-			if err != nil {
-				mp.log.Error().Err(err).Msg("failed to send event")
-			}
-		}
-
+	if err != nil {
 		return err
+	}
+
+	log.Info().Msgf("received payload from %s: %s", dm.DevEUI, string(msg))
+
+	result, err := mp.dmc.FindDeviceFromDevEUI(ctx, dm.DevEUI)
+	if err != nil {
+		log.Error().Err(err).Msg("device lookup failure")
+		return err
+	}
+
+	if dm.Error != "" {
+		log.Info().Msg("ignoring payload due to device error")
+		return nil
+	}
+
+	messageConverters := mp.conReg.DesignateConverters(ctx, result.Types)
+	if len(messageConverters) == 0 {
+		return fmt.Errorf("no matching converters for device")
+	}
+
+	for _, convert := range messageConverters {
+		payload, err := convert(ctx, result.InternalID, msg)
+		if err != nil {
+			log.Error().Err(err).Msg("conversion failed")
+			continue
+		}
+
+		err = mp.event.Send(ctx, *payload)
+		if err != nil {
+			log.Error().Err(err).Msg("failed to send event")
+		}
 	}
 
 	return err

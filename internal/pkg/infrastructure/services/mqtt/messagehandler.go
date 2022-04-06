@@ -3,6 +3,7 @@ package mqtt
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"net/http"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -32,18 +33,28 @@ func NewMessageHandler(logger zerolog.Logger, forwardingEndpoint string) func(mq
 			span.End()
 		}()
 
+		log := logger
+
+		traceID := span.SpanContext().TraceID()
+		if traceID.IsValid() {
+			log = logger.With().Str("traceID", traceID.String()).Logger()
+		}
+
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, forwardingEndpoint, bytes.NewBuffer(payload))
 		if err != nil {
-			logger.Error().Err(err).Msg("failed to create http request")
+			log.Error().Err(err).Msg("failed to create http request")
 			return
 		}
 
 		req.Header.Add("Content-Type", "application/json")
 
-		logger.Info().Msgf("forwarding received payload to %s", forwardingEndpoint)
-		_, err = httpClient.Do(req)
+		log.Info().Msgf("forwarding received payload to %s", forwardingEndpoint)
+		resp, err := httpClient.Do(req)
 		if err != nil {
-			logger.Error().Err(err).Msg("failed to forward message")
+			log.Error().Err(err).Msg("forwarding request failed")
+		} else if resp.StatusCode != http.StatusCreated {
+			err = fmt.Errorf("unexpected response code %d", resp.StatusCode)
+			log.Error().Err(err).Msg("failed to forward message")
 		}
 
 		msg.Ack()

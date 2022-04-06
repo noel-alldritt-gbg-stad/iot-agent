@@ -5,27 +5,24 @@ import (
 	"fmt"
 	"os"
 	"runtime/debug"
-	"strings"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/application/iotagent"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
+	"github.com/diwise/iot-agent/internal/pkg/infrastructure/logging"
 	"github.com/diwise/iot-agent/internal/pkg/infrastructure/services/mqtt"
 	"github.com/diwise/iot-agent/internal/pkg/infrastructure/tracing"
 	"github.com/diwise/iot-agent/internal/pkg/presentation/api"
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 func main() {
 	serviceName := "iot-agent"
 	serviceVersion := version()
 
-	logger := newLogger(serviceName, serviceVersion)
+	ctx, logger := logging.NewLogger(context.Background(), serviceName, serviceVersion)
 	logger.Info().Msg("starting up ...")
-
-	ctx := context.Background()
 
 	cleanup, err := tracing.Init(ctx, logger, serviceName, serviceVersion)
 	if err != nil {
@@ -56,11 +53,6 @@ func main() {
 	SetupAndRunApi(logger, app, apiPort)
 }
 
-func newLogger(serviceName, serviceVersion string) zerolog.Logger {
-	logger := log.With().Str("service", strings.ToLower(serviceName)).Str("version", serviceVersion).Logger()
-	return logger
-}
-
 func version() string {
 	buildInfo, ok := debug.ReadBuildInfo()
 	if !ok {
@@ -83,7 +75,7 @@ func version() string {
 
 func SetupIoTAgent(serviceName string, logger zerolog.Logger) iotagent.IoTAgent {
 	dmcUrl := os.Getenv("DEV_MGMT_URL")
-	dmc := domain.NewDeviceManagementClient(dmcUrl, logger)
+	dmc := domain.NewDeviceManagementClient(dmcUrl)
 	event := events.NewEventSender(serviceName, logger)
 	event.Start()
 
