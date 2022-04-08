@@ -78,6 +78,9 @@ services:
   
   grafana:
     image: grafana/grafana:8.4.5
+    environment:
+      GF_SECURITY_ADMIN_USER: diwise
+      GF_SECURITY_ADMIN_PASSWORD: diwise
     volumes:
       - ./configs/grafana/datasources:/etc/grafana/provisioning/datasources
       - grafana-data:/var/lib/grafana

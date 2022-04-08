@@ -17,8 +17,10 @@ import (
 	"github.com/rs/zerolog"
 )
 
+const serviceName string = "iot-agent"
+
 func main() {
-	serviceName := "iot-agent"
+
 	serviceVersion := version()
 
 	ctx, logger := logging.NewLogger(context.Background(), serviceName, serviceVersion)
@@ -42,7 +44,7 @@ func main() {
 		logger.Fatal().Err(err).Msg("mqtt configuration error")
 	}
 
-	forwardingEndpoint := fmt.Sprintf("http://127.0.0.1:%s/newmsg", apiPort)
+	forwardingEndpoint := fmt.Sprintf("http://127.0.0.1:%s/api/v0/messages", apiPort)
 	mqttClient, err := mqtt.NewClient(logger, mqttConfig, forwardingEndpoint)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("failed to create mqtt client")

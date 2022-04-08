@@ -15,6 +15,11 @@ type mqttClient struct {
 
 func (c *mqttClient) Start() error {
 
+	if !c.cfg.enabled {
+		c.log.Warn().Msg("mqtt has been explicitly disabled with MQTT_DISABLED=true and will therefore not start")
+		return nil
+	}
+
 	go c.run()
 
 	return nil

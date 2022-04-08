@@ -6,6 +6,7 @@ import (
 
 	"github.com/diwise/iot-agent/internal/pkg/application/iotagent"
 	"github.com/diwise/iot-agent/internal/pkg/infrastructure/logging"
+	"github.com/diwise/iot-agent/internal/pkg/infrastructure/tracing"
 	"github.com/go-chi/chi/v5"
 	"github.com/riandyrn/otelchi"
 	"github.com/rs/cors"
@@ -50,7 +51,7 @@ func newAPI(logger zerolog.Logger, r chi.Router, app iotagent.IoTAgent) *api {
 	r.Use(otelchi.Middleware(serviceName, otelchi.WithChiRoutes(r)))
 
 	r.Get("/health", a.health)
-	r.Post("/newmsg", a.incomingMsg)
+	r.Post("/api/v0/messages", a.incomingMessageHandler)
 
 	return a
 }
@@ -65,16 +66,11 @@ func (a *api) health(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (a *api) incomingMsg(w http.ResponseWriter, r *http.Request) {
+func (a *api) incomingMessageHandler(w http.ResponseWriter, r *http.Request) {
 	var err error
 
-	ctx, span := tracer.Start(r.Context(), "newmsg")
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-		}
-		span.End()
-	}()
+	ctx, span := tracer.Start(r.Context(), "incoming-message")
+	defer func() { tracing.RecordAnyErrorAndEndSpan(err, span) }()
 
 	log := a.log
 
@@ -91,10 +87,11 @@ func (a *api) incomingMsg(w http.ResponseWriter, r *http.Request) {
 	log.Info().Msg("attempting to process message")
 	err = a.app.MessageReceived(ctx, msg)
 	if err != nil {
+		log.Error().Err(err).Msg("failed to handle message")
+
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 
-		log.Error().Err(err).Msg("failed to handle message")
 		return
 	}
 
