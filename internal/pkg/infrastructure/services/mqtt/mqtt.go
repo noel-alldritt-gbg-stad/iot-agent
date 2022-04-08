@@ -16,6 +16,7 @@ type Client interface {
 }
 
 type Config struct {
+	enabled  bool
 	host     string
 	user     string
 	password string
@@ -62,12 +63,17 @@ func NewConfigFromEnvironment() (Config, error) {
 	const topicEnvNamePattern string = "MQTT_TOPIC_%d"
 
 	cfg := Config{
+		enabled:  os.Getenv("MQTT_DISABLED") != "true",
 		host:     os.Getenv("MQTT_HOST"),
 		user:     os.Getenv("MQTT_USER"),
 		password: os.Getenv("MQTT_PASSWORD"),
 		topics: []string{
 			os.Getenv(fmt.Sprintf(topicEnvNamePattern, 0)),
 		},
+	}
+
+	if !cfg.enabled {
+		return cfg, nil
 	}
 
 	if cfg.host == "" {
