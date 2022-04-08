@@ -6,6 +6,7 @@ import (
 
 	"github.com/diwise/iot-agent/internal/pkg/application/iotagent"
 	"github.com/diwise/iot-agent/internal/pkg/infrastructure/logging"
+	"github.com/diwise/iot-agent/internal/pkg/infrastructure/tracing"
 	"github.com/go-chi/chi/v5"
 	"github.com/riandyrn/otelchi"
 	"github.com/rs/cors"
@@ -69,12 +70,7 @@ func (a *api) incomingMessageHandler(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	ctx, span := tracer.Start(r.Context(), "incoming-message")
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-		}
-		span.End()
-	}()
+	defer func() { tracing.RecordAnyErrorAndEndSpan(err, span) }()
 
 	log := a.log
 
@@ -91,10 +87,11 @@ func (a *api) incomingMessageHandler(w http.ResponseWriter, r *http.Request) {
 	log.Info().Msg("attempting to process message")
 	err = a.app.MessageReceived(ctx, msg)
 	if err != nil {
+		log.Error().Err(err).Msg("failed to handle message")
+
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 
-		log.Error().Err(err).Msg("failed to handle message")
 		return
 	}
 
