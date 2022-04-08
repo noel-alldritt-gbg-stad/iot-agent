@@ -39,7 +39,7 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 		Type   string `json:"type"`
 	}{}
 
-	log := logging.GetLoggerFromContext(ctx)
+	log := logging.GetFromContext(ctx)
 
 	err := json.Unmarshal(msg, &dm)
 	if err != nil {

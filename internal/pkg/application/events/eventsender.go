@@ -32,7 +32,7 @@ func NewEventSender(serviceName string, logger zerolog.Logger) EventSender {
 }
 
 func (e *eventSender) Send(ctx context.Context, msg conversion.InternalMessage) error {
-	log := logging.GetLoggerFromContext(ctx)
+	log := logging.GetFromContext(ctx)
 
 	if !e.started {
 		err := fmt.Errorf("attempt to send before start")

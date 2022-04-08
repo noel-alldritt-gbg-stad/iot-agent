@@ -39,7 +39,7 @@ func (dmc *devManagementClient) FindDeviceFromDevEUI(ctx context.Context, devEUI
 		span.End()
 	}()
 
-	log := logging.GetLoggerFromContext(ctx)
+	log := logging.GetFromContext(ctx)
 
 	log.Info().Msgf("looking up internal id and types for devEUI %s", devEUI)
 
