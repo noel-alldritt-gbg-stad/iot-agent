@@ -50,7 +50,7 @@ func newAPI(logger zerolog.Logger, r chi.Router, app iotagent.IoTAgent) *api {
 	r.Use(otelchi.Middleware(serviceName, otelchi.WithChiRoutes(r)))
 
 	r.Get("/health", a.health)
-	r.Post("/newmsg", a.incomingMsg)
+	r.Post("/api/v0/messages", a.incomingMessageHandler)
 
 	return a
 }
@@ -65,10 +65,10 @@ func (a *api) health(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (a *api) incomingMsg(w http.ResponseWriter, r *http.Request) {
+func (a *api) incomingMessageHandler(w http.ResponseWriter, r *http.Request) {
 	var err error
 
-	ctx, span := tracer.Start(r.Context(), "newmsg")
+	ctx, span := tracer.Start(r.Context(), "incoming-message")
 	defer func() {
 		if err != nil {
 			span.RecordError(err)

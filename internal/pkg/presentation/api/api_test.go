@@ -31,7 +31,7 @@ func TestThatApiCallsMessageReceivedProperlyOnValidMessageFromMQTT(t *testing.T)
 	server := httptest.NewServer(api.r)
 	defer server.Close()
 
-	resp, _ := testRequest(is, server, http.MethodPost, "/newmsg", bytes.NewBuffer([]byte(msgfromMQTT)))
+	resp, _ := testRequest(is, server, http.MethodPost, "/api/v0/messages", bytes.NewBuffer([]byte(msgfromMQTT)))
 	is.Equal(resp.StatusCode, http.StatusCreated)
 	is.Equal(len(app.MessageReceivedCalls()), 1)
 }
