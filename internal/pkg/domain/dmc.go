@@ -47,7 +47,7 @@ func (dmc *devManagementClient) FindDeviceFromDevEUI(ctx context.Context, devEUI
 		Transport: otelhttp.NewTransport(http.DefaultTransport),
 	}
 
-	url := dmc.url + "/api/v0/devices/" + devEUI
+	url := dmc.url + "/api/v0/devices?devEUI=" + devEUI
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
@@ -71,15 +71,20 @@ func (dmc *devManagementClient) FindDeviceFromDevEUI(ctx context.Context, devEUI
 		return nil, err
 	}
 
-	result := &Result{}
+	result := []Result{}
 
-	err = json.Unmarshal(respBody, result)
+	err = json.Unmarshal(respBody, &result)
 	if err != nil {
 		log.Error().Msgf("failed to unmarshal response body: %s", err.Error())
 		return nil, err
 	}
 
-	return result, nil
+	if len(result) == 0 {
+		return nil, fmt.Errorf("device management returned an empty list of devices")
+	}
+
+	device := result[0]
+	return &device, nil
 }
 
 type Result struct {
