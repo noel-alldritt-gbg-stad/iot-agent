@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/diwise/iot-agent/internal/pkg/infrastructure/tracing"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/rs/zerolog"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
@@ -26,12 +27,7 @@ func NewMessageHandler(logger zerolog.Logger, forwardingEndpoint string) func(mq
 		var err error
 
 		ctx, span := tracer.Start(context.Background(), "forward-message")
-		defer func() {
-			if err != nil {
-				span.RecordError(err)
-			}
-			span.End()
-		}()
+		defer func() { tracing.RecordAnyErrorAndEndSpan(err, span) }()
 
 		log := logger
 
@@ -39,6 +35,8 @@ func NewMessageHandler(logger zerolog.Logger, forwardingEndpoint string) func(mq
 		if traceID.IsValid() {
 			log = logger.With().Str("traceID", traceID.String()).Logger()
 		}
+
+		log.Info().Msgf("received payload %s from topic %s", string(payload), msg.Topic())
 
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, forwardingEndpoint, bytes.NewBuffer(payload))
 		if err != nil {
