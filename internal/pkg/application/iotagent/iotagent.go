@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
+	"github.com/diwise/iot-agent/internal/pkg/application/decoder"
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/application/messageprocessor"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
@@ -20,7 +21,8 @@ type iotAgent struct {
 
 func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventSender, log zerolog.Logger) IoTAgent {
 	conreg := conversion.NewConverterRegistry()
-	msgprcs := messageprocessor.NewMessageReceivedProcessor(dmc, conreg, eventPub, log)
+	decreg := decoder.NewDecoderRegistry()
+	msgprcs := messageprocessor.NewMessageReceivedProcessor(dmc, conreg, eventPub, decreg, log)
 
 	return &iotAgent{
 		mp: msgprcs,

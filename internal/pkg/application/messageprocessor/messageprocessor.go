@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
+	"github.com/diwise/iot-agent/internal/pkg/application/decoder"
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
 	"github.com/diwise/iot-agent/internal/pkg/infrastructure/logging"
@@ -19,24 +20,27 @@ type MessageProcessor interface {
 // hantera kö av msgs, skicka till converter registry
 
 type msgProcessor struct {
-	dmc    domain.DeviceManagementClient
-	conReg conversion.ConverterRegistry
-	event  events.EventSender
+	dmc        domain.DeviceManagementClient
+	conReg     conversion.ConverterRegistry
+	event      events.EventSender
+	decoderReg decoder.DecoderRegistry
 }
 
-func NewMessageReceivedProcessor(dmc domain.DeviceManagementClient, conReg conversion.ConverterRegistry, event events.EventSender, log zerolog.Logger) MessageProcessor {
+func NewMessageReceivedProcessor(dmc domain.DeviceManagementClient, conReg conversion.ConverterRegistry, event events.EventSender, decoderReg decoder.DecoderRegistry, log zerolog.Logger) MessageProcessor {
 	return &msgProcessor{
-		dmc:    dmc,
-		conReg: conReg,
-		event:  event,
+		dmc:        dmc,
+		conReg:     conReg,
+		event:      event,
+		decoderReg: decoderReg,
 	}
 }
 
 func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 	dm := struct {
-		DevEUI string `json:"devEUI"`
-		Error  string `json:"error"`
-		Type   string `json:"type"`
+		DevEUI     string `json:"devEUI"`
+		Error      string `json:"error"`
+		Type       string `json:"type"`
+		SensorType string `json:"sensorType"`
 	}{}
 
 	log := logging.GetFromContext(ctx)
@@ -62,6 +66,13 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 	messageConverters := mp.conReg.DesignateConverters(ctx, result.Types)
 	if len(messageConverters) == 0 {
 		return fmt.Errorf("no matching converters for device")
+	}
+
+	decoder := mp.decoderReg.DesignateDecoders(ctx, dm.SensorType)
+	msg, err = decoder(ctx, msg)
+	if err != nil {
+		log.Error().Err(err).Msg("decoding failed")
+		return err
 	}
 
 	for _, convert := range messageConverters {
