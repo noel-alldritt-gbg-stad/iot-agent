@@ -5,7 +5,7 @@ import (
 )
 
 type DecoderRegistry interface {
-	DesignateDecoders(ctx context.Context, sensorType string) MessageDecoderFunc
+	GetDecodersForSensorType(ctx context.Context, sensorType string) MessageDecoderFunc
 }
 
 type decoderRegistry struct {
@@ -23,11 +23,10 @@ func NewDecoderRegistry() DecoderRegistry {
 	}
 }
 
-func (c *decoderRegistry) DesignateDecoders(ctx context.Context, sensorType string) MessageDecoderFunc {
+func (c *decoderRegistry) GetDecodersForSensorType(ctx context.Context, sensorType string) MessageDecoderFunc {
 
-	decoder, exist := c.registeredDecoders[sensorType]
-	if exist {
-		return decoder
+	if d, ok := c.registeredDecoders[sensorType]; ok {
+		return d
 	}
 
 	return DefaultDecoder

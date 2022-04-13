@@ -2,30 +2,44 @@ package decoder
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
 	"github.com/matryer/is"
 	"github.com/rs/zerolog"
 )
 
-func TestSenlabTBasicDecoder(t *testing.T){
+func TestSenlabTBasicDecoder(t *testing.T) {
 	is, _ := testSetup(t)
 
-	ctx := context.Background()
-	r, err := SenlabTBasicDecoder(ctx, []byte(senlabT))
+	r := struct {
+		DevEUI       string
+		Id           int
+		BatteryLevel int
+		Temperature  float32
+		Timestamp    string
+	}{}
 
+	err := SenlabTBasicDecoder(context.Background(), []byte(senlabT), func(c context.Context, m []byte) error {
+		json.Unmarshal(m, &r)
+		return nil
+	})
+
+	is.True(r.Id == 1)	
+	is.True(r.BatteryLevel == 100)
+	is.True(r.Temperature == 6.625)
+	is.True(r.Timestamp == "2022-04-12T05:08:50.301732Z")
 	is.NoErr(err)
-	is.True(r != nil)	
 }
 
-func TestSenlabTBasicDecoderSensorReadingError(t *testing.T){
+func TestSenlabTBasicDecoderSensorReadingError(t *testing.T) {
 	is, _ := testSetup(t)
 
-	ctx := context.Background()
-	r, err := SenlabTBasicDecoder(ctx, []byte(senlabT_sensorReadingError))
+	err := SenlabTBasicDecoder(context.Background(), []byte(senlabT_sensorReadingError), func(c context.Context, m []byte) error {
+		return nil
+	})
 
 	is.True(err != nil)
-	is.True(r == nil)	
 }
 
 func testSetup(t *testing.T) (*is.I, zerolog.Logger) {

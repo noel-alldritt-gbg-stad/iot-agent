@@ -42,14 +42,13 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 		Type       string `json:"type"`
 		SensorType string `json:"sensorType"`
 	}{}
-
-	log := logging.GetFromContext(ctx)
-
+	
 	err := json.Unmarshal(msg, &dm)
 	if err != nil {
 		return err
 	}
 
+	log := logging.GetFromContext(ctx)
 	log.Info().Msgf("received payload from %s: %s", dm.DevEUI, string(msg))
 
 	result, err := mp.dmc.FindDeviceFromDevEUI(ctx, dm.DevEUI)
@@ -66,13 +65,6 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 	messageConverters := mp.conReg.DesignateConverters(ctx, result.Types)
 	if len(messageConverters) == 0 {
 		return fmt.Errorf("no matching converters for device")
-	}
-
-	decoder := mp.decoderReg.DesignateDecoders(ctx, dm.SensorType)
-	msg, err = decoder(ctx, msg)
-	if err != nil {
-		log.Error().Err(err).Msg("decoding failed")
-		return err
 	}
 
 	for _, convert := range messageConverters {
