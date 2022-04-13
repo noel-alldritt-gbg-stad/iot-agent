@@ -9,14 +9,14 @@ import (
 	"errors"
 )
 
-type MessageDecoderFunc func(context.Context, []byte, func(context.Context, []byte) error ) error
+type MessageDecoderFunc func(context.Context, []byte, func(context.Context, []byte) error) error
 
 func DefaultDecoder(ctx context.Context, msg []byte, fn func(context.Context, []byte) error) error {
 	err := fn(ctx, msg)
 	return err
 }
 
-func SenlabTBasicDecoder(ctx context.Context, msg []byte, fn func(context.Context, []byte) error ) error {
+func SenlabTBasicDecoder(ctx context.Context, msg []byte, fn func(context.Context, []byte) error) error {
 
 	dm := []struct {
 		DevEUI    string `json:"devEui"`
@@ -24,23 +24,24 @@ func SenlabTBasicDecoder(ctx context.Context, msg []byte, fn func(context.Contex
 		Timestamp string `json:"timestamp"`
 	}{}
 
-	if err := json.Unmarshal(msg, &dm); err != nil {
-		return err
-	}
-
-	b, err := hex.DecodeString(dm[0].Payload)
+	err := json.Unmarshal(msg, &dm)
 	if err != nil {
 		return err
 	}
 
-	// | ID(1) | BatteryLevel(1) | Internal(n) | Temp(2)
-	// | ID(1) | BatteryLevel(1) | Internal(n) | Temp(2) | Temp(2)
-	if len(b) < 4 {
-		return errors.New("invalid payload")
-	}
-
 	var p payload
 	for _, d := range dm {
+
+		b, err := hex.DecodeString(d.Payload)
+		if err != nil {
+			return err
+		}
+
+		// | ID(1) | BatteryLevel(1) | Internal(n) | Temp(2)
+		// | ID(1) | BatteryLevel(1) | Internal(n) | Temp(2) | Temp(2)
+		if len(b) < 4 {
+			return errors.New("invalid payload")
+		}
 
 		err = decodePayload(b, &p)
 		if err != nil {
@@ -69,10 +70,10 @@ func SenlabTBasicDecoder(ctx context.Context, msg []byte, fn func(context.Contex
 		err = fn(ctx, r)
 		if err != nil {
 			return err
-		}		
+		}
 	}
 
-	return err
+	return nil
 }
 
 type payload struct {

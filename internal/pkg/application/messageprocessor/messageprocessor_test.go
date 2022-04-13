@@ -5,8 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
-	"github.com/diwise/iot-agent/internal/pkg/application/decoder"
+	"github.com/diwise/iot-agent/internal/pkg/application/conversion"	
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
 	"github.com/matryer/is"
@@ -14,15 +13,15 @@ import (
 )
 
 func TestFailsOnInvalidMessage(t *testing.T) {
-	is, dmc, cr, ep, log, dr := testSetup(t)
-	mp := NewMessageReceivedProcessor(dmc, cr, ep, dr, log)
+	is, dmc, cr, ep, log := testSetup(t)
+	mp := NewMessageReceivedProcessor(dmc, cr, ep, log)
 
 	err := mp.ProcessMessage(context.Background(), []byte("msg"))
 	is.True(err != nil)
 }
 
 func TestFailsOnInvalidType(t *testing.T) {
-	is, _, cr, ep, log, dr := testSetup(t)
+	is, _, cr, ep, log := testSetup(t)
 
 	dmc := &domain.DeviceManagementClientMock{
 		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (*domain.Result, error) {
@@ -30,7 +29,7 @@ func TestFailsOnInvalidType(t *testing.T) {
 		},
 	}
 
-	mp := NewMessageReceivedProcessor(dmc, cr, ep, dr, log)
+	mp := NewMessageReceivedProcessor(dmc, cr, ep, log)
 
 	err := mp.ProcessMessage(context.Background(), []byte(payload))
 	is.True(err != nil)
@@ -38,14 +37,14 @@ func TestFailsOnInvalidType(t *testing.T) {
 }
 
 func TestProcessMessageWorksWithValidTemperatureInput(t *testing.T) {
-	is, dmc, cr, ep, log, dr := testSetup(t)
-	mp := NewMessageReceivedProcessor(dmc, cr, ep, dr, log)
+	is, dmc, cr, ep, log := testSetup(t)
+	mp := NewMessageReceivedProcessor(dmc, cr, ep, log)
 
 	err := mp.ProcessMessage(context.Background(), []byte(payload))
 	is.NoErr(err)
 }
 
-func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, conversion.ConverterRegistry, events.EventSender, zerolog.Logger, decoder.DecoderRegistry) {
+func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, conversion.ConverterRegistry, events.EventSender, zerolog.Logger) {
 	is := is.New(t)
 	dmc := &domain.DeviceManagementClientMock{
 		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (*domain.Result, error) {
@@ -72,11 +71,9 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, convers
 		SendFunc: func(ctx context.Context, msg conversion.InternalMessage) error {
 			return nil
 		},
-	}
+	}	
 
-	dr := decoder.NewDecoderRegistry()
-
-	return is, dmc, cr, ep, zerolog.Logger{}, dr
+	return is, dmc, cr, ep, zerolog.Logger{}
 }
 
 const payload string = `{"devEUI":"xxxxxxxxxxxxxx","object":{"externalTemperature":23.5}}`

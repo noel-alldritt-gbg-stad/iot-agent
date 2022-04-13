@@ -25,7 +25,7 @@ type iotAgent struct {
 func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventSender, log zerolog.Logger) IoTAgent {
 	conreg := conversion.NewConverterRegistry()
 	decreg := decoder.NewDecoderRegistry()
-	msgprcs := messageprocessor.NewMessageReceivedProcessor(dmc, conreg, eventPub, decreg, log)
+	msgprcs := messageprocessor.NewMessageReceivedProcessor(dmc, conreg, eventPub, log)
 
 	return &iotAgent{
 		mp: msgprcs,
@@ -35,20 +35,16 @@ func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventSender,
 }
 
 func (a *iotAgent) MessageReceived(ctx context.Context, msg []byte) error {
-
-	dm := struct {
-		SensorType string `json:"sensorType"`
-	}{}
 	
-	err := json.Unmarshal(msg, &dm)
+	sensorType, err := parseSensorType(msg)
 	if err != nil {
 		return err
 	}
+	
+	dfn := a.dr.GetDecodersForSensorType(ctx, sensorType)	
 
-	dfn := a.dr.GetDecodersForSensorType(ctx, dm.SensorType)	
-
-	err = dfn(ctx, msg, func (context.Context, []byte) error {
-		err = a.mp.ProcessMessage(ctx, msg)
+	err = dfn(ctx, msg, func (c context.Context,m []byte) error {
+		err = a.mp.ProcessMessage(c, m)
 		if err != nil {
 			a.log.Error().Err(err).Msg("failed to process message")
 			return err
@@ -61,4 +57,24 @@ func (a *iotAgent) MessageReceived(ctx context.Context, msg []byte) error {
 	}
 	
 	return nil
+}
+
+func parseSensorType(msg []byte) (string, error) {
+	dm := struct {
+		SensorType string `json:"sensorType"`
+	}{}
+	
+	dmA := []struct {
+		SensorType string `json:"sensorType"`
+	}{}
+
+	err := json.Unmarshal(msg, &dm)
+	if err != nil {
+		err = json.Unmarshal(msg, &dmA)
+		if err != nil {
+			return "", err
+		}
+		return dmA[0].SensorType, nil
+	}
+	return dm.SensorType, nil
 }

@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
-	"github.com/diwise/iot-agent/internal/pkg/application/decoder"
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
 	"github.com/diwise/iot-agent/internal/pkg/infrastructure/logging"
@@ -22,16 +21,14 @@ type MessageProcessor interface {
 type msgProcessor struct {
 	dmc        domain.DeviceManagementClient
 	conReg     conversion.ConverterRegistry
-	event      events.EventSender
-	decoderReg decoder.DecoderRegistry
+	event      events.EventSender	
 }
 
-func NewMessageReceivedProcessor(dmc domain.DeviceManagementClient, conReg conversion.ConverterRegistry, event events.EventSender, decoderReg decoder.DecoderRegistry, log zerolog.Logger) MessageProcessor {
+func NewMessageReceivedProcessor(dmc domain.DeviceManagementClient, conReg conversion.ConverterRegistry, event events.EventSender, log zerolog.Logger) MessageProcessor {
 	return &msgProcessor{
 		dmc:        dmc,
 		conReg:     conReg,
-		event:      event,
-		decoderReg: decoderReg,
+		event:      event,		
 	}
 }
 
@@ -39,8 +36,7 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 	dm := struct {
 		DevEUI     string `json:"devEUI"`
 		Error      string `json:"error"`
-		Type       string `json:"type"`
-		SensorType string `json:"sensorType"`
+		Type       string `json:"type"`		
 	}{}
 	
 	err := json.Unmarshal(msg, &dm)
