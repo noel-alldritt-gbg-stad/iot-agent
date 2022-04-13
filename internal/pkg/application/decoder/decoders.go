@@ -6,7 +6,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
+	"errors"	
 )
 
 type MessageDecoderFunc func(context.Context, []byte, func(context.Context, []byte) error) error
@@ -48,18 +48,26 @@ func SenlabTBasicDecoder(ctx context.Context, msg []byte, fn func(context.Contex
 			return err
 		}
 
+		object := struct {
+			Temperature float32
+		}{
+			Temperature: p.Temperature,
+		}
+
 		result := struct {
 			DevEUI       string
 			Id           int
 			BatteryLevel int
 			Temperature  float32
 			Timestamp    string
+			Object 		 interface{}
 		}{
 			d.DevEUI,
 			p.ID,
 			p.BatteryLevel,
 			p.Temperature,
 			d.Timestamp,
+			object,
 		}
 
 		r, err := json.Marshal(&result)
