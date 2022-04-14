@@ -10,10 +10,9 @@ type MessageConverterFunc func(ctx context.Context, internalID string, msg []byt
 
 func Temperature(ctx context.Context, internalID string, msg []byte) (*InternalMessage, error) {
 	dm := struct {
-		Object struct {
-			ExtTemp *float64 `json:"externalTemperature"`
+		Measurements []struct {			
 			Temp    *float64 `json:"temperature"`
-		} `json:"object"`
+		} `json:"measurements"`
 	}{}
 
 	err := json.Unmarshal(msg, &dm)
@@ -26,10 +25,9 @@ func Temperature(ctx context.Context, internalID string, msg []byte) (*InternalM
 		Type:       "urn:oma:lwm2m:ext:3303",
 	}
 
-	if dm.Object.ExtTemp != nil {
-		payload.SensorValue = *dm.Object.ExtTemp
-	} else if dm.Object.Temp != nil {
-		payload.SensorValue = *dm.Object.Temp
+	//TODO: range and call func?
+ 	if dm.Measurements[0].Temp != nil {
+		payload.SensorValue = *dm.Measurements[0].Temp
 	} else {
 		return nil, fmt.Errorf("no temperature value found in payload")
 	}

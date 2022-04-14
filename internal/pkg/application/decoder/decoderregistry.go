@@ -16,6 +16,7 @@ func NewDecoderRegistry() DecoderRegistry {
 
 	Decoders := map[string]MessageDecoderFunc{
 		"tem_lab_14ns": SenlabTBasicDecoder,
+		"Elsys_Codec": ElsysDecoder,
 	}
 
 	return &decoderRegistry{

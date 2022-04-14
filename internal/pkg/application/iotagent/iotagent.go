@@ -17,8 +17,8 @@ type IoTAgent interface {
 }
 
 type iotAgent struct {
-	mp messageprocessor.MessageProcessor
-	dr decoder.DecoderRegistry
+	mp  messageprocessor.MessageProcessor
+	dr  decoder.DecoderRegistry
 	log zerolog.Logger
 }
 
@@ -28,22 +28,22 @@ func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventSender,
 	msgprcs := messageprocessor.NewMessageReceivedProcessor(dmc, conreg, eventPub, log)
 
 	return &iotAgent{
-		mp: msgprcs,
-		dr: decreg,
+		mp:  msgprcs,
+		dr:  decreg,
 		log: log,
 	}
 }
 
 func (a *iotAgent) MessageReceived(ctx context.Context, msg []byte) error {
-	
+
 	sensorType, err := parseSensorType(msg)
 	if err != nil {
 		return err
 	}
-	
-	dfn := a.dr.GetDecodersForSensorType(ctx, sensorType)	
 
-	err = dfn(ctx, msg, func (c context.Context,m []byte) error {
+	dfn := a.dr.GetDecodersForSensorType(ctx, sensorType)
+
+	err = dfn(ctx, msg, func(c context.Context, m []byte) error {
 		err = a.mp.ProcessMessage(c, m)
 		if err != nil {
 			a.log.Error().Err(err).Msg("failed to process message")
@@ -51,21 +51,23 @@ func (a *iotAgent) MessageReceived(ctx context.Context, msg []byte) error {
 		}
 		return nil
 	})
-	
+
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
 func parseSensorType(msg []byte) (string, error) {
 	dm := struct {
-		SensorType string `json:"sensorType"`
+		SensorType        string `json:"sensorType"`
+		DeviceProfileName string `json:"deviceProfileName"`
 	}{}
-	
+
 	dmA := []struct {
-		SensorType string `json:"sensorType"`
+		SensorType        string `json:"sensorType"`
+		DeviceProfileName string `json:"deviceProfileName"`
 	}{}
 
 	err := json.Unmarshal(msg, &dm)
@@ -74,7 +76,22 @@ func parseSensorType(msg []byte) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		return dmA[0].SensorType, nil
+		if dmA[0].SensorType != "" {
+			return dmA[0].SensorType, nil
+		}
+
+		if dmA[0].DeviceProfileName != "" {
+			return dmA[0].DeviceProfileName, nil
+		}
 	}
-	return dm.SensorType, nil
+
+	if dm.SensorType != "" {
+		return dm.SensorType, nil
+	}
+
+	if dm.DeviceProfileName != "" {
+		return dm.DeviceProfileName, nil
+	}
+
+	return "", nil
 }

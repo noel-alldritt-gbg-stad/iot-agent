@@ -103,15 +103,3 @@ const elsys string = `{
 		"Location": "Vangen"
 	}
 }`
-
-const sensorstrip string = `[{
-	"devEui": "70b3d52c00019193",
-	"sensorType": "strips_lora_ms_h",
-	"timestamp": "2022-04-14T06:36:19.543989Z",
-	"payload": "ffff01590200c50400c6064407000008000009000a01",
-	"spreadingFactor": "9",
-	"rssi": "-113",
-	"snr": "-2.8",
-	"gatewayIdentifier": "187",
-	"fPort": "1"
-}]`
