@@ -10,7 +10,7 @@ import (
 
 func TestThatTemperatureDecodesValueCorrectly(t *testing.T) {
 	is, ctx := mcmTestSetup(t)
-	payload := `{"devEUI":"ncaknlclkdanklcd","measurements":[{"externalTemperature":22.2}]}`
+	payload := `{"devEUI":"ncaknlclkdanklcd","measurements":[{"temperature":22.2}]}`
 
 	msg, err := Temperature(ctx, "internalID", []byte(payload))
 
