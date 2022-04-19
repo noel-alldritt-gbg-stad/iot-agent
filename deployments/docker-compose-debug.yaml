@@ -1,0 +1,43 @@
+version: '3'
+services:
+  rabbitmq: 
+    image: 'bitnami/rabbitmq:3.8'
+    #image: 'arm64v8/rabbitmq:3.8'
+    environment:
+      RABBITMQ_DEFAULT_USER: 'user'
+      RABBITMQ_DEFAULT_PASS: 'bitnami'
+    expose:
+      - "5672"      
+    ports:
+      - '4369'
+      - '5672:5672'
+      - '25672'
+      - '15672'
+    volumes:
+      - 'rabbitmq_data:/bitnami'
+      
+  otel-collector:
+    image: 'otel/opentelemetry-collector:0.48.0'
+    command: '--config /etc/otel-config.yaml'
+    expose:
+      - "4318"    
+    volumes:
+     - ./configs/otel-config.yaml:/etc/otel-config.yaml
+    restart: always
+    ports:
+      - '4318:4318' 
+
+  iot-device-mgmt:
+    image: 'ghcr.io/diwise/iot-device-mgmt@sha256:00302e43e60323692e1c94d1979cacd2b4f38d44f920e8a232040e7b8d5e002c'
+    restart: always
+    expose:
+      - 8080
+    environment:
+      RABBITMQ_HOST: 'rabbitmq'
+      OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4318'
+    ports:
+      - '8080:8080'      
+    
+volumes:
+  rabbitmq_data:
+    driver: local  

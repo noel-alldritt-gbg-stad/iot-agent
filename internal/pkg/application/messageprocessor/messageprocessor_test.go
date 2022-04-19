@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
+	"github.com/diwise/iot-agent/internal/pkg/application/conversion"	
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
 	"github.com/matryer/is"
@@ -71,7 +71,7 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, convers
 		SendFunc: func(ctx context.Context, msg conversion.InternalMessage) error {
 			return nil
 		},
-	}
+	}	
 
 	return is, dmc, cr, ep, zerolog.Logger{}
 }

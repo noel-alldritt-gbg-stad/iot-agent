@@ -26,7 +26,7 @@ type Config struct {
 func NewClient(logger zerolog.Logger, cfg Config, forwardingEndpoint string) (Client, error) {
 	options := mqtt.NewClientOptions()
 
-	connectionString := fmt.Sprintf("tls://%s:8883", cfg.host)
+	connectionString := fmt.Sprintf("ssl://%s:8883", cfg.host)
 	options.AddBroker(connectionString)
 
 	options.Username = cfg.user
@@ -39,7 +39,8 @@ func NewClient(logger zerolog.Logger, cfg Config, forwardingEndpoint string) (Cl
 		logger.Info().Msg("connected")
 		for _, topic := range cfg.topics {
 			logger.Info().Msgf("subscribing to %s", topic)
-			mc.Subscribe(topic, 0, nil)
+			token := mc.Subscribe(topic, 0, nil)
+			token.Wait()
 		}
 	}
 

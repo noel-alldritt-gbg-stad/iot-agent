@@ -1,6 +1,7 @@
 package conversion
 
 import (
+	"context"
 	"testing"
 
 	"github.com/matryer/is"
@@ -9,14 +10,14 @@ import (
 func TestThatConverterRegistryReturnsOnlyConvertersThatMatchType(t *testing.T) {
 	is, conReg := testSetup(t)
 
-	mcs := conReg.DesignateConverters(nil, []string{"urn:oma:lwm2m:ext:3303", "humidity"})
+	mcs := conReg.DesignateConverters(context.Background(), []string{"urn:oma:lwm2m:ext:3303", "humidity"})
 	is.Equal(len(mcs), 1)
 }
 
 func TestThatConverterRegistryReturnsEmptyIfNoTypesMatch(t *testing.T) {
 	is, conReg := testSetup(t)
 
-	mcs := conReg.DesignateConverters(nil, []string{"co2"})
+	mcs := conReg.DesignateConverters(context.Background(), []string{"co2"})
 	is.Equal(len(mcs), 0)
 }
 

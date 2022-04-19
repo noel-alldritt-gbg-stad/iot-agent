@@ -35,7 +35,7 @@ func (c *mqttClient) run() {
 		c.log.Fatal().Err(token.Error()).Msg("connection error")
 	}
 
-	for keepRunning == true {
+	for keepRunning {
 		time.Sleep(1 * time.Second)
 	}
 }
