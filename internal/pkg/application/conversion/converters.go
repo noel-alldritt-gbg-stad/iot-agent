@@ -10,8 +10,8 @@ type MessageConverterFunc func(ctx context.Context, internalID string, msg []byt
 
 func Temperature(ctx context.Context, internalID string, msg []byte) (*InternalMessage, error) {
 	dm := struct {
-		Measurements []struct {			
-			Temp    *float64 `json:"temperature"`
+		Measurements []struct {
+			Temp *float64 `json:"temperature"`
 		} `json:"measurements"`
 	}{}
 
@@ -26,7 +26,7 @@ func Temperature(ctx context.Context, internalID string, msg []byte) (*InternalM
 	}
 
 	//TODO: range and call func?
- 	if dm.Measurements[0].Temp != nil {
+	if len(dm.Measurements) > 0 && dm.Measurements[0].Temp != nil {
 		payload.SensorValue = *dm.Measurements[0].Temp
 	} else {
 		return nil, fmt.Errorf("no temperature value found in payload")
