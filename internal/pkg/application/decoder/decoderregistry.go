@@ -2,6 +2,7 @@ package decoder
 
 import (
 	"context"
+	"strings"
 )
 
 type DecoderRegistry interface {
@@ -16,7 +17,7 @@ func NewDecoderRegistry() DecoderRegistry {
 
 	Decoders := map[string]MessageDecoderFunc{
 		"tem_lab_14ns": SenlabTBasicDecoder,
-		"Elsys_Codec": ElsysDecoder,
+		"elsys_codec":  ElsysDecoder,
 	}
 
 	return &decoderRegistry{
@@ -26,7 +27,7 @@ func NewDecoderRegistry() DecoderRegistry {
 
 func (c *decoderRegistry) GetDecodersForSensorType(ctx context.Context, sensorType string) MessageDecoderFunc {
 
-	if d, ok := c.registeredDecoders[sensorType]; ok {
+	if d, ok := c.registeredDecoders[strings.ToLower(sensorType)]; ok {
 		return d
 	}
 
