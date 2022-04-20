@@ -48,16 +48,11 @@ func (a *iotAgent) MessageReceived(ctx context.Context, msg []byte) error {
 		err = a.mp.ProcessMessage(c, m)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to process message")
-			return err
 		}
-		return nil
+		return err
 	})
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func parseSensorType(msg []byte) (string, error) {
