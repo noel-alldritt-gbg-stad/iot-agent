@@ -8,7 +8,7 @@ import (
 
 type MessageConverterFunc func(ctx context.Context, internalID string, msg []byte) (*InternalMessage, error)
 
-func Temperature(ctx context.Context, internalID string, msg []byte) (*InternalMessage, error) {
+func Temperature(ctx context.Context, deviceID string, msg []byte) (*InternalMessage, error) {
 	dm := struct {
 		Measurements []struct {
 			Temp *float64 `json:"temperature"`
@@ -17,19 +17,19 @@ func Temperature(ctx context.Context, internalID string, msg []byte) (*InternalM
 
 	err := json.Unmarshal(msg, &dm)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal temperature measurements: %s", err.Error())
 	}
 
-	payload := &InternalMessage{
-		InternalID: internalID,
-		Type:       "urn:oma:lwm2m:ext:3303",
+	if len(dm.Measurements) == 0 || dm.Measurements[0].Temp == nil {
+		return nil, fmt.Errorf("no temperature value found in payload")
 	}
 
 	//TODO: range and call func?
-	if len(dm.Measurements) > 0 && dm.Measurements[0].Temp != nil {
-		payload.SensorValue = *dm.Measurements[0].Temp
-	} else {
-		return nil, fmt.Errorf("no temperature value found in payload")
+
+	payload := &InternalMessage{
+		InternalID:  deviceID,
+		Type:        "urn:oma:lwm2m:ext:3303",
+		SensorValue: *dm.Measurements[0].Temp,
 	}
 
 	return payload, nil

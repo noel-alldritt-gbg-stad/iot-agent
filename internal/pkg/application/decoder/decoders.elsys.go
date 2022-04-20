@@ -3,14 +3,15 @@ package decoder
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 )
 
 func ElsysDecoder(ctx context.Context, msg []byte, fn func(context.Context, []byte) error) error {
 
 	d := struct {
 		DevEUI     string `json:"devEUI"`
-		FPort      int    `json:"fPort,omitempty"`
-		SensorType string `json:"deviceProfileName,omitempty"`
+		FPort      int    `json:"fPort"`
+		SensorType string `json:"deviceProfileName"`
 		Data       string `json:"data"`
 		Object     struct {
 			Temperature         *float32 `json:"temperature,omitempty"`
@@ -21,7 +22,7 @@ func ElsysDecoder(ctx context.Context, msg []byte, fn func(context.Context, []by
 
 	err := json.Unmarshal(msg, &d)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal elsys payload: %s", err.Error())
 	}
 
 	pp := &Payload{
@@ -32,7 +33,7 @@ func ElsysDecoder(ctx context.Context, msg []byte, fn func(context.Context, []by
 
 	if d.Object.Temperature != nil {
 		temp := struct {
-			Temperature float32
+			Temperature float32 `json:"temperature"`
 		}{
 			*d.Object.Temperature,
 		}
@@ -50,24 +51,22 @@ func ElsysDecoder(ctx context.Context, msg []byte, fn func(context.Context, []by
 
 	if d.Object.Vdd != nil {
 		bat := struct {
-			BatteryCurrentLevel int `json:"battery_current_level"`
+			BatteryLevel int `json:"battery_level"`
 		}{
-			*d.Object.Vdd,
+			*d.Object.Vdd, // TODO: Adjust for max VDD
 		}
 		pp.Measurements = append(pp.Measurements, bat)
 	}
 
 	r, err := json.Marshal(&pp)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	err = fn(ctx, r)
 	if err != nil {
 		return err
-	}	
+	}
 
 	return nil
 }
-
-

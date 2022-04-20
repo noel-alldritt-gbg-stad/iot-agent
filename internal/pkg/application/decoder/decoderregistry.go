@@ -6,7 +6,7 @@ import (
 )
 
 type DecoderRegistry interface {
-	GetDecodersForSensorType(ctx context.Context, sensorType string) MessageDecoderFunc
+	GetDecoderForSensorType(ctx context.Context, sensorType string) MessageDecoderFunc
 }
 
 type decoderRegistry struct {
@@ -25,7 +25,7 @@ func NewDecoderRegistry() DecoderRegistry {
 	}
 }
 
-func (c *decoderRegistry) GetDecodersForSensorType(ctx context.Context, sensorType string) MessageDecoderFunc {
+func (c *decoderRegistry) GetDecoderForSensorType(ctx context.Context, sensorType string) MessageDecoderFunc {
 
 	if d, ok := c.registeredDecoders[strings.ToLower(sensorType)]; ok {
 		return d

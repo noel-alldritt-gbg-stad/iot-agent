@@ -9,7 +9,6 @@ import (
 	"errors"
 )
 
-
 func SenlabTBasicDecoder(ctx context.Context, msg []byte, fn func(context.Context, []byte) error) error {
 
 	dm := []struct {
@@ -54,7 +53,7 @@ func SenlabTBasicDecoder(ctx context.Context, msg []byte, fn func(context.Contex
 		}
 
 		bat := struct {
-			BatteryCurrentLevel int `json:"battery_current_level"`
+			BatteryLevel int `json:"battery_level"`
 		}{
 			p.BatteryLevel,
 		}
@@ -129,5 +128,5 @@ func singleProbe(b []byte, p *payload) error {
 }
 
 func dualProbe(b []byte, p *payload) error {
-	return errors.New("unsupported payload")
+	return errors.New("unsupported dual probe payload")
 }

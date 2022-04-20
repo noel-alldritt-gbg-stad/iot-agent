@@ -42,7 +42,7 @@ func (a *iotAgent) MessageReceived(ctx context.Context, msg []byte) error {
 
 	log := logging.GetFromContext(ctx)
 
-	dfn := a.dr.GetDecodersForSensorType(ctx, sensorType)
+	dfn := a.dr.GetDecoderForSensorType(ctx, sensorType)
 
 	err = dfn(ctx, msg, func(c context.Context, m []byte) error {
 		err = a.mp.ProcessMessage(c, m)

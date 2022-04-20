@@ -19,6 +19,5 @@ type Payload struct {
 type MessageDecoderFunc func(context.Context, []byte, func(context.Context, []byte) error) error
 
 func DefaultDecoder(ctx context.Context, msg []byte, fn func(context.Context, []byte) error) error {
-	err := fn(ctx, msg)
-	return err
+	return fn(ctx, msg)
 }
