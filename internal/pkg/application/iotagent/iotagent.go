@@ -9,6 +9,7 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/application/messageprocessor"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
+	"github.com/diwise/iot-agent/internal/pkg/infrastructure/logging"
 	"github.com/rs/zerolog"
 )
 
@@ -17,9 +18,8 @@ type IoTAgent interface {
 }
 
 type iotAgent struct {
-	mp  messageprocessor.MessageProcessor
-	dr  decoder.DecoderRegistry
-	log zerolog.Logger
+	mp messageprocessor.MessageProcessor
+	dr decoder.DecoderRegistry
 }
 
 func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventSender, log zerolog.Logger) IoTAgent {
@@ -28,9 +28,8 @@ func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventSender,
 	msgprcs := messageprocessor.NewMessageReceivedProcessor(dmc, conreg, eventPub, log)
 
 	return &iotAgent{
-		mp:  msgprcs,
-		dr:  decreg,
-		log: log,
+		mp: msgprcs,
+		dr: decreg,
 	}
 }
 
@@ -41,12 +40,14 @@ func (a *iotAgent) MessageReceived(ctx context.Context, msg []byte) error {
 		return err
 	}
 
+	log := logging.GetFromContext(ctx)
+
 	dfn := a.dr.GetDecodersForSensorType(ctx, sensorType)
 
 	err = dfn(ctx, msg, func(c context.Context, m []byte) error {
 		err = a.mp.ProcessMessage(c, m)
 		if err != nil {
-			a.log.Error().Err(err).Msg("failed to process message")
+			log.Error().Err(err).Msg("failed to process message")
 			return err
 		}
 		return nil
