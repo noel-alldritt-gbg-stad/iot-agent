@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 )
 
 func ElsysDecoder(ctx context.Context, msg []byte, fn func(context.Context, []byte) error) error {
 
 	d := struct {
 		DevEUI     string `json:"devEUI"`
-		FPort      string `json:"fPort"`
+		FPort      int    `json:"fPort"`
 		SensorType string `json:"deviceProfileName"`
 		Data       string `json:"data"`
 		Object     struct {
@@ -27,7 +28,7 @@ func ElsysDecoder(ctx context.Context, msg []byte, fn func(context.Context, []by
 
 	pp := &Payload{
 		DevEUI:     d.DevEUI,
-		FPort:      d.FPort,
+		FPort:      strconv.Itoa(d.FPort),
 		SensorType: d.SensorType,
 	}
 

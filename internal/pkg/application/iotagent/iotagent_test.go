@@ -128,7 +128,7 @@ const elsys string = `{
 	},
 	"adr": true,
 	"fCnt": 10301,
-	"fPort": "5",
+	"fPort": 5,
 	"data": "Bw2KDADB",
 	"object": {
 		"externalTemperature": 19.3,
