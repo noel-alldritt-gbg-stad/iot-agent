@@ -2,9 +2,11 @@ package decoder
 
 import (
 	"context"
+	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 )
 
 func SensativeDecoder(ctx context.Context, msg []byte, fn func(context.Context, []byte) error) error {
@@ -32,7 +34,7 @@ func SensativeDecoder(ctx context.Context, msg []byte, fn func(context.Context, 
 			return err
 		}
 
-		if len(b) < 4 {
+		if len(b) < 2 {
 			return errors.New("payload too short")
 		}
 
@@ -69,11 +71,50 @@ func SensativeDecoder(ctx context.Context, msg []byte, fn func(context.Context, 
 }
 
 func decodeSensativeMeasurements(payload []byte, callback func(m Measurement)) error {
-	temp := struct {
-		Value float32 `json:"temperature"`
-	}{42.0}
 
-	callback(temp)
+	pos := 2
+
+	for pos < len(payload) {
+		channel := payload[pos] & 0x7F
+		pos = pos + 1
+		size := 1
+
+		switch channel {
+		case 1: // battery
+			callback(struct {
+				Value int `json:"battery_level"`
+			}{int(payload[pos])})
+		case 2: // temp report
+			size = 2
+			// TODO: Handle sub zero readings
+			callback(struct {
+				Value float64 `json:"temperature"`
+			}{float64(binary.BigEndian.Uint16(payload[pos:pos+2])) / 10})
+		case 4: // average temp report
+			size = 2
+		case 6: // humidity report
+			callback(struct {
+				Value int `json:"humidity"`
+			}{int(payload[pos] / 2)})
+		case 7: // lux report
+			size = 2
+		case 8: // lux2 report
+			size = 2
+		case 9: // door report
+			callback(struct {
+				Value bool `json:"door_report"`
+			}{payload[pos] != 0})
+		case 10: // door alarm
+			callback(struct {
+				Value bool `json:"door_alarm"`
+			}{payload[pos] != 0})
+		default:
+			fmt.Printf("unknown channel %d\n", channel)
+			size = 20
+		}
+
+		pos = pos + size
+	}
 
 	return nil
 }
