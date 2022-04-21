@@ -89,5 +89,6 @@ func (dmc *devManagementClient) FindDeviceFromDevEUI(ctx context.Context, devEUI
 
 type Result struct {
 	InternalID string   `json:"id"`
+	SensorType string   `json:"sensorType"`
 	Types      []string `json:"types"`
 }

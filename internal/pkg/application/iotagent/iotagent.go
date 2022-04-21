@@ -18,8 +18,9 @@ type IoTAgent interface {
 }
 
 type iotAgent struct {
-	mp messageprocessor.MessageProcessor
-	dr decoder.DecoderRegistry
+	mp  messageprocessor.MessageProcessor
+	dr  decoder.DecoderRegistry
+	dmc domain.DeviceManagementClient
 }
 
 func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventSender, log zerolog.Logger) IoTAgent {
@@ -28,23 +29,30 @@ func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventSender,
 	msgprcs := messageprocessor.NewMessageReceivedProcessor(dmc, conreg, eventPub, log)
 
 	return &iotAgent{
-		mp: msgprcs,
-		dr: decreg,
+		mp:  msgprcs,
+		dr:  decreg,
+		dmc: dmc,
 	}
 }
 
 func (a *iotAgent) MessageReceived(ctx context.Context, msg []byte) error {
-
-	sensorType, err := parseSensorType(msg)
-	if err != nil {
-		return err
-	}
-
 	log := logging.GetFromContext(ctx)
 
-	dfn := a.dr.GetDecoderForSensorType(ctx, sensorType)
+	devEUI, err := getDevEUIFromMessage(msg)
+	if err != nil {
+		log.Error().Err(err).Msg("unable to get DevEUI from payload")
+		return err
+	}
+	
+	device, err := a.dmc.FindDeviceFromDevEUI(ctx, devEUI)
+	if err != nil {
+		log.Error().Err(err).Msg("device lookup failure")
+		return err
+	}
+	
+	decoder := a.dr.GetDecoderForSensorType(ctx, device.SensorType)
 
-	err = dfn(ctx, msg, func(c context.Context, m []byte) error {
+	err = decoder(ctx, msg, func(c context.Context, m []byte) error {
 		err = a.mp.ProcessMessage(c, m)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to process message")
@@ -55,39 +63,24 @@ func (a *iotAgent) MessageReceived(ctx context.Context, msg []byte) error {
 	return err
 }
 
-func parseSensorType(msg []byte) (string, error) {
+func getDevEUIFromMessage(msg []byte) (string, error) {
 	dm := struct {
-		SensorType        string `json:"sensorType"`
-		DeviceProfileName string `json:"deviceProfileName"`
+		DevEUI string `json:"devEUI"`
 	}{}
 
-	dmA := []struct {
-		SensorType        string `json:"sensorType"`
-		DeviceProfileName string `json:"deviceProfileName"`
+	var err error
+
+	if err = json.Unmarshal(msg, &dm); err == nil {
+		return dm.DevEUI, nil
+	}
+
+	dmList := []struct {
+		DevEUI string `json:"devEUI"`
 	}{}
 
-	err := json.Unmarshal(msg, &dm)
-	if err != nil {
-		err = json.Unmarshal(msg, &dmA)
-		if err != nil {
-			return "", err
-		}
-		if dmA[0].SensorType != "" {
-			return dmA[0].SensorType, nil
-		}
-
-		if dmA[0].DeviceProfileName != "" {
-			return dmA[0].DeviceProfileName, nil
-		}
+	if err = json.Unmarshal(msg, &dmList); err == nil {
+		return dmList[0].DevEUI, nil
 	}
 
-	if dm.SensorType != "" {
-		return dm.SensorType, nil
-	}
-
-	if dm.DeviceProfileName != "" {
-		return dm.DeviceProfileName, nil
-	}
-
-	return "", nil
+	return "", err
 }

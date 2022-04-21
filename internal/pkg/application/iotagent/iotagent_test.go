@@ -19,7 +19,7 @@ func TestSenlabTPayload(t *testing.T) {
 
 	is.NoErr(err)
 	is.True(len(e.SendCalls()) > 0)
-	is.True(e.SendCalls()[0].Msg.Type == "urn:oma:lwm2m:ext:3303")	
+	is.True(e.SendCalls()[0].Msg.SensorValue == 6.625)	
 }
 
 func TestElsysPayload(t *testing.T) {
@@ -30,16 +30,37 @@ func TestElsysPayload(t *testing.T) {
 
 	is.NoErr(err)
 	is.True(len(e.SendCalls()) > 0)
-	is.True(e.SendCalls()[0].Msg.Type == "urn:oma:lwm2m:ext:3303")
+	is.True(e.SendCalls()[0].Msg.SensorValue == 19.3)
+}
+
+func TestErsPayload(t *testing.T) {
+	is, dmc, e, log := testSetup(t)
+
+	app := NewIoTAgent(dmc, e, log)
+	err := app.MessageReceived(context.Background(), []byte(ers))
+
+	is.NoErr(err)
+	is.True(len(e.SendCalls()) > 0)
+	is.True(e.SendCalls()[0].Msg.SensorValue == 23.8)
 }
 
 func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *events.EventSenderMock, zerolog.Logger) {
 	is := is.New(t)
 	dmc := &domain.DeviceManagementClientMock{
 		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (*domain.Result, error) {
+
+			if devEUI == "70b3d580a010f260" {
+				return &domain.Result{
+					InternalID: "internal-id-for-device",
+					Types:      []string{"urn:oma:lwm2m:ext:3303"},
+					SensorType: "tem_lab_14ns",
+				}, nil				
+			}
+
 			return &domain.Result{
 				InternalID: "internal-id-for-device",
 				Types:      []string{"urn:oma:lwm2m:ext:3303"},
+				SensorType: "Elsys_Codec",
 			}, nil
 		},
 	}
@@ -102,4 +123,21 @@ const elsys string = `{
 	"tags": {
 		"Location": "Vangen"
 	}
+}`
+
+const ers string = `
+{
+    "deviceName": "mcg-ers-co2-01",
+    "deviceProfileName": "ELSYS",
+    "deviceProfileID": "0b765672-274a-41eb-b1c5-bb2bec9d14e8",
+    "devEUI": "a81758fffe05e6fb",
+    "data": "AQDuAhYEALIFAgYBxAcONA==",
+    "object": {
+        "co2": 452,
+        "humidity": 22,
+        "light": 178,
+        "motion": 2,
+        "temperature": 23.8,
+        "vdd": 3636
+    }
 }`
