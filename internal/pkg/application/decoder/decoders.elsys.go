@@ -10,7 +10,7 @@ func ElsysDecoder(ctx context.Context, msg []byte, fn func(context.Context, []by
 
 	d := struct {
 		DevEUI     string `json:"devEUI"`
-		FPort      int    `json:"fPort"`
+		FPort      string `json:"fPort"`
 		SensorType string `json:"deviceProfileName"`
 		Data       string `json:"data"`
 		Object     struct {

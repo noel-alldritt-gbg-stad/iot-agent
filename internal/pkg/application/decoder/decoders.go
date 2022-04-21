@@ -5,10 +5,10 @@ import "context"
 type Payload struct {
 	DevEUI       string        `json:"devEUI"`
 	DeviceName   string        `json:"deviceName,omitempty"`
-	FPort        int           `json:"fPort,omitempty"`
+	FPort        string        `json:"fPort,omitempty"`
 	Latitude     float64       `json:"latitude,omitempty"`
 	Longitude    float64       `json:"longitude,omitempty"`
-	Rssi         int           `json:"rssi,omitempty"`
+	Rssi         string        `json:"rssi,omitempty"`
 	SensorType   string        `json:"sensorType,omitempty"`
 	Timestamp    string        `json:"timestamp,omitempty"`
 	Type         string        `json:"type,omitempty"`

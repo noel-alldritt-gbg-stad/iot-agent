@@ -19,8 +19,8 @@ func TestSenlabTBasicDecoder(t *testing.T) {
 		return nil
 	})
 
-	is.True(r.Timestamp == "2022-04-12T05:08:50.301732Z")
 	is.NoErr(err)
+	is.Equal(r.Timestamp, "2022-04-12T05:08:50.301732Z")
 }
 
 func TestElsysDecoder(t *testing.T) {
@@ -33,8 +33,8 @@ func TestElsysDecoder(t *testing.T) {
 		return nil
 	})
 
-	is.True(r.SensorType == "Elsys_Codec")
 	is.NoErr(err)
+	is.Equal(r.SensorType, "Elsys_Codec")
 }
 
 func TestSenlabTBasicDecoderSensorReadingError(t *testing.T) {
@@ -58,10 +58,10 @@ const senlabT string = `[{
 	"timestamp": "2022-04-12T05:08:50.301732Z",
 	"payload": "01FE90619c10006A",
 	"spreadingFactor": 12,
-	"rssi": -113,
-	"snr": -11.8,
+	"rssi": "-113",
+	"snr": "-11.8",
 	"gatewayIdentifier": 184,
-	"fPort": 3,
+	"fPort": "3",
 	"latitude": 57.806266,
 	"longitude": 12.07727
 }]`
@@ -73,10 +73,10 @@ const senlabT_sensorReadingError string = `[{
 	"timestamp": "2022-04-12T05:08:50.301732Z",
 	"payload": "01FE90619c10FD14",
 	"spreadingFactor": 12,
-	"rssi": -113,
-	"snr": -11.8,
+	"rssi": "-113",
+	"snr": "-11.8",
 	"gatewayIdentifier": 184,
-	"fPort": 3,
+	"fPort": "3",
 	"latitude": 57.806266,
 	"longitude": 12.07727
 }]`
@@ -107,7 +107,7 @@ const elsys string = `{
 	},
 	"adr": true,
 	"fCnt": 10301,
-	"fPort": 5,
+	"fPort": "5",
 	"data": "Bw2KDADB",
 	"object": {
 		"externalTemperature": 19.3,
