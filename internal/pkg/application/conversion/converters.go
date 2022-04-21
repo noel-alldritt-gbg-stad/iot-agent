@@ -15,24 +15,24 @@ func Temperature(ctx context.Context, deviceID string, msg []byte) (*InternalMes
 		} `json:"measurements"`
 	}{}
 
-	err := json.Unmarshal(msg, &dm)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal temperature measurements: %s", err.Error())
+	if err := json.Unmarshal(msg, &dm); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal measurements: %s", err.Error())
 	}
 
-	if len(dm.Measurements) == 0 || dm.Measurements[0].Temp == nil {
-		return nil, fmt.Errorf("no temperature value found in payload")
+	for _, m := range dm.Measurements {
+		if m.Temp != nil {
+			payload := &InternalMessage{
+				InternalID:  deviceID,
+				Type:        "urn:oma:lwm2m:ext:3303",
+				SensorValue: *m.Temp,
+			}
+
+			//TODO: range and call func?
+			return payload, nil
+		}
 	}
 
-	//TODO: range and call func?
-
-	payload := &InternalMessage{
-		InternalID:  deviceID,
-		Type:        "urn:oma:lwm2m:ext:3303",
-		SensorValue: *dm.Measurements[0].Temp,
-	}
-
-	return payload, nil
+	return nil, fmt.Errorf("no temperature value found in payload")
 }
 
 type InternalMessage struct {
