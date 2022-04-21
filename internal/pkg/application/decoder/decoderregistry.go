@@ -16,8 +16,9 @@ type decoderRegistry struct {
 func NewDecoderRegistry() DecoderRegistry {
 
 	Decoders := map[string]MessageDecoderFunc{
-		"tem_lab_14ns": SenlabTBasicDecoder,
-		"elsys_codec":  ElsysDecoder,
+		"tem_lab_14ns":     SenlabTBasicDecoder,
+		"elsys_codec":      ElsysDecoder,
+		"strips_lora_ms_h": SensativeDecoder,
 	}
 
 	return &decoderRegistry{
