@@ -10,6 +10,7 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/application/iotagent"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
 	"github.com/diwise/iot-agent/internal/pkg/infrastructure/logging"
+	"github.com/diwise/iot-agent/internal/pkg/infrastructure/metrics"
 	"github.com/diwise/iot-agent/internal/pkg/infrastructure/services/mqtt"
 	"github.com/diwise/iot-agent/internal/pkg/infrastructure/tracing"
 	"github.com/diwise/iot-agent/internal/pkg/presentation/api"
@@ -88,6 +89,8 @@ func SetupAndRunApi(logger zerolog.Logger, app iotagent.IoTAgent, port string) {
 	r := chi.NewRouter()
 
 	a := api.NewApi(logger, r, app)
+
+	metrics.AddHandlers(r)
 
 	a.Start(port)
 }
