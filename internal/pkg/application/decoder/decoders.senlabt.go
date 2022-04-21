@@ -13,10 +13,10 @@ func SenlabTBasicDecoder(ctx context.Context, msg []byte, fn func(context.Contex
 
 	dm := []struct {
 		DevEUI     string  `json:"devEUI"`
-		FPort      int     `json:"fPort,omitempty"`
+		FPort      string  `json:"fPort,omitempty"`
 		Latitude   float64 `json:"latitude,omitempty"`
 		Longitude  float64 `json:"longitude,omitempty"`
-		Rssi       int     `json:"rssi,omitempty"`
+		Rssi       string  `json:"rssi,omitempty"`
 		SensorType string  `json:"sensorType,omitempty"`
 		Timestamp  string  `json:"timestamp,omitempty"`
 		Payload    string  `json:"payload"`
@@ -121,7 +121,7 @@ func singleProbe(b []byte, p *payload) error {
 	}
 
 	p.ID = int(b[0])
-	p.BatteryLevel = (int(b[1]) / 254) * 100
+	p.BatteryLevel = (int(b[1]) * 100) / 254
 	p.Temperature = float32(temp) / 16.0
 
 	return nil
