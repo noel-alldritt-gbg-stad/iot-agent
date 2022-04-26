@@ -2,18 +2,16 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"runtime/debug"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/application/iotagent"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
 	"github.com/diwise/iot-agent/internal/pkg/infrastructure/services/mqtt"
 	"github.com/diwise/iot-agent/internal/pkg/presentation/api"
-	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
+	"github.com/diwise/service-chassis/pkg/infrastructure/buildinfo"
+	"github.com/diwise/service-chassis/pkg/infrastructure/env"
+	"github.com/diwise/service-chassis/pkg/infrastructure/o11y"
 	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/metrics"
-	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/tracing"
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog"
 )
@@ -22,30 +20,22 @@ const serviceName string = "iot-agent"
 
 func main() {
 
-	serviceVersion := version()
-
-	ctx, logger := logging.NewLogger(context.Background(), serviceName, serviceVersion)
-	logger.Info().Msg("starting up ...")
-
-	cleanup, err := tracing.Init(ctx, logger, serviceName, serviceVersion)
-	if err != nil {
-		logger.Fatal().Err(err).Msg("failed to init tracing")
-	}
+	serviceVersion := buildinfo.SourceVersion()
+	_, logger, cleanup := o11y.Init(context.Background(), serviceName, serviceVersion)
 	defer cleanup()
 
-	app := SetupIoTAgent(serviceName, logger)
+	forwardingEndpoint := env.GetVariableOrDie(logger, "MSG_FWD_ENDPOINT", "endpoint that incoming packages should be forwarded to")
+	deviceMgmtClientURL := env.GetVariableOrDie(logger, "DEV_MGMT_URL", "device management client URL")
 
-	apiPort := os.Getenv("SERVICE_PORT")
-	if apiPort == "" {
-		apiPort = "8080"
-	}
+	apiPort := env.GetVariableOrDefault(logger, "SERVICE_PORT", "8080")
+
+	app := SetupIoTAgent(logger, serviceName, deviceMgmtClientURL)
 
 	mqttConfig, err := mqtt.NewConfigFromEnvironment()
 	if err != nil {
 		logger.Fatal().Err(err).Msg("mqtt configuration error")
 	}
 
-	forwardingEndpoint := fmt.Sprintf("http://127.0.0.1:%s/api/v0/messages", apiPort)
 	mqttClient, err := mqtt.NewClient(logger, mqttConfig, forwardingEndpoint)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("failed to create mqtt client")
@@ -56,29 +46,8 @@ func main() {
 	SetupAndRunApi(logger, app, apiPort)
 }
 
-func version() string {
-	buildInfo, ok := debug.ReadBuildInfo()
-	if !ok {
-		return "unknown"
-	}
-
-	buildSettings := buildInfo.Settings
-	infoMap := map[string]string{}
-	for _, s := range buildSettings {
-		infoMap[s.Key] = s.Value
-	}
-
-	sha := infoMap["vcs.revision"]
-	if infoMap["vcs.modified"] == "true" {
-		sha += "+"
-	}
-
-	return sha
-}
-
-func SetupIoTAgent(serviceName string, logger zerolog.Logger) iotagent.IoTAgent {
-	dmcUrl := os.Getenv("DEV_MGMT_URL")
-	dmc := domain.NewDeviceManagementClient(dmcUrl)
+func SetupIoTAgent(logger zerolog.Logger, serviceName, deviceMgmtClientURL string) iotagent.IoTAgent {
+	dmc := domain.NewDeviceManagementClient(deviceMgmtClientURL)
 	event := events.NewEventSender(serviceName, logger)
 	event.Start()
 

@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/diwise/messaging-golang v0.0.0-20220413073613-1dcf3cdf0dcd
-	github.com/diwise/service-chassis v0.0.0-20220426092520-95ae4991f094
+	github.com/diwise/service-chassis v0.0.0-20220426150153-706eb92d048e
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/google/uuid v1.3.0
