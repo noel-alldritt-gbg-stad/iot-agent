@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/diwise/iot-agent/internal/pkg/infrastructure/tracing"
+	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/tracing"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/rs/zerolog"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"

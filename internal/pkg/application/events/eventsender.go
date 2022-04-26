@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
-	"github.com/diwise/iot-agent/internal/pkg/infrastructure/logging"
+	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
 	"github.com/rs/zerolog"
 
 	"github.com/diwise/messaging-golang/pkg/messaging"

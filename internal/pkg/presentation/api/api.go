@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/iotagent"
-	"github.com/diwise/iot-agent/internal/pkg/infrastructure/logging"
-	"github.com/diwise/iot-agent/internal/pkg/infrastructure/tracing"
+	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
+	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/tracing"
 	"github.com/go-chi/chi/v5"
 	"github.com/riandyrn/otelchi"
 	"github.com/rs/cors"

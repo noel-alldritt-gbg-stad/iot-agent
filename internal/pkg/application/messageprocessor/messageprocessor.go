@@ -8,7 +8,7 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
-	"github.com/diwise/iot-agent/internal/pkg/infrastructure/logging"
+	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
 	"github.com/rs/zerolog"
 )
 
@@ -19,26 +19,26 @@ type MessageProcessor interface {
 // hantera kö av msgs, skicka till converter registry
 
 type msgProcessor struct {
-	dmc        domain.DeviceManagementClient
-	conReg     conversion.ConverterRegistry
-	event      events.EventSender	
+	dmc    domain.DeviceManagementClient
+	conReg conversion.ConverterRegistry
+	event  events.EventSender
 }
 
 func NewMessageReceivedProcessor(dmc domain.DeviceManagementClient, conReg conversion.ConverterRegistry, event events.EventSender, log zerolog.Logger) MessageProcessor {
 	return &msgProcessor{
-		dmc:        dmc,
-		conReg:     conReg,
-		event:      event,		
+		dmc:    dmc,
+		conReg: conReg,
+		event:  event,
 	}
 }
 
 func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 	dm := struct {
-		DevEUI     string `json:"devEUI"`
-		Error      string `json:"error"`
-		Type       string `json:"type"`		
+		DevEUI string `json:"devEUI"`
+		Error  string `json:"error"`
+		Type   string `json:"type"`
 	}{}
-	
+
 	err := json.Unmarshal(msg, &dm)
 	if err != nil {
 		return err

@@ -9,7 +9,7 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/application/messageprocessor"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
-	"github.com/diwise/iot-agent/internal/pkg/infrastructure/logging"
+	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
 	"github.com/rs/zerolog"
 )
 
@@ -43,13 +43,13 @@ func (a *iotAgent) MessageReceived(ctx context.Context, msg []byte) error {
 		log.Error().Err(err).Msg("unable to get DevEUI from payload")
 		return err
 	}
-	
+
 	device, err := a.dmc.FindDeviceFromDevEUI(ctx, devEUI)
 	if err != nil {
 		log.Error().Err(err).Msg("device lookup failure")
 		return err
 	}
-	
+
 	decoder := a.dr.GetDecoderForSensorType(ctx, device.SensorType)
 
 	err = decoder(ctx, msg, func(c context.Context, m []byte) error {

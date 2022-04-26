@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/diwise/iot-agent/internal/pkg/infrastructure/logging"
+	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
 	"github.com/matryer/is"
 )
 
