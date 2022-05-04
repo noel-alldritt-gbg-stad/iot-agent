@@ -9,9 +9,9 @@ import (
 	"github.com/farshidtz/senml/v2/codec"
 )
 
-type MessageConverterFunc func(ctx context.Context, internalID string, msg []byte) (*InternalMessage, error)
+type MessageConverterFunc func(ctx context.Context, internalID string, msg []byte) ([]byte, error)
 
-func Temperature(ctx context.Context, deviceID string, msg []byte) (*InternalMessage, error) {
+func Temperature(ctx context.Context, deviceID string, msg []byte) ([]byte, error) {
 	dm := struct {
 		Measurements []struct {
 			Temp *float64 `json:"temperature"`
@@ -22,20 +22,31 @@ func Temperature(ctx context.Context, deviceID string, msg []byte) (*InternalMes
 		return nil, fmt.Errorf("failed to unmarshal measurements: %s", err.Error())
 	}
 
+	var pack senml.Pack
+
+	pack = append(pack, senml.Record{
+		BaseName:    "urn:oma:lwm2m:ext:3303",
+		Name:        "0",
+		StringValue: deviceID,
+	})
+
 	for _, m := range dm.Measurements {
 		if m.Temp != nil {
-			payload := &InternalMessage{
-				InternalID:  deviceID,
-				Type:        "urn:oma:lwm2m:ext:3303",
-				SensorValue: *m.Temp,
+			rec := senml.Record{
+				Name:  "Temperature",
+				Value: m.Temp,
 			}
 
-			//TODO: range and call func?
-			return payload, nil
+			pack = append(pack, rec)
 		}
 	}
 
-	return nil, fmt.Errorf("no temperature value found in payload")
+	data, err := codec.EncodeJSON(pack)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal measurements: %s", err.Error())
+	}
+
+	return data, nil
 }
 
 func AirQuality(ctx context.Context, deviceID string, msg []byte) ([]byte, error) {
@@ -74,18 +85,5 @@ func AirQuality(ctx context.Context, deviceID string, msg []byte) ([]byte, error
 		return nil, fmt.Errorf("failed to unmarshal measurements: %s", err.Error())
 	}
 
-	//each measurement from payload is a new record on pack
-
 	return data, nil
-}
-
-type InternalMessage struct {
-	InternalID   string  `json:"internalID"`
-	Type         string  `json:"type"`
-	SensorValue  float64 `json:"sensorValue"`
-	ResourceName string  `json:"resourceName"`
-}
-
-func (im InternalMessage) ContentType() string {
-	return "application/json" // TODO: Decide a proper content type here
 }

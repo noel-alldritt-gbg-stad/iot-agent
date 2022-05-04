@@ -13,6 +13,8 @@ import (
 	"github.com/rs/zerolog"
 )
 
+//go:generate moq -rm -out iotagent_mock.go . IoTAgent
+
 type IoTAgent interface {
 	MessageReceived(ctx context.Context, msg []byte) error
 }

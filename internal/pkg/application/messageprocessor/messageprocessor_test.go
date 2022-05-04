@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/diwise/iot-agent/internal/pkg/application/conversion"	
+	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
 	"github.com/matryer/is"
@@ -57,21 +57,17 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, convers
 	cr := &conversion.ConverterRegistryMock{
 		DesignateConvertersFunc: func(ctx context.Context, types []string) []conversion.MessageConverterFunc {
 			return []conversion.MessageConverterFunc{
-				func(ctx context.Context, internalID string, msg []byte) (*conversion.InternalMessage, error) {
-					return &conversion.InternalMessage{
-						InternalID:  "internalID",
-						Type:        "urn:oma:lwm2m:ext:3303",
-						SensorValue: 0.0,
-					}, nil
+				func(ctx context.Context, internalID string, msg []byte) ([]byte, error) {
+					return []byte{}, nil
 				},
 			}
 		},
 	}
 	ep := &events.EventSenderMock{
-		SendFunc: func(ctx context.Context, msg conversion.InternalMessage) error {
+		SendFunc: func(ctx context.Context, msg []byte) error {
 			return nil
 		},
-	}	
+	}
 
 	return is, dmc, cr, ep, zerolog.Logger{}
 }
