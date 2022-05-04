@@ -18,6 +18,10 @@ func ElsysDecoder(ctx context.Context, msg []byte, fn func(context.Context, []by
 			Temperature         *float32 `json:"temperature,omitempty"`
 			ExternalTemperature *float32 `json:"externalTemperature,omitempty"`
 			Vdd                 *int     `json:"vdd,omitempty"`
+			CO2                 *int     `json:"co2,omitempty"`
+			Humidity            *int     `json:"humidity,omitempty"`
+			Light               *int     `json:"lights,omitempty"`
+			Motion              *int     `json:"motion,omitempty"`
 		} `json:"object"`
 	}{}
 
@@ -48,6 +52,42 @@ func ElsysDecoder(ctx context.Context, msg []byte, fn func(context.Context, []by
 			*d.Object.ExternalTemperature,
 		}
 		pp.Measurements = append(pp.Measurements, temp)
+	}
+
+	if d.Object.CO2 != nil {
+		co2 := struct {
+			CO2 int `json:"co2"`
+		}{
+			*d.Object.CO2,
+		}
+		pp.Measurements = append(pp.Measurements, co2)
+	}
+
+	if d.Object.Humidity != nil {
+		hmd := struct {
+			Humidity int `json:"humidity"`
+		}{
+			*d.Object.Humidity,
+		}
+		pp.Measurements = append(pp.Measurements, hmd)
+	}
+
+	if d.Object.Light != nil {
+		lght := struct {
+			Light int `json:"light"`
+		}{
+			*d.Object.Light,
+		}
+		pp.Measurements = append(pp.Measurements, lght)
+	}
+
+	if d.Object.Motion != nil {
+		mtn := struct {
+			Motion int `json:"motion"`
+		}{
+			*d.Object.Motion,
+		}
+		pp.Measurements = append(pp.Measurements, mtn)
 	}
 
 	if d.Object.Vdd != nil {
