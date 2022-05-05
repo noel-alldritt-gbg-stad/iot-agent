@@ -61,11 +61,18 @@ func TestErsPayload(t *testing.T) {
 	err := app.MessageReceived(context.Background(), []byte(ers))
 
 	is.NoErr(err)
-	is.True(len(e.SendCalls()) > 0)
+	is.True(len(e.SendCalls()) == 2) // expecting two calls since payload should produce measurement for both temperature and co2.
 
-	pack, err := codec.Decode(senml.MediaTypeSenmlJSON, e.SendCalls()[0].Msg)
+	tempPack, err := codec.Decode(senml.MediaTypeSenmlJSON, e.SendCalls()[0].Msg) // the first call to send is for the temperature pack.
 	is.NoErr(err)
-	is.True(*pack[1].Value == 23.8)
+	is.True(tempPack[0].BaseName == "urn:oma:lwm2m:ext:3303")
+	is.True(tempPack[1].Name == "Temperature")
+
+	co2Pack, err := codec.Decode(senml.MediaTypeSenmlJSON, e.SendCalls()[1].Msg) // the second call to send is for the co2 pack.
+	is.NoErr(err)
+
+	is.True(co2Pack[0].BaseName == "urn:oma:lwm2m:ext:3428")
+	is.True(co2Pack[1].Name == "CO2")
 }
 
 func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *events.EventSenderMock, zerolog.Logger) {
@@ -82,6 +89,9 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *events
 				res.SensorType = "tem_lab_14ns"
 			} else if devEUI == "70b3d52c00019193" {
 				res.SensorType = "strips_lora_ms_h"
+			} else if devEUI == "a81758fffe05e6fb" {
+				res.SensorType = "Elsys_Codec"
+				res.Types = []string{"urn:oma:lwm2m:ext:3303", "urn:oma:lwm2m:ext:3428"}
 			} else {
 				res.SensorType = "Elsys_Codec"
 			}
