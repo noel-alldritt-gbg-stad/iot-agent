@@ -5,7 +5,6 @@ package events
 
 import (
 	"context"
-	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
 	"sync"
 )
 
@@ -19,7 +18,7 @@ var _ EventSender = &EventSenderMock{}
 //
 // 		// make and configure a mocked EventSender
 // 		mockedEventSender := &EventSenderMock{
-// 			SendFunc: func(ctx context.Context, msg conversion.InternalMessage) error {
+// 			SendFunc: func(ctx context.Context, msg []byte) error {
 // 				panic("mock out the Send method")
 // 			},
 // 			StartFunc: func() error {
@@ -36,7 +35,7 @@ var _ EventSender = &EventSenderMock{}
 // 	}
 type EventSenderMock struct {
 	// SendFunc mocks the Send method.
-	SendFunc func(ctx context.Context, msg conversion.InternalMessage) error
+	SendFunc func(ctx context.Context, msg []byte) error
 
 	// StartFunc mocks the Start method.
 	StartFunc func() error
@@ -51,7 +50,7 @@ type EventSenderMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Msg is the msg argument value.
-			Msg conversion.InternalMessage
+			Msg []byte
 		}
 		// Start holds details about calls to the Start method.
 		Start []struct {
@@ -66,13 +65,13 @@ type EventSenderMock struct {
 }
 
 // Send calls SendFunc.
-func (mock *EventSenderMock) Send(ctx context.Context, msg conversion.InternalMessage) error {
+func (mock *EventSenderMock) Send(ctx context.Context, msg []byte) error {
 	if mock.SendFunc == nil {
 		panic("EventSenderMock.SendFunc: method is nil but EventSender.Send was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
-		Msg conversion.InternalMessage
+		Msg []byte
 	}{
 		Ctx: ctx,
 		Msg: msg,
@@ -88,11 +87,11 @@ func (mock *EventSenderMock) Send(ctx context.Context, msg conversion.InternalMe
 //     len(mockedEventSender.SendCalls())
 func (mock *EventSenderMock) SendCalls() []struct {
 	Ctx context.Context
-	Msg conversion.InternalMessage
+	Msg []byte
 } {
 	var calls []struct {
 		Ctx context.Context
-		Msg conversion.InternalMessage
+		Msg []byte
 	}
 	mock.lockSend.RLock()
 	calls = mock.calls.Send

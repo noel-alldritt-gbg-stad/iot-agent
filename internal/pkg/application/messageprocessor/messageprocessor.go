@@ -70,7 +70,7 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 			continue
 		}
 
-		err = mp.event.Send(ctx, *payload)
+		err = mp.event.Send(ctx, payload)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to send event")
 		}

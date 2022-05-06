@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/matryer/is"
 	"github.com/rs/zerolog"
@@ -23,18 +24,32 @@ func TestSenlabTBasicDecoder(t *testing.T) {
 	is.Equal(r.Timestamp, "2022-04-12T05:08:50.301732Z")
 }
 
-func TestElsysDecoder(t *testing.T) {
+func TestElsysTemperatureDecoder(t *testing.T) {
 	is, _ := testSetup(t)
 
 	r := &Payload{}
 
-	err := ElsysDecoder(context.Background(), []byte(elsys), func(c context.Context, m []byte) error {
+	err := ElsysDecoder(context.Background(), []byte(elsysTemp), func(c context.Context, m []byte) error {
 		json.Unmarshal(m, &r)
 		return nil
 	})
 
 	is.NoErr(err)
 	is.Equal(r.SensorType, "Elsys_Codec")
+}
+
+func TestElsysCO2Decoder(t *testing.T) {
+	is, _ := testSetup(t)
+
+	r := &Payload{}
+
+	err := ElsysDecoder(context.Background(), []byte(elsysCO2), func(c context.Context, m []byte) error {
+		json.Unmarshal(m, &r)
+		return nil
+	})
+
+	is.NoErr(err)
+	is.Equal(r.SensorType, "ELSYS")
 }
 
 func TestSenlabTBasicDecoderSensorReadingError(t *testing.T) {
@@ -45,6 +60,17 @@ func TestSenlabTBasicDecoderSensorReadingError(t *testing.T) {
 	})
 
 	is.True(err != nil)
+}
+
+func TestTimeStringConvert(t *testing.T) {
+	is, _ := testSetup(t)
+	
+	tm, err := time.Parse(time.RFC3339, "1978-07-04T21:24:16.000000Z")
+	
+	min := tm.Unix()
+	
+	is.True(min == 268435456)
+	is.NoErr(err)
 }
 
 func testSetup(t *testing.T) (*is.I, zerolog.Logger) {
@@ -81,7 +107,7 @@ const senlabT_sensorReadingError string = `[{
 	"longitude": 12.07727
 }]`
 
-const elsys string = `{
+const elsysTemp string = `{
 	"applicationID": "8",
 	"applicationName": "Water-Temperature",
 	"deviceName": "sk-elt-temp-16",
@@ -115,5 +141,21 @@ const elsys string = `{
 	},
 	"tags": {
 		"Location": "Vangen"
+	}
+}`
+
+const elsysCO2 string = `{
+	"deviceName":"mcg-ers-co2-01",
+	"deviceProfileName":"ELSYS",
+	"deviceProfileID":"0b765672-274a-41eb-b1c5-bb2bec9d14e8",
+	"devEUI":"a81758fffe05e6fb",
+	"data":"AQDoAgwEAFoFAgYBqwcONA==",
+	"object": {
+		"co2":427,
+		"humidity":12,
+		"light":90,
+		"motion":2,
+		"temperature":23.2,
+		"vdd":3636
 	}
 }`

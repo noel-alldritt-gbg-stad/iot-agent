@@ -10,12 +10,22 @@ import (
 
 func TestThatTemperatureDecodesValueCorrectly(t *testing.T) {
 	is, ctx := mcmTestSetup(t)
-	payload := `{"devEUI":"ncaknlclkdanklcd","measurements":[{"temperature":22.2}]}`
+	payload := `{"devEUI":"ncaknlclkdanklcd","timestamp":"2006-01-02T15:04:05Z","measurements":[{"temperature":22.2}]}`
 
 	msg, err := Temperature(ctx, "internalID", []byte(payload))
 
 	is.NoErr(err)
-	is.Equal(msg.SensorValue, 22.2)
+	is.Equal(`[{"bn":"urn:oma:lwm2m:ext:3303","bt":1136214245,"n":"0","vs":"internalID"},{"n":"Temperature","v":22.2}]`, string(msg))
+}
+
+func TestThatCO2DecodesValueCorrectly(t *testing.T) {
+	is, ctx := mcmTestSetup(t)
+	payload := `{"devEUI":"ncaknlclkdanklcd","timestamp":"2006-01-02T15:04:05Z","measurements":[{"co2":22}]}`
+
+	msg, err := AirQuality(ctx, "internalID", []byte(payload))
+
+	is.NoErr(err)
+	is.Equal(`[{"bn":"urn:oma:lwm2m:ext:3428","bt":1136214245,"n":"0","vs":"internalID"},{"n":"CO2","v":22}]`, string(msg))
 }
 
 func mcmTestSetup(t *testing.T) (*is.I, context.Context) {
