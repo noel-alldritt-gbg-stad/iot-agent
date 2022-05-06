@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/matryer/is"
 	"github.com/rs/zerolog"
@@ -59,6 +60,17 @@ func TestSenlabTBasicDecoderSensorReadingError(t *testing.T) {
 	})
 
 	is.True(err != nil)
+}
+
+func TestTimeStringConvert(t *testing.T) {
+	is, _ := testSetup(t)
+	
+	tm, err := time.Parse(time.RFC3339, "1978-07-04T21:24:16.000000Z")
+	
+	min := tm.Unix()
+	
+	is.True(min == 268435456)
+	is.NoErr(err)
 }
 
 func testSetup(t *testing.T) (*is.I, zerolog.Logger) {

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"time"
 )
 
 func ElsysDecoder(ctx context.Context, msg []byte, fn func(context.Context, []byte) error) error {
@@ -34,6 +35,7 @@ func ElsysDecoder(ctx context.Context, msg []byte, fn func(context.Context, []by
 		DevEUI:     d.DevEUI,
 		FPort:      strconv.Itoa(d.FPort),
 		SensorType: d.SensorType,
+		Timestamp: time.Now().Format(time.RFC3339),
 	}
 
 	if d.Object.Temperature != nil {

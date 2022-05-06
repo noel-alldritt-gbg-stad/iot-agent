@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/farshidtz/senml/v2"
 	"github.com/farshidtz/senml/v2/codec"
@@ -13,6 +14,7 @@ type MessageConverterFunc func(ctx context.Context, internalID string, msg []byt
 
 func Temperature(ctx context.Context, deviceID string, msg []byte) ([]byte, error) {
 	dm := struct {
+		Timestamp    string `json:"timestamp"`
 		Measurements []struct {
 			Temp *float64 `json:"temperature"`
 		} `json:"measurements"`
@@ -24,8 +26,14 @@ func Temperature(ctx context.Context, deviceID string, msg []byte) ([]byte, erro
 
 	var pack senml.Pack
 
+	baseTime, err := parseTime(dm.Timestamp)
+	if err != nil {
+		return nil, err
+	}
+
 	pack = append(pack, senml.Record{
 		BaseName:    "urn:oma:lwm2m:ext:3303",
+		BaseTime:    baseTime,
 		Name:        "0",
 		StringValue: deviceID,
 	})
@@ -51,6 +59,7 @@ func Temperature(ctx context.Context, deviceID string, msg []byte) ([]byte, erro
 
 func AirQuality(ctx context.Context, deviceID string, msg []byte) ([]byte, error) {
 	dm := struct {
+		Timestamp    string `json:"timestamp"`
 		Measurements []struct {
 			CO2 *int `json:"co2"`
 		} `json:"measurements"`
@@ -62,8 +71,14 @@ func AirQuality(ctx context.Context, deviceID string, msg []byte) ([]byte, error
 
 	var pack senml.Pack
 
+	baseTime, err := parseTime(dm.Timestamp)
+	if err != nil {
+		return nil, err
+	}
+
 	pack = append(pack, senml.Record{
 		BaseName:    "urn:oma:lwm2m:ext:3428",
+		BaseTime:    baseTime,
 		Name:        "0",
 		StringValue: deviceID,
 	})
@@ -86,4 +101,13 @@ func AirQuality(ctx context.Context, deviceID string, msg []byte) ([]byte, error
 	}
 
 	return data, nil
+}
+
+func parseTime(t string) (float64, error) {
+	baseTime, err := time.Parse(time.RFC3339, t)
+	if err != nil {
+		return 0, fmt.Errorf("unable to parse time %s as RFC3339, %s", t, err.Error())
+	}
+
+	return float64(baseTime.Unix()), nil
 }
