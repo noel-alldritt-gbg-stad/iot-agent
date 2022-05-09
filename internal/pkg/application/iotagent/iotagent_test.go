@@ -101,7 +101,7 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *events
 	}
 
 	e := &events.EventSenderMock{
-		SendFunc: func(ctx context.Context, msg []byte) error {
+		SendFunc: func(ctx context.Context, m events.MsgStruct) error {
 			return nil
 		},
 	}
