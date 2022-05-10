@@ -10,6 +10,7 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
 	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
+	iotcore "github.com/diwise/iot-core/pkg/messaging/events"
 	"github.com/rs/zerolog"
 )
 
@@ -69,7 +70,7 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 			continue
 		}
 
-		m := events.InternalMessage{
+		m := iotcore.MessageReceived {
 			Device:    result.InternalID,
 			Timestamp: time.Now().UTC().Format(time.RFC3339),
 			Pack:      payload,

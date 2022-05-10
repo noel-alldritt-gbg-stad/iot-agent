@@ -6,8 +6,7 @@ import (
 
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
-	"github.com/farshidtz/senml/v2"
-	"github.com/farshidtz/senml/v2/codec"
+	iotcore "github.com/diwise/iot-core/pkg/messaging/events"
 	"github.com/matryer/is"
 	"github.com/rs/zerolog"
 )
@@ -21,8 +20,7 @@ func TestSenlabTPayload(t *testing.T) {
 	is.NoErr(err)
 	is.True(len(e.SendCalls()) > 0)
 
-	pack, err := codec.Decode(senml.MediaTypeSenmlJSON, e.SendCalls()[0].Msg)
-	is.NoErr(err)
+	pack := e.SendCalls()[0].M.Pack	
 	is.True(*pack[1].Value == 6.625)
 }
 
@@ -35,8 +33,7 @@ func TestStripsPayload(t *testing.T) {
 	is.NoErr(err)
 	is.True(len(e.SendCalls()) > 0)
 
-	pack, err := codec.Decode(senml.MediaTypeSenmlJSON, e.SendCalls()[0].Msg)
-	is.NoErr(err)
+	pack := e.SendCalls()[0].M.Pack	
 	is.True(pack[0].BaseName == "urn:oma:lwm2m:ext:3303")
 }
 
@@ -49,8 +46,7 @@ func TestElsysPayload(t *testing.T) {
 	is.NoErr(err)
 	is.True(len(e.SendCalls()) > 0)
 
-	pack, err := codec.Decode(senml.MediaTypeSenmlJSON, e.SendCalls()[0].Msg)
-	is.NoErr(err)
+	pack := e.SendCalls()[0].M.Pack	
 	is.True(*pack[1].Value == 19.3)
 }
 
@@ -63,13 +59,11 @@ func TestErsPayload(t *testing.T) {
 	is.NoErr(err)
 	is.True(len(e.SendCalls()) == 2) // expecting two calls since payload should produce measurement for both temperature and co2.
 
-	tempPack, err := codec.Decode(senml.MediaTypeSenmlJSON, e.SendCalls()[0].Msg) // the first call to send is for the temperature pack.
-	is.NoErr(err)
+	tempPack := e.SendCalls()[0].M.Pack // the first call to send is for the temperature pack.	
 	is.True(tempPack[0].BaseName == "urn:oma:lwm2m:ext:3303")
 	is.True(tempPack[1].Name == "Temperature")
 
-	co2Pack, err := codec.Decode(senml.MediaTypeSenmlJSON, e.SendCalls()[1].Msg) // the second call to send is for the co2 pack.
-	is.NoErr(err)
+	co2Pack := e.SendCalls()[1].M.Pack // the second call to send is for the co2 pack.
 
 	is.True(co2Pack[0].BaseName == "urn:oma:lwm2m:ext:3428")
 	is.True(co2Pack[1].Name == "CO2")
@@ -101,7 +95,7 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *events
 	}
 
 	e := &events.EventSenderMock{
-		SendFunc: func(ctx context.Context, m events.MsgStruct) error {
+		SendFunc: func(ctx context.Context, m iotcore.MessageReceived) error {
 			return nil
 		},
 	}

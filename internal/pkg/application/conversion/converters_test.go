@@ -15,7 +15,7 @@ func TestThatTemperatureDecodesValueCorrectly(t *testing.T) {
 	msg, err := Temperature(ctx, "internalID", []byte(payload))
 
 	is.NoErr(err)
-	is.Equal(`[{"bn":"urn:oma:lwm2m:ext:3303","bt":1136214245,"n":"0","vs":"internalID"},{"n":"Temperature","v":22.2}]`, string(msg))
+	is.Equal(22.2, *msg[1].Value)
 }
 
 func TestThatCO2DecodesValueCorrectly(t *testing.T) {
@@ -25,7 +25,7 @@ func TestThatCO2DecodesValueCorrectly(t *testing.T) {
 	msg, err := AirQuality(ctx, "internalID", []byte(payload))
 
 	is.NoErr(err)
-	is.Equal(`[{"bn":"urn:oma:lwm2m:ext:3428","bt":1136214245,"n":"0","vs":"internalID"},{"n":"CO2","v":22}]`, string(msg))
+	is.Equal(22.0, *msg[1].Value)
 }
 
 func mcmTestSetup(t *testing.T) (*is.I, context.Context) {

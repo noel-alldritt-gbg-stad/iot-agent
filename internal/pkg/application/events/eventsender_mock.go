@@ -5,6 +5,7 @@ package events
 
 import (
 	"context"
+	iotcore "github.com/diwise/iot-core/pkg/messaging/events"
 	"sync"
 )
 
@@ -18,7 +19,7 @@ var _ EventSender = &EventSenderMock{}
 //
 // 		// make and configure a mocked EventSender
 // 		mockedEventSender := &EventSenderMock{
-// 			SendFunc: func(ctx context.Context, m InternalMessage) error {
+// 			SendFunc: func(ctx context.Context, m iotcore.MessageReceived) error {
 // 				panic("mock out the Send method")
 // 			},
 // 			StartFunc: func() error {
@@ -35,7 +36,7 @@ var _ EventSender = &EventSenderMock{}
 // 	}
 type EventSenderMock struct {
 	// SendFunc mocks the Send method.
-	SendFunc func(ctx context.Context, m InternalMessage) error
+	SendFunc func(ctx context.Context, m iotcore.MessageReceived) error
 
 	// StartFunc mocks the Start method.
 	StartFunc func() error
@@ -50,7 +51,7 @@ type EventSenderMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// M is the m argument value.
-			M InternalMessage
+			M iotcore.MessageReceived
 		}
 		// Start holds details about calls to the Start method.
 		Start []struct {
@@ -65,13 +66,13 @@ type EventSenderMock struct {
 }
 
 // Send calls SendFunc.
-func (mock *EventSenderMock) Send(ctx context.Context, m InternalMessage) error {
+func (mock *EventSenderMock) Send(ctx context.Context, m iotcore.MessageReceived) error {
 	if mock.SendFunc == nil {
 		panic("EventSenderMock.SendFunc: method is nil but EventSender.Send was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
-		M   InternalMessage
+		M   iotcore.MessageReceived
 	}{
 		Ctx: ctx,
 		M:   m,
@@ -87,11 +88,11 @@ func (mock *EventSenderMock) Send(ctx context.Context, m InternalMessage) error 
 //     len(mockedEventSender.SendCalls())
 func (mock *EventSenderMock) SendCalls() []struct {
 	Ctx context.Context
-	M   InternalMessage
+	M   iotcore.MessageReceived
 } {
 	var calls []struct {
 		Ctx context.Context
-		M   InternalMessage
+		M   iotcore.MessageReceived
 	}
 	mock.lockSend.RLock()
 	calls = mock.calls.Send

@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
-	"github.com/farshidtz/senml/v2"
 	"github.com/rs/zerolog"
 
+	iotcore "github.com/diwise/iot-core/pkg/messaging/events"
 	"github.com/diwise/messaging-golang/pkg/messaging"
 )
 
@@ -15,7 +15,7 @@ import (
 
 type EventSender interface {
 	Start() error
-	Send(ctx context.Context, m InternalMessage) error
+	Send(ctx context.Context, m iotcore.MessageReceived) error
 	Stop() error
 }
 
@@ -33,17 +33,8 @@ func NewEventSender(serviceName string, logger zerolog.Logger) EventSender {
 	return sender
 }
 
-type InternalMessage struct {
-	Device    string
-	Timestamp string
-	Pack      senml.Pack
-}
 
-func (m *InternalMessage) ContentType() string {
-	return "application/json"
-}
-
-func (e *eventSender) Send(ctx context.Context, m InternalMessage) error {
+func (e *eventSender) Send(ctx context.Context, m iotcore.MessageReceived) error {
 	log := logging.GetFromContext(ctx)
 
 	if !e.started {
