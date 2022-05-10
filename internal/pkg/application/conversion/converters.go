@@ -7,12 +7,11 @@ import (
 	"time"
 
 	"github.com/farshidtz/senml/v2"
-	"github.com/farshidtz/senml/v2/codec"
 )
 
-type MessageConverterFunc func(ctx context.Context, internalID string, msg []byte) ([]byte, error)
+type MessageConverterFunc func(ctx context.Context, internalID string, msg []byte) (senml.Pack, error)
 
-func Temperature(ctx context.Context, deviceID string, msg []byte) ([]byte, error) {
+func Temperature(ctx context.Context, deviceID string, msg []byte) (senml.Pack, error) {
 	dm := struct {
 		Timestamp    string `json:"timestamp"`
 		Measurements []struct {
@@ -49,15 +48,10 @@ func Temperature(ctx context.Context, deviceID string, msg []byte) ([]byte, erro
 		}
 	}
 
-	data, err := codec.EncodeJSON(pack)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal measurements: %s", err.Error())
-	}
-
-	return data, nil
+	return pack, nil
 }
 
-func AirQuality(ctx context.Context, deviceID string, msg []byte) ([]byte, error) {
+func AirQuality(ctx context.Context, deviceID string, msg []byte) (senml.Pack, error) {
 	dm := struct {
 		Timestamp    string `json:"timestamp"`
 		Measurements []struct {
@@ -95,12 +89,7 @@ func AirQuality(ctx context.Context, deviceID string, msg []byte) ([]byte, error
 		}
 	}
 
-	data, err := codec.EncodeJSON(pack)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal measurements: %s", err.Error())
-	}
-
-	return data, nil
+	return pack, nil
 }
 
 func parseTime(t string) (float64, error) {

@@ -64,11 +64,11 @@ func TestSenlabTBasicDecoderSensorReadingError(t *testing.T) {
 
 func TestTimeStringConvert(t *testing.T) {
 	is, _ := testSetup(t)
-	
+
 	tm, err := time.Parse(time.RFC3339, "1978-07-04T21:24:16.000000Z")
-	
+
 	min := tm.Unix()
-	
+
 	is.True(min == 268435456)
 	is.NoErr(err)
 }
@@ -159,3 +159,5 @@ const elsysCO2 string = `{
 		"vdd":3636
 	}
 }`
+
+const anotherCO2 string = `{"deviceName":"mcg-ers-co2-01","deviceProfileName":"ELSYS","deviceProfileID":"0b765672-274a-41eb-b1c5-bb2bec9d14e8","devEUI":"a81758fffe05e6fb","data":"AQD5AhMEAa8FCgYCcQcONA==","object":{"co2":625,"humidity":19,"light":431,"motion":10,"temperature":24.9,"vdd":3636}}`

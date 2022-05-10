@@ -5,6 +5,7 @@ package events
 
 import (
 	"context"
+	iotcore "github.com/diwise/iot-core/pkg/messaging/events"
 	"sync"
 )
 
@@ -18,7 +19,7 @@ var _ EventSender = &EventSenderMock{}
 //
 // 		// make and configure a mocked EventSender
 // 		mockedEventSender := &EventSenderMock{
-// 			SendFunc: func(ctx context.Context, msg []byte) error {
+// 			SendFunc: func(ctx context.Context, m iotcore.MessageReceived) error {
 // 				panic("mock out the Send method")
 // 			},
 // 			StartFunc: func() error {
@@ -35,7 +36,7 @@ var _ EventSender = &EventSenderMock{}
 // 	}
 type EventSenderMock struct {
 	// SendFunc mocks the Send method.
-	SendFunc func(ctx context.Context, msg []byte) error
+	SendFunc func(ctx context.Context, m iotcore.MessageReceived) error
 
 	// StartFunc mocks the Start method.
 	StartFunc func() error
@@ -49,8 +50,8 @@ type EventSenderMock struct {
 		Send []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// Msg is the msg argument value.
-			Msg []byte
+			// M is the m argument value.
+			M iotcore.MessageReceived
 		}
 		// Start holds details about calls to the Start method.
 		Start []struct {
@@ -65,21 +66,21 @@ type EventSenderMock struct {
 }
 
 // Send calls SendFunc.
-func (mock *EventSenderMock) Send(ctx context.Context, msg []byte) error {
+func (mock *EventSenderMock) Send(ctx context.Context, m iotcore.MessageReceived) error {
 	if mock.SendFunc == nil {
 		panic("EventSenderMock.SendFunc: method is nil but EventSender.Send was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
-		Msg []byte
+		M   iotcore.MessageReceived
 	}{
 		Ctx: ctx,
-		Msg: msg,
+		M:   m,
 	}
 	mock.lockSend.Lock()
 	mock.calls.Send = append(mock.calls.Send, callInfo)
 	mock.lockSend.Unlock()
-	return mock.SendFunc(ctx, msg)
+	return mock.SendFunc(ctx, m)
 }
 
 // SendCalls gets all the calls that were made to Send.
@@ -87,11 +88,11 @@ func (mock *EventSenderMock) Send(ctx context.Context, msg []byte) error {
 //     len(mockedEventSender.SendCalls())
 func (mock *EventSenderMock) SendCalls() []struct {
 	Ctx context.Context
-	Msg []byte
+	M   iotcore.MessageReceived
 } {
 	var calls []struct {
 		Ctx context.Context
-		Msg []byte
+		M   iotcore.MessageReceived
 	}
 	mock.lockSend.RLock()
 	calls = mock.calls.Send

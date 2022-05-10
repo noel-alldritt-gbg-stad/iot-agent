@@ -3,11 +3,13 @@ package messageprocessor
 import (
 	"context"
 	"errors"
-	"testing"
+	"testing"	
 
 	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
+	iotcore "github.com/diwise/iot-core/pkg/messaging/events"
+	"github.com/farshidtz/senml/v2"
 	"github.com/matryer/is"
 	"github.com/rs/zerolog"
 )
@@ -57,14 +59,14 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, convers
 	cr := &conversion.ConverterRegistryMock{
 		DesignateConvertersFunc: func(ctx context.Context, types []string) []conversion.MessageConverterFunc {
 			return []conversion.MessageConverterFunc{
-				func(ctx context.Context, internalID string, msg []byte) ([]byte, error) {
-					return []byte{}, nil
+				func(ctx context.Context, internalID string, msg []byte) (senml.Pack, error) {
+					return senml.Pack{}, nil
 				},
 			}
 		},
 	}
 	ep := &events.EventSenderMock{
-		SendFunc: func(ctx context.Context, msg []byte) error {
+		SendFunc: func(ctx context.Context, m iotcore.MessageReceived) error {
 			return nil
 		},
 	}

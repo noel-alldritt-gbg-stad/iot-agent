@@ -7,6 +7,7 @@ import (
 	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
 	"github.com/rs/zerolog"
 
+	iotcore "github.com/diwise/iot-core/pkg/messaging/events"
 	"github.com/diwise/messaging-golang/pkg/messaging"
 )
 
@@ -14,7 +15,7 @@ import (
 
 type EventSender interface {
 	Start() error
-	Send(ctx context.Context, msg []byte) error
+	Send(ctx context.Context, m iotcore.MessageReceived) error
 	Stop() error
 }
 
@@ -32,20 +33,9 @@ func NewEventSender(serviceName string, logger zerolog.Logger) EventSender {
 	return sender
 }
 
-type msgStruct struct {
-	Msg []byte
-}
 
-func (m *msgStruct) ContentType() string {
-	return "application/json"
-}
-
-func (e *eventSender) Send(ctx context.Context, msg []byte) error {
+func (e *eventSender) Send(ctx context.Context, m iotcore.MessageReceived) error {
 	log := logging.GetFromContext(ctx)
-
-	ms := &msgStruct{
-		Msg: msg,
-	}
 
 	if !e.started {
 		err := fmt.Errorf("attempt to send before start")
@@ -54,7 +44,7 @@ func (e *eventSender) Send(ctx context.Context, msg []byte) error {
 	}
 
 	log.Info().Msg("sending command to iot-core queue")
-	return e.rmqMessenger.SendCommandTo(ctx, ms, "iot-core")
+	return e.rmqMessenger.SendCommandTo(ctx, &m, "iot-core")
 }
 
 func (e *eventSender) Start() error {

@@ -4,19 +4,19 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
 	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
+	iotcore "github.com/diwise/iot-core/pkg/messaging/events"
 	"github.com/rs/zerolog"
 )
 
 type MessageProcessor interface {
 	ProcessMessage(ctx context.Context, msg []byte) error
 }
-
-// hantera kö av msgs, skicka till converter registry
 
 type msgProcessor struct {
 	dmc    domain.DeviceManagementClient
@@ -70,7 +70,13 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 			continue
 		}
 
-		err = mp.event.Send(ctx, payload)
+		m := iotcore.MessageReceived {
+			Device:    result.InternalID,
+			Timestamp: time.Now().UTC().Format(time.RFC3339),
+			Pack:      payload,
+		}
+
+		err = mp.event.Send(ctx, m)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to send event")
 		}
