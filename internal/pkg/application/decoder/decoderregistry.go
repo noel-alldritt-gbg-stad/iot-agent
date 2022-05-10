@@ -19,6 +19,7 @@ func NewDecoderRegistry() DecoderRegistry {
 		"tem_lab_14ns":     SenlabTBasicDecoder,
 		"elsys_codec":      ElsysDecoder,
 		"strips_lora_ms_h": SensativeDecoder,
+		"enviot":           EnviotDecoder,
 	}
 
 	return &decoderRegistry{

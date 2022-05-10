@@ -52,6 +52,21 @@ func TestElsysCO2Decoder(t *testing.T) {
 	is.Equal(r.SensorType, "ELSYS")
 }
 
+func TestEnviotDecoder(t *testing.T) {
+	is, _ := testSetup(t)
+
+	r := &Payload{}
+
+	err := EnviotDecoder(context.Background(), []byte(enviot), func(c context.Context, m []byte) error {
+		json.Unmarshal(m, &r)
+		return nil
+	})
+
+	is.NoErr(err)
+	is.Equal(r.SensorType, "Enviot")
+	is.Equal(len(r.Measurements), 4) // expected four measurements
+}
+
 func TestSenlabTBasicDecoderSensorReadingError(t *testing.T) {
 	is, _ := testSetup(t)
 
@@ -160,4 +175,27 @@ const elsysCO2 string = `{
 	}
 }`
 
-const anotherCO2 string = `{"deviceName":"mcg-ers-co2-01","deviceProfileName":"ELSYS","deviceProfileID":"0b765672-274a-41eb-b1c5-bb2bec9d14e8","devEUI":"a81758fffe05e6fb","data":"AQD5AhMEAa8FCgYCcQcONA==","object":{"co2":625,"humidity":19,"light":431,"motion":10,"temperature":24.9,"vdd":3636}}`
+//const anotherCO2 string = `{"deviceName":"mcg-ers-co2-01","deviceProfileName":"ELSYS","deviceProfileID":"0b765672-274a-41eb-b1c5-bb2bec9d14e8","devEUI":"a81758fffe05e6fb","data":"AQD5AhMEAa8FCgYCcQcONA==","object":{"co2":625,"humidity":19,"light":431,"motion":10,"temperature":24.9,"vdd":3636}}`
+
+const enviot string = `{
+	"deviceProfileName":"Enviot",
+	"devEUI":"10a52aaa84ffffff",
+	"adr":false,
+	"fCnt":56068,
+	"fPort":1,
+	"data":"VgAALuAAAAAAAAAABFtVAAGEtw==",
+	"object":{
+		"payload":{
+			"battery":86,
+			"distance":0,
+			"fixangle":-60,
+			"humidity":85,
+			"pressure":995,
+			"sensorStatus":0,
+			"signalStrength":0,
+			"snowHeight":0,
+			"temperature":11.5,
+			"vDistance":0
+		}
+	}
+}`
