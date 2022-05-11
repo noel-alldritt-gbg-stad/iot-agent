@@ -12,7 +12,7 @@ import (
 func TestThatTemperatureDecodesValueCorrectly(t *testing.T) {
 	is, ctx := mcmTestSetup(t)
 	payload := decoder.Payload{
-		DevEUI: "ncaknlclkdanklcd",
+		DevEUI:    "ncaknlclkdanklcd",
 		Timestamp: "2006-01-02T15:04:05Z",
 	}
 	temp := struct {
@@ -21,7 +21,7 @@ func TestThatTemperatureDecodesValueCorrectly(t *testing.T) {
 		22.2,
 	}
 	payload.Measurements = append(payload.Measurements, temp)
-	
+
 	msg, err := Temperature(ctx, "internalID", payload)
 
 	is.NoErr(err)
@@ -31,7 +31,7 @@ func TestThatTemperatureDecodesValueCorrectly(t *testing.T) {
 func TestThatCO2DecodesValueCorrectly(t *testing.T) {
 	is, ctx := mcmTestSetup(t)
 	payload := decoder.Payload{
-		DevEUI: "ncaknlclkdanklcd",
+		DevEUI:    "ncaknlclkdanklcd",
 		Timestamp: "2006-01-02T15:04:05Z",
 	}
 	co2 := struct {

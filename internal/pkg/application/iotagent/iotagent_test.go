@@ -19,7 +19,7 @@ func TestSenlabTPayload(t *testing.T) {
 	is.NoErr(err)
 	is.True(len(e.SendCalls()) > 0)
 
-	pack := e.SendCalls()[0].M.Pack	
+	pack := e.SendCalls()[0].M.Pack
 	is.True(*pack[1].Value == 6.625)
 }
 
@@ -32,7 +32,7 @@ func TestStripsPayload(t *testing.T) {
 	is.NoErr(err)
 	is.True(len(e.SendCalls()) > 0)
 
-	pack := e.SendCalls()[0].M.Pack	
+	pack := e.SendCalls()[0].M.Pack
 	is.True(pack[0].BaseName == "urn:oma:lwm2m:ext:3303")
 }
 
@@ -45,7 +45,7 @@ func TestElsysPayload(t *testing.T) {
 	is.NoErr(err)
 	is.True(len(e.SendCalls()) > 0)
 
-	pack := e.SendCalls()[0].M.Pack	
+	pack := e.SendCalls()[0].M.Pack
 	is.True(*pack[1].Value == 19.3)
 }
 
@@ -58,7 +58,7 @@ func TestErsPayload(t *testing.T) {
 	is.NoErr(err)
 	is.True(len(e.SendCalls()) == 2) // expecting two calls since payload should produce measurement for both temperature and co2.
 
-	tempPack := e.SendCalls()[0].M.Pack // the first call to send is for the temperature pack.	
+	tempPack := e.SendCalls()[0].M.Pack // the first call to send is for the temperature pack.
 	is.True(tempPack[0].BaseName == "urn:oma:lwm2m:ext:3303")
 	is.True(tempPack[1].Name == "Temperature")
 

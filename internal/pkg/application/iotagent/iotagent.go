@@ -9,7 +9,7 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/application/messageprocessor"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
-	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"	
+	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
 )
 
 //go:generate moq -rm -out iotagent_mock.go . IoTAgent
@@ -21,7 +21,7 @@ type IoTAgent interface {
 type iotAgent struct {
 	mp  messageprocessor.MessageProcessor
 	dr  decoder.DecoderRegistry
-	dmc domain.DeviceManagementClient	
+	dmc domain.DeviceManagementClient
 }
 
 func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventSender) IoTAgent {
@@ -32,13 +32,13 @@ func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventSender)
 	return &iotAgent{
 		mp:  msgprcs,
 		dr:  decreg,
-		dmc: dmc,		
+		dmc: dmc,
 	}
 }
 
 func (a *iotAgent) MessageReceived(ctx context.Context, msg []byte) error {
 	log := logging.GetFromContext(ctx)
-	
+
 	devEUI, err := getDevEUIFromMessage(msg)
 	if err != nil {
 		log.Error().Err(err).Msg("unable to get DevEUI from payload")

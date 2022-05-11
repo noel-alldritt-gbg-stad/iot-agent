@@ -1,7 +1,7 @@
 package messageprocessor
 
 import (
-	"context"	
+	"context"
 	"fmt"
 	"time"
 
@@ -10,7 +10,7 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
 	iotcore "github.com/diwise/iot-core/pkg/messaging/events"
-	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"	
+	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
 )
 
 type MessageProcessor interface {
@@ -58,7 +58,7 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg decoder.Payload)
 			continue
 		}
 
-		m := iotcore.MessageReceived {
+		m := iotcore.MessageReceived{
 			Device:    result.InternalID,
 			Timestamp: time.Now().UTC().Format(time.RFC3339),
 			Pack:      payload,

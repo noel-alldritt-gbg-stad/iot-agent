@@ -25,7 +25,7 @@ type MessageDecoderFunc func(context.Context, []byte, func(context.Context, Payl
 
 func DefaultDecoder(ctx context.Context, msg []byte, fn func(context.Context, Payload) error) error {
 	log := logging.GetFromContext(ctx)
-		
+
 	d := struct {
 		DevEUI string `json:"devEUI"`
 	}{}

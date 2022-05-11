@@ -11,7 +11,7 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/domain"
 	iotcore "github.com/diwise/iot-core/pkg/messaging/events"
 	"github.com/farshidtz/senml/v2"
-	"github.com/matryer/is"	
+	"github.com/matryer/is"
 )
 
 func TestFailsOnInvalidType(t *testing.T) {
@@ -68,7 +68,7 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, convers
 
 func newPayload() decoder.Payload {
 	payload := decoder.Payload{
-		DevEUI: "ncaknlclkdanklcd",
+		DevEUI:    "ncaknlclkdanklcd",
 		Timestamp: "2006-01-02T15:04:05Z",
 	}
 	temp := struct {
@@ -77,6 +77,6 @@ func newPayload() decoder.Payload {
 		23.5,
 	}
 	payload.Measurements = append(payload.Measurements, temp)
-	
+
 	return payload
 }

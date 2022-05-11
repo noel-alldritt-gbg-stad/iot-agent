@@ -67,7 +67,7 @@ func AirQuality(ctx context.Context, deviceID string, payload decoder.Payload) (
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var pack senml.Pack
 	pack = append(pack, senml.Record{
 		BaseName:    "urn:oma:lwm2m:ext:3428",

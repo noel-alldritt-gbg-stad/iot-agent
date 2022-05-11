@@ -35,7 +35,7 @@ func ElsysDecoder(ctx context.Context, msg []byte, fn func(context.Context, Payl
 		DevEUI:     d.DevEUI,
 		FPort:      strconv.Itoa(d.FPort),
 		SensorType: d.SensorType,
-		Timestamp: time.Now().Format(time.RFC3339),
+		Timestamp:  time.Now().Format(time.RFC3339),
 	}
 
 	if d.Object.Temperature != nil {
@@ -100,7 +100,7 @@ func ElsysDecoder(ctx context.Context, msg []byte, fn func(context.Context, Payl
 		}
 		pp.Measurements = append(pp.Measurements, bat)
 	}
-	
+
 	err = fn(ctx, *pp)
 	if err != nil {
 		return err

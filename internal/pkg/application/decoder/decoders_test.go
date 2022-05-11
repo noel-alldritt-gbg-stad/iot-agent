@@ -1,7 +1,7 @@
 package decoder
 
 import (
-	"context"	
+	"context"
 	"testing"
 	"time"
 
