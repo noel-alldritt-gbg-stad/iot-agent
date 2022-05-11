@@ -2,7 +2,6 @@ package conversion
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -20,7 +19,7 @@ func Temperature(ctx context.Context, deviceID string, payload decoder.Payload) 
 		} `json:"measurements"`
 	}{}
 
-	if err := convertPayloadToStruct(payload, &dm); err != nil {
+	if err := payload.ConvertToStruct(&dm); err != nil {
 		return nil, fmt.Errorf("failed to convert payload: %s", err.Error())
 	}
 
@@ -59,7 +58,7 @@ func AirQuality(ctx context.Context, deviceID string, payload decoder.Payload) (
 		} `json:"measurements"`
 	}{}
 
-	if err := convertPayloadToStruct(payload, &dm); err != nil {
+	if err := payload.ConvertToStruct(&dm); err != nil {
 		return nil, fmt.Errorf("failed to convert payload: %s", err.Error())
 	}
 
@@ -98,16 +97,4 @@ func parseTime(t string) (float64, error) {
 	}
 
 	return float64(baseTime.Unix()), nil
-}
-
-func convertPayloadToStruct(p decoder.Payload, v any) error {
-	b, err := json.Marshal(p)
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(b, &v)
-	if err != nil {
-		return err
-	}
-	return nil
 }

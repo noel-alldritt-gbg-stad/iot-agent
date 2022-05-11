@@ -21,6 +21,18 @@ type Payload struct {
 	Measurements []interface{} `json:"measurements"`
 }
 
+func (p Payload) ConvertToStruct(v any) error {
+	b, err := json.Marshal(p)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(b, &v)
+	if err != nil {
+		return err
+	}
+	return nil	
+}
+
 type MessageDecoderFunc func(context.Context, []byte, func(context.Context, Payload) error) error
 
 func DefaultDecoder(ctx context.Context, msg []byte, fn func(context.Context, Payload) error) error {
