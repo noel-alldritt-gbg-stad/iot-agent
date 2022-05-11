@@ -1,6 +1,11 @@
 package decoder
 
-import "context"
+import (
+	"context"
+	"encoding/json"
+
+	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
+)
 
 type Payload struct {
 	DevEUI       string        `json:"devEUI"`
@@ -16,8 +21,25 @@ type Payload struct {
 	Measurements []interface{} `json:"measurements"`
 }
 
-type MessageDecoderFunc func(context.Context, []byte, func(context.Context, []byte) error) error
+type MessageDecoderFunc func(context.Context, []byte, func(context.Context, Payload) error) error
 
-func DefaultDecoder(ctx context.Context, msg []byte, fn func(context.Context, []byte) error) error {
-	return fn(ctx, msg)
+func DefaultDecoder(ctx context.Context, msg []byte, fn func(context.Context, Payload) error) error {
+	log := logging.GetFromContext(ctx)
+		
+	d := struct {
+		DevEUI string `json:"devEUI"`
+	}{}
+
+	err := json.Unmarshal(msg, &d)
+	if err != nil {
+		return err
+	}
+
+	p := Payload{
+		DevEUI: d.DevEUI,
+	}
+
+	log.Info().Msgf("default decoder used for devEUI %s", p.DevEUI)
+
+	return fn(ctx, p)
 }

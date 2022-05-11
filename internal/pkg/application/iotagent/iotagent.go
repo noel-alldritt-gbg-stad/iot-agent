@@ -9,8 +9,7 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/application/messageprocessor"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
-	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
-	"github.com/rs/zerolog"
+	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"	
 )
 
 //go:generate moq -rm -out iotagent_mock.go . IoTAgent
@@ -22,24 +21,24 @@ type IoTAgent interface {
 type iotAgent struct {
 	mp  messageprocessor.MessageProcessor
 	dr  decoder.DecoderRegistry
-	dmc domain.DeviceManagementClient
+	dmc domain.DeviceManagementClient	
 }
 
-func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventSender, log zerolog.Logger) IoTAgent {
+func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventSender) IoTAgent {
 	conreg := conversion.NewConverterRegistry()
 	decreg := decoder.NewDecoderRegistry()
-	msgprcs := messageprocessor.NewMessageReceivedProcessor(dmc, conreg, eventPub, log)
+	msgprcs := messageprocessor.NewMessageReceivedProcessor(dmc, conreg, eventPub)
 
 	return &iotAgent{
 		mp:  msgprcs,
 		dr:  decreg,
-		dmc: dmc,
+		dmc: dmc,		
 	}
 }
 
 func (a *iotAgent) MessageReceived(ctx context.Context, msg []byte) error {
 	log := logging.GetFromContext(ctx)
-
+	
 	devEUI, err := getDevEUIFromMessage(msg)
 	if err != nil {
 		log.Error().Err(err).Msg("unable to get DevEUI from payload")
@@ -52,9 +51,9 @@ func (a *iotAgent) MessageReceived(ctx context.Context, msg []byte) error {
 		return err
 	}
 
-	decoder := a.dr.GetDecoderForSensorType(ctx, device.SensorType)
+	d := a.dr.GetDecoderForSensorType(ctx, device.SensorType)
 
-	err = decoder(ctx, msg, func(c context.Context, m []byte) error {
+	err = d(ctx, msg, func(c context.Context, m decoder.Payload) error {
 		err = a.mp.ProcessMessage(c, m)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to process message")

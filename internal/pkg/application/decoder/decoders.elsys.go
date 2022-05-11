@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func ElsysDecoder(ctx context.Context, msg []byte, fn func(context.Context, []byte) error) error {
+func ElsysDecoder(ctx context.Context, msg []byte, fn func(context.Context, Payload) error) error {
 
 	d := struct {
 		DevEUI     string `json:"devEUI"`
@@ -100,13 +100,8 @@ func ElsysDecoder(ctx context.Context, msg []byte, fn func(context.Context, []by
 		}
 		pp.Measurements = append(pp.Measurements, bat)
 	}
-
-	r, err := json.Marshal(&pp)
-	if err != nil {
-		return err
-	}
-
-	err = fn(ctx, r)
+	
+	err = fn(ctx, *pp)
 	if err != nil {
 		return err
 	}

@@ -8,13 +8,12 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/domain"
 	iotcore "github.com/diwise/iot-core/pkg/messaging/events"
 	"github.com/matryer/is"
-	"github.com/rs/zerolog"
 )
 
 func TestSenlabTPayload(t *testing.T) {
-	is, dmc, e, log := testSetup(t)
+	is, dmc, e := testSetup(t)
 
-	app := NewIoTAgent(dmc, e, log)
+	app := NewIoTAgent(dmc, e)
 	err := app.MessageReceived(context.Background(), []byte(senlabT))
 
 	is.NoErr(err)
@@ -25,9 +24,9 @@ func TestSenlabTPayload(t *testing.T) {
 }
 
 func TestStripsPayload(t *testing.T) {
-	is, dmc, e, log := testSetup(t)
+	is, dmc, e := testSetup(t)
 
-	app := NewIoTAgent(dmc, e, log)
+	app := NewIoTAgent(dmc, e)
 	err := app.MessageReceived(context.Background(), []byte(stripsPayload))
 
 	is.NoErr(err)
@@ -38,9 +37,9 @@ func TestStripsPayload(t *testing.T) {
 }
 
 func TestElsysPayload(t *testing.T) {
-	is, dmc, e, log := testSetup(t)
+	is, dmc, e := testSetup(t)
 
-	app := NewIoTAgent(dmc, e, log)
+	app := NewIoTAgent(dmc, e)
 	err := app.MessageReceived(context.Background(), []byte(elsys))
 
 	is.NoErr(err)
@@ -51,9 +50,9 @@ func TestElsysPayload(t *testing.T) {
 }
 
 func TestErsPayload(t *testing.T) {
-	is, dmc, e, log := testSetup(t)
+	is, dmc, e := testSetup(t)
 
-	app := NewIoTAgent(dmc, e, log)
+	app := NewIoTAgent(dmc, e)
 	err := app.MessageReceived(context.Background(), []byte(ers))
 
 	is.NoErr(err)
@@ -69,7 +68,7 @@ func TestErsPayload(t *testing.T) {
 	is.True(co2Pack[1].Name == "CO2")
 }
 
-func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *events.EventSenderMock, zerolog.Logger) {
+func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *events.EventSenderMock) {
 	is := is.New(t)
 	dmc := &domain.DeviceManagementClientMock{
 		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (*domain.Result, error) {
@@ -100,7 +99,7 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *events
 		},
 	}
 
-	return is, dmc, e, zerolog.Logger{}
+	return is, dmc, e
 }
 
 const senlabT string = `[{

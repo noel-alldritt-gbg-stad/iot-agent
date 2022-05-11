@@ -9,7 +9,7 @@ import (
 	"fmt"
 )
 
-func SensativeDecoder(ctx context.Context, msg []byte, fn func(context.Context, []byte) error) error {
+func SensativeDecoder(ctx context.Context, msg []byte, fn func(context.Context, Payload) error) error {
 
 	dm := []struct {
 		DevEUI     string  `json:"devEUI"`
@@ -56,12 +56,7 @@ func SensativeDecoder(ctx context.Context, msg []byte, fn func(context.Context, 
 			return err
 		}
 
-		r, err := json.Marshal(&pp)
-		if err != nil {
-			return nil
-		}
-
-		err = fn(ctx, r)
+		err = fn(ctx, *pp)
 		if err != nil {
 			return err
 		}

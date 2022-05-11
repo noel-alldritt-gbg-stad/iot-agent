@@ -20,7 +20,7 @@ services:
     image: 'otel/opentelemetry-collector:0.48.0'
     command: '--config /etc/otel-config.yaml'
     expose:
-      - "4318"    
+      - 4318
     volumes:
      - ./configs/otel-config.yaml:/etc/otel-config.yaml
     restart: always
@@ -28,15 +28,17 @@ services:
       - '4318:4318' 
 
   iot-device-mgmt:
-    image: 'ghcr.io/diwise/iot-device-mgmt@sha256:00302e43e60323692e1c94d1979cacd2b4f38d44f920e8a232040e7b8d5e002c'
+    image: 'ghcr.io/diwise/iot-device-mgmt@sha256:10cf0fb65c753d5b4a0699d4a2f58f34316c2e19d523f69dcaaeabd692cfdb33'
     restart: always
-    expose:
-      - 8080
     environment:
       RABBITMQ_HOST: 'rabbitmq'
       OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4318'
+    volumes:
+      - ./configs/diwise/devices.csv:/opt/diwise/config/devices.csv
     ports:
-      - '8080:8080'      
+      - '8080:8080'     
+    expose:
+      - 8080
     
 volumes:
   rabbitmq_data:
