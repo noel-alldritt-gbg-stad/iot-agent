@@ -2,20 +2,19 @@ package messageprocessor
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
+	"github.com/diwise/iot-agent/internal/pkg/application/decoder"
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
-	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
 	iotcore "github.com/diwise/iot-core/pkg/messaging/events"
-	"github.com/rs/zerolog"
+	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
 )
 
 type MessageProcessor interface {
-	ProcessMessage(ctx context.Context, msg []byte) error
+	ProcessMessage(ctx context.Context, msg decoder.Payload) error
 }
 
 type msgProcessor struct {
@@ -24,7 +23,7 @@ type msgProcessor struct {
 	event  events.EventSender
 }
 
-func NewMessageReceivedProcessor(dmc domain.DeviceManagementClient, conReg conversion.ConverterRegistry, event events.EventSender, log zerolog.Logger) MessageProcessor {
+func NewMessageReceivedProcessor(dmc domain.DeviceManagementClient, conReg conversion.ConverterRegistry, event events.EventSender) MessageProcessor {
 	return &msgProcessor{
 		dmc:    dmc,
 		conReg: conReg,
@@ -32,28 +31,17 @@ func NewMessageReceivedProcessor(dmc domain.DeviceManagementClient, conReg conve
 	}
 }
 
-func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
-	dm := struct {
-		DevEUI string `json:"devEUI"`
-		Error  string `json:"error"`
-		Type   string `json:"type"`
-	}{}
-
-	err := json.Unmarshal(msg, &dm)
-	if err != nil {
-		return err
-	}
+func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg decoder.Payload) error {
 
 	log := logging.GetFromContext(ctx)
-	log.Info().Msgf("received payload from %s: %s", dm.DevEUI, string(msg))
 
-	result, err := mp.dmc.FindDeviceFromDevEUI(ctx, dm.DevEUI)
+	result, err := mp.dmc.FindDeviceFromDevEUI(ctx, msg.DevEUI)
 	if err != nil {
 		log.Error().Err(err).Msg("device lookup failure")
 		return err
 	}
 
-	if dm.Error != "" {
+	if msg.Error != "" {
 		log.Info().Msg("ignoring payload due to device error")
 		return nil
 	}
@@ -70,7 +58,7 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg []byte) error {
 			continue
 		}
 
-		m := iotcore.MessageReceived {
+		m := iotcore.MessageReceived{
 			Device:    result.InternalID,
 			Timestamp: time.Now().UTC().Format(time.RFC3339),
 			Pack:      payload,

@@ -8,58 +8,57 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/domain"
 	iotcore "github.com/diwise/iot-core/pkg/messaging/events"
 	"github.com/matryer/is"
-	"github.com/rs/zerolog"
 )
 
 func TestSenlabTPayload(t *testing.T) {
-	is, dmc, e, log := testSetup(t)
+	is, dmc, e := testSetup(t)
 
-	app := NewIoTAgent(dmc, e, log)
+	app := NewIoTAgent(dmc, e)
 	err := app.MessageReceived(context.Background(), []byte(senlabT))
 
 	is.NoErr(err)
 	is.True(len(e.SendCalls()) > 0)
 
-	pack := e.SendCalls()[0].M.Pack	
+	pack := e.SendCalls()[0].M.Pack
 	is.True(*pack[1].Value == 6.625)
 }
 
 func TestStripsPayload(t *testing.T) {
-	is, dmc, e, log := testSetup(t)
+	is, dmc, e := testSetup(t)
 
-	app := NewIoTAgent(dmc, e, log)
+	app := NewIoTAgent(dmc, e)
 	err := app.MessageReceived(context.Background(), []byte(stripsPayload))
 
 	is.NoErr(err)
 	is.True(len(e.SendCalls()) > 0)
 
-	pack := e.SendCalls()[0].M.Pack	
+	pack := e.SendCalls()[0].M.Pack
 	is.True(pack[0].BaseName == "urn:oma:lwm2m:ext:3303")
 }
 
 func TestElsysPayload(t *testing.T) {
-	is, dmc, e, log := testSetup(t)
+	is, dmc, e := testSetup(t)
 
-	app := NewIoTAgent(dmc, e, log)
+	app := NewIoTAgent(dmc, e)
 	err := app.MessageReceived(context.Background(), []byte(elsys))
 
 	is.NoErr(err)
 	is.True(len(e.SendCalls()) > 0)
 
-	pack := e.SendCalls()[0].M.Pack	
+	pack := e.SendCalls()[0].M.Pack
 	is.True(*pack[1].Value == 19.3)
 }
 
 func TestErsPayload(t *testing.T) {
-	is, dmc, e, log := testSetup(t)
+	is, dmc, e := testSetup(t)
 
-	app := NewIoTAgent(dmc, e, log)
+	app := NewIoTAgent(dmc, e)
 	err := app.MessageReceived(context.Background(), []byte(ers))
 
 	is.NoErr(err)
 	is.True(len(e.SendCalls()) == 2) // expecting two calls since payload should produce measurement for both temperature and co2.
 
-	tempPack := e.SendCalls()[0].M.Pack // the first call to send is for the temperature pack.	
+	tempPack := e.SendCalls()[0].M.Pack // the first call to send is for the temperature pack.
 	is.True(tempPack[0].BaseName == "urn:oma:lwm2m:ext:3303")
 	is.True(tempPack[1].Name == "Temperature")
 
@@ -69,7 +68,7 @@ func TestErsPayload(t *testing.T) {
 	is.True(co2Pack[1].Name == "CO2")
 }
 
-func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *events.EventSenderMock, zerolog.Logger) {
+func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *events.EventSenderMock) {
 	is := is.New(t)
 	dmc := &domain.DeviceManagementClientMock{
 		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (*domain.Result, error) {
@@ -100,7 +99,7 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *events
 		},
 	}
 
-	return is, dmc, e, zerolog.Logger{}
+	return is, dmc, e
 }
 
 const senlabT string = `[{

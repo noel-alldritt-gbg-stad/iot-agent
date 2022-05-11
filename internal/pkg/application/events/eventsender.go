@@ -33,7 +33,6 @@ func NewEventSender(serviceName string, logger zerolog.Logger) EventSender {
 	return sender
 }
 
-
 func (e *eventSender) Send(ctx context.Context, m iotcore.MessageReceived) error {
 	log := logging.GetFromContext(ctx)
 

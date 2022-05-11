@@ -51,7 +51,7 @@ func SetupIoTAgent(logger zerolog.Logger, serviceName, deviceMgmtClientURL strin
 	event := events.NewEventSender(serviceName, logger)
 	event.Start()
 
-	return iotagent.NewIoTAgent(dmc, event, logger)
+	return iotagent.NewIoTAgent(dmc, event)
 }
 
 func SetupAndRunApi(logger zerolog.Logger, app iotagent.IoTAgent, port string) {

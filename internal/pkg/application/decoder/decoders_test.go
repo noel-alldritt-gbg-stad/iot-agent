@@ -2,7 +2,6 @@ package decoder
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 	"time"
 
@@ -15,8 +14,8 @@ func TestSenlabTBasicDecoder(t *testing.T) {
 
 	r := &Payload{}
 
-	err := SenlabTBasicDecoder(context.Background(), []byte(senlabT), func(c context.Context, m []byte) error {
-		json.Unmarshal(m, &r)
+	err := SenlabTBasicDecoder(context.Background(), []byte(senlabT), func(c context.Context, m Payload) error {
+		r = &m
 		return nil
 	})
 
@@ -29,8 +28,8 @@ func TestElsysTemperatureDecoder(t *testing.T) {
 
 	r := &Payload{}
 
-	err := ElsysDecoder(context.Background(), []byte(elsysTemp), func(c context.Context, m []byte) error {
-		json.Unmarshal(m, &r)
+	err := ElsysDecoder(context.Background(), []byte(elsysTemp), func(c context.Context, m Payload) error {
+		r = &m
 		return nil
 	})
 
@@ -43,8 +42,8 @@ func TestElsysCO2Decoder(t *testing.T) {
 
 	r := &Payload{}
 
-	err := ElsysDecoder(context.Background(), []byte(elsysCO2), func(c context.Context, m []byte) error {
-		json.Unmarshal(m, &r)
+	err := ElsysDecoder(context.Background(), []byte(elsysCO2), func(c context.Context, m Payload) error {
+		r = &m
 		return nil
 	})
 
@@ -70,7 +69,7 @@ func TestEnviotDecoder(t *testing.T) {
 func TestSenlabTBasicDecoderSensorReadingError(t *testing.T) {
 	is, _ := testSetup(t)
 
-	err := SenlabTBasicDecoder(context.Background(), []byte(senlabT_sensorReadingError), func(c context.Context, m []byte) error {
+	err := SenlabTBasicDecoder(context.Background(), []byte(senlabT_sensorReadingError), func(c context.Context, m Payload) error {
 		return nil
 	})
 
@@ -86,6 +85,17 @@ func TestTimeStringConvert(t *testing.T) {
 
 	is.True(min == 268435456)
 	is.NoErr(err)
+}
+
+func TestDefaultDecoder(t *testing.T) {
+	is, _ := testSetup(t)
+	r := &Payload{}
+	err := DefaultDecoder(context.Background(), []byte(elsysTemp), func(c context.Context, m Payload) error {
+		r = &m
+		return nil
+	})
+	is.NoErr(err)
+	is.True(r.DevEUI == "xxxxxxxxxxxxxx")
 }
 
 func testSetup(t *testing.T) (*is.I, zerolog.Logger) {

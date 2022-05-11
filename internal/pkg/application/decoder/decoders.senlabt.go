@@ -9,7 +9,7 @@ import (
 	"errors"
 )
 
-func SenlabTBasicDecoder(ctx context.Context, msg []byte, fn func(context.Context, []byte) error) error {
+func SenlabTBasicDecoder(ctx context.Context, msg []byte, fn func(context.Context, Payload) error) error {
 
 	dm := []struct {
 		DevEUI     string  `json:"devEUI"`
@@ -38,7 +38,7 @@ func SenlabTBasicDecoder(ctx context.Context, msg []byte, fn func(context.Contex
 		// | ID(1) | BatteryLevel(1) | Internal(n) | Temp(2)
 		// | ID(1) | BatteryLevel(1) | Internal(n) | Temp(2) | Temp(2)
 		if len(b) < 4 {
-			return errors.New("invalid payload")
+			return errors.New("payload too short")
 		}
 
 		err = decodePayload(b, &p)
@@ -70,12 +70,7 @@ func SenlabTBasicDecoder(ctx context.Context, msg []byte, fn func(context.Contex
 		pp.Measurements = append(pp.Measurements, temp)
 		pp.Measurements = append(pp.Measurements, bat)
 
-		r, err := json.Marshal(&pp)
-		if err != nil {
-			return nil
-		}
-
-		err = fn(ctx, r)
+		err = fn(ctx, *pp)
 		if err != nil {
 			return err
 		}
