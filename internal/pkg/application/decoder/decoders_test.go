@@ -56,8 +56,8 @@ func TestEnviotDecoder(t *testing.T) {
 
 	r := &Payload{}
 
-	err := EnviotDecoder(context.Background(), []byte(enviot), func(c context.Context, m []byte) error {
-		json.Unmarshal(m, &r)
+	err := EnviotDecoder(context.Background(), []byte(enviot), func(c context.Context, m Payload) error {
+		r = &m
 		return nil
 	})
 

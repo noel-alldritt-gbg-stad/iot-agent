@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func EnviotDecoder(ctx context.Context, msg []byte, fn func(context.Context, []byte) error) error {
+func EnviotDecoder(ctx context.Context, msg []byte, fn func(context.Context, Payload) error) error {
 
 	d := struct {
 		DevEUI     string `json:"devEUI"`
@@ -75,10 +75,5 @@ func EnviotDecoder(ctx context.Context, msg []byte, fn func(context.Context, []b
 		pp.Measurements = append(pp.Measurements, snow)
 	}
 
-	r, err := json.Marshal(&pp)
-	if err != nil {
-		return err
-	}
-
-	return fn(ctx, r)
+	return fn(ctx, *pp)
 }
