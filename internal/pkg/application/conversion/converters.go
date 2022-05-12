@@ -90,6 +90,45 @@ func AirQuality(ctx context.Context, deviceID string, payload decoder.Payload) (
 	return pack, nil
 }
 
+func Presence(ctx context.Context, deviceID string, payload decoder.Payload) (senml.Pack, error) {
+	dm := struct {
+		Timestamp    string `json:"timestamp"`
+		Measurements []struct {
+			Presence *bool `json:"present"`
+		} `json:"measurements"`
+	}{}
+
+	if err := payload.ConvertToStruct(&dm); err != nil {
+		return nil, fmt.Errorf("failed to convert payload: %s", err.Error())
+	}
+
+	baseTime, err := parseTime(dm.Timestamp)
+	if err != nil {
+		return nil, err
+	}
+
+	var pack senml.Pack
+	pack = append(pack, senml.Record{
+		BaseName:    "urn:oma:lwm2m:ext:3302",
+		BaseTime:    baseTime,
+		Name:        "0",
+		StringValue: deviceID,
+	})
+
+	for _, m := range dm.Measurements {
+		if m.Presence != nil {
+			rec := senml.Record{
+				Name:      "Presence",
+				BoolValue: m.Presence,
+			}
+
+			pack = append(pack, rec)
+		}
+	}
+
+	return pack, nil
+}
+
 func parseTime(t string) (float64, error) {
 	baseTime, err := time.Parse(time.RFC3339, t)
 	if err != nil {

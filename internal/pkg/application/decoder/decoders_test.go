@@ -76,6 +76,36 @@ func TestSenlabTBasicDecoderSensorReadingError(t *testing.T) {
 	is.True(err != nil)
 }
 
+func TestPrecenseSensorReading(t *testing.T) {
+	is, _ := testSetup(t)
+
+	err := PresenceDecoder(context.Background(), []byte(livboj1), func(ctx context.Context, p Payload) error {
+		return nil
+	})
+
+	is.NoErr(err)
+}
+
+func TestPrecenseCloseProximityAlarm(t *testing.T) {
+	is, _ := testSetup(t)
+
+	err := PresenceDecoder(context.Background(), []byte(livboj2), func(ctx context.Context, p Payload) error {
+		return nil
+	})
+
+	is.NoErr(err)
+}
+
+func TestPrecenseWhenNoChangeDetected(t *testing.T) {
+	is, _ := testSetup(t)
+
+	err := PresenceDecoder(context.Background(), []byte(livboj3), func(ctx context.Context, p Payload) error {
+		return nil
+	})
+
+	is.NoErr(err)
+}
+
 func TestTimeStringConvert(t *testing.T) {
 	is, _ := testSetup(t)
 
@@ -207,5 +237,39 @@ const enviot string = `{
 			"temperature":11.5,
 			"vDistance":0
 		}
+	}
+}`
+
+const livboj1 string = `
+{
+	"deviceName": "sn-elt-livboj-01",
+	"devEUI": "a81758fffe04d855",
+	"data": "Bw4dDQA=",
+	"object": {
+		"present": false
+	}
+}`
+
+const livboj2 string = `
+{
+	"deviceName": "sn-elt-livboj-01",
+	"devEUI": "a81758fffe04d855",	
+	"objectJSON": {
+		"closeProximityAlarm": {
+			"value": true
+		}
+	}
+}`
+
+const livboj3 string = `
+{
+	"deviceName": "sn-elt-livboj-01",
+	"devEUI": "a81758fffe04d855",
+	"data": "Bw4dDQA=",
+	"objectJSON": {
+		"buildId" : {
+			"id": 51575888,
+			"modified": false
+		}	
 	}
 }`

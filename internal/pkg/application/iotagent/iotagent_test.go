@@ -68,6 +68,19 @@ func TestErsPayload(t *testing.T) {
 	is.True(co2Pack[1].Name == "CO2")
 }
 
+func TestPresencePayload(t *testing.T) {
+	is, dmc, e := testSetup(t)
+
+	app := NewIoTAgent(dmc, e)
+	err := app.MessageReceived(context.Background(), []byte(livboj))
+
+	is.NoErr(err)
+	is.True(len(e.SendCalls()) > 0)
+
+	pack := e.SendCalls()[0].M.Pack
+	is.True(*pack[1].BoolValue)
+}
+
 func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *events.EventSenderMock) {
 	is := is.New(t)
 	dmc := &domain.DeviceManagementClientMock{
@@ -85,6 +98,9 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *events
 			} else if devEUI == "a81758fffe05e6fb" {
 				res.SensorType = "Elsys_Codec"
 				res.Types = []string{"urn:oma:lwm2m:ext:3303", "urn:oma:lwm2m:ext:3428"}
+			} else if devEUI == "a81758fffe04d855" {
+				res.SensorType = "presence"
+				res.Types = []string{"urn:oma:lwm2m:ext:3302"}
 			} else {
 				res.SensorType = "Elsys_Codec"
 			}
@@ -170,4 +186,14 @@ const ers string = `
         "temperature": 23.8,
         "vdd": 3636
     }
+}`
+
+const livboj string = `
+{
+	"deviceName": "sn-elt-livboj-01",
+	"devEUI": "a81758fffe04d855",
+	"data": "Bw4dDQA=",
+	"object": {
+		"present": true
+	}
 }`

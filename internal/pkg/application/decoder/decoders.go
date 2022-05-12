@@ -30,7 +30,7 @@ func (p Payload) ConvertToStruct(v any) error {
 	if err != nil {
 		return err
 	}
-	return nil	
+	return nil
 }
 
 type MessageDecoderFunc func(context.Context, []byte, func(context.Context, Payload) error) error

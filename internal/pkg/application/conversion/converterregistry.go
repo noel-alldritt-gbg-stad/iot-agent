@@ -17,6 +17,7 @@ func NewConverterRegistry() ConverterRegistry {
 	converters := map[string]MessageConverterFunc{
 		"urn:oma:lwm2m:ext:3303": Temperature,
 		"urn:oma:lwm2m:ext:3428": AirQuality,
+		"urn:oma:lwm2m:ext:3302": Presence,
 	}
 
 	return &converterRegistry{
