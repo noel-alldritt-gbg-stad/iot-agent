@@ -68,6 +68,19 @@ func TestErsPayload(t *testing.T) {
 	is.True(co2Pack[1].Name == "CO2")
 }
 
+func TestPresencePayload(t *testing.T) {
+	is, dmc, e := testSetup(t)
+
+	app := NewIoTAgent(dmc, e)
+	err := app.MessageReceived(context.Background(), []byte(livboj))
+
+	is.NoErr(err)
+	is.True(len(e.SendCalls()) > 0)
+
+	pack := e.SendCalls()[0].M.Pack
+	is.True(*pack[1].BoolValue)
+}
+
 func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *events.EventSenderMock) {
 	is := is.New(t)
 	dmc := &domain.DeviceManagementClientMock{
@@ -85,6 +98,9 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *events
 			} else if devEUI == "a81758fffe05e6fb" {
 				res.SensorType = "Elsys_Codec"
 				res.Types = []string{"urn:oma:lwm2m:ext:3303", "urn:oma:lwm2m:ext:3428"}
+			} else if devEUI == "3489573498573459" {
+				res.SensorType = "presence"
+				res.Types = []string{"urn:oma:lwm2m:ext:3302"}
 			} else {
 				res.SensorType = "Elsys_Codec"
 			}
@@ -171,3 +187,27 @@ const ers string = `
         "vdd": 3636
     }
 }`
+
+const livboj string = `
+{
+    "applicationID": "XYZ",
+    "applicationName": "Livbojar",
+    "deviceName": "Livboj",
+    "deviceProfileName": "Sensative_Codec",
+    "deviceProfileID": "8be301da",    
+	"devEUI": "3489573498573459",
+    "rxInfo": [],
+    "txInfo": {},
+    "adr": true,
+    "fCnt": 128,
+    "fPort": 1,
+    "data": "//8VAQ==",
+    "object": {
+        "closeProximityAlarm": {
+            "value": true
+        },
+        "historySeqNr": 65535,
+        "prevHistSeqNr": 65535
+    }
+}`
+

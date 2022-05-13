@@ -47,6 +47,25 @@ func TestThatCO2DecodesValueCorrectly(t *testing.T) {
 	is.Equal(22.0, *msg[1].Value)
 }
 
+func TestThatPresenceDecodesValueCorrectly(t *testing.T) {
+	is, ctx := mcmTestSetup(t)
+	payload := decoder.Payload{
+		DevEUI:    "ncaknlclkdanklcd",
+		Timestamp: "2006-01-02T15:04:05Z",
+	}
+	present := struct {
+		Presence bool `json:"present"`
+	}{
+		true,
+	}
+	payload.Measurements = append(payload.Measurements, present)
+
+	msg, err := Presence(ctx, "internalID", payload)
+
+	is.NoErr(err)
+	is.True(*msg[1].BoolValue)
+}
+
 func mcmTestSetup(t *testing.T) (*is.I, context.Context) {
 	ctx, _ := logging.NewLogger(context.Background(), "test", "")
 	return is.New(t), ctx

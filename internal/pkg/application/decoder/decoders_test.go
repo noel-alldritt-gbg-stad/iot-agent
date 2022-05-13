@@ -76,6 +76,16 @@ func TestSenlabTBasicDecoderSensorReadingError(t *testing.T) {
 	is.True(err != nil)
 }
 
+func TestPresenceSensorReading(t *testing.T) {
+	is, _ := testSetup(t)
+
+	err := PresenceDecoder(context.Background(), []byte(livboj), func(ctx context.Context, p Payload) error {
+		return nil
+	})
+
+	is.NoErr(err)
+}
+
 func TestTimeStringConvert(t *testing.T) {
 	is, _ := testSetup(t)
 
@@ -209,3 +219,27 @@ const enviot string = `{
 		}
 	}
 }`
+
+const livboj string = `
+{
+    "applicationID": "XYZ",
+    "applicationName": "Livbojar",
+    "deviceName": "Livboj",
+    "deviceProfileName": "Sensative_Codec",
+    "deviceProfileID": "8be301da",    
+	"devEUI": "3489573498573459",
+    "rxInfo": [],
+    "txInfo": {},
+    "adr": true,
+    "fCnt": 128,
+    "fPort": 1,
+    "data": "//8VAQ==",
+    "object": {
+        "closeProximityAlarm": {
+            "value": true
+        },
+        "historySeqNr": 65535,
+        "prevHistSeqNr": 65535
+    }
+}`
+

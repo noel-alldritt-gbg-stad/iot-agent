@@ -20,6 +20,7 @@ func NewDecoderRegistry() DecoderRegistry {
 		"elsys_codec":      ElsysDecoder,
 		"strips_lora_ms_h": SensativeDecoder,
 		"enviot":           EnviotDecoder,
+		"presence":         PresenceDecoder,
 	}
 
 	return &decoderRegistry{
