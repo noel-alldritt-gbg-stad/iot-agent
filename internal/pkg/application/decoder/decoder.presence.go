@@ -7,22 +7,16 @@ import (
 	"time"
 )
 
-func PresenceDecoder(ctx context.Context, msg []byte, fn func(context.Context, Payload) error) error {
+func PresenceDecoder(ctx context.Context, msg []byte, fn func(context.Context, Payload) error) error {		
 	d := struct {
 		DevEUI string `json:"devEUI"`
 		Data   string `json:"data"`
+		DeviceProfileName string `json:"deviceProfileName"`
 		Object struct {
-			Presence *bool `json:"present,omitempty"`
+			Presence struct{
+				Value *bool `json:"value"`
+			} `json:"closeProximityAlarm,omitempty"`
 		} `json:"object,omitempty"`
-		ObjectJSON struct {
-			BuildID struct {
-				Id       *int64 `json:"id,omitempty"`
-				Modified *bool  `json:"modified,omitempty"`
-			} `json:"buildId,omitempty"`
-			CloseProximityAlarm struct {
-				Value *bool `json:"value,omitempty"`
-			} `json:"closeProximityAlarm"`
-		} `json:"objectJSON,omitempty"`
 	}{}
 
 	err := json.Unmarshal(msg, &d)
@@ -34,19 +28,11 @@ func PresenceDecoder(ctx context.Context, msg []byte, fn func(context.Context, P
 		DevEUI:    d.DevEUI,
 		Timestamp: time.Now().Format(time.RFC3339),
 	}
-	if d.Object.Presence != nil {
+	if d.Object.Presence.Value != nil {
 		present := struct {
 			Presence bool `json:"present"`
 		}{
-			*d.Object.Presence,
-		}
-		payload.Measurements = append(payload.Measurements, present)
-	}
-	if d.ObjectJSON.CloseProximityAlarm.Value != nil {
-		present := struct {
-			Presence bool `json:"present"`
-		}{
-			*d.ObjectJSON.CloseProximityAlarm.Value,
+			*d.Object.Presence.Value,
 		}
 		payload.Measurements = append(payload.Measurements, present)
 	}

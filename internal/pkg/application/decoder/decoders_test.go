@@ -79,27 +79,7 @@ func TestSenlabTBasicDecoderSensorReadingError(t *testing.T) {
 func TestPrecenseSensorReading(t *testing.T) {
 	is, _ := testSetup(t)
 
-	err := PresenceDecoder(context.Background(), []byte(livboj1), func(ctx context.Context, p Payload) error {
-		return nil
-	})
-
-	is.NoErr(err)
-}
-
-func TestPrecenseCloseProximityAlarm(t *testing.T) {
-	is, _ := testSetup(t)
-
-	err := PresenceDecoder(context.Background(), []byte(livboj2), func(ctx context.Context, p Payload) error {
-		return nil
-	})
-
-	is.NoErr(err)
-}
-
-func TestPrecenseWhenNoChangeDetected(t *testing.T) {
-	is, _ := testSetup(t)
-
-	err := PresenceDecoder(context.Background(), []byte(livboj3), func(ctx context.Context, p Payload) error {
+	err := PresenceDecoder(context.Background(), []byte(livboj), func(ctx context.Context, p Payload) error {
 		return nil
 	})
 
@@ -240,36 +220,26 @@ const enviot string = `{
 	}
 }`
 
-const livboj1 string = `
+const livboj string = `
 {
-	"deviceName": "sn-elt-livboj-01",
-	"devEUI": "a81758fffe04d855",
-	"data": "Bw4dDQA=",
-	"object": {
-		"present": false
-	}
+    "applicationID": "XYZ",
+    "applicationName": "Livbojar",
+    "deviceName": "Livboj",
+    "deviceProfileName": "Sensative_Codec",
+    "deviceProfileID": "8be301da",    
+	"devEUI": "3489573498573459",
+    "rxInfo": [],
+    "txInfo": {},
+    "adr": true,
+    "fCnt": 128,
+    "fPort": 1,
+    "data": "//8VAQ==",
+    "object": {
+        "closeProximityAlarm": {
+            "value": true
+        },
+        "historySeqNr": 65535,
+        "prevHistSeqNr": 65535
+    }
 }`
 
-const livboj2 string = `
-{
-	"deviceName": "sn-elt-livboj-01",
-	"devEUI": "a81758fffe04d855",	
-	"objectJSON": {
-		"closeProximityAlarm": {
-			"value": true
-		}
-	}
-}`
-
-const livboj3 string = `
-{
-	"deviceName": "sn-elt-livboj-01",
-	"devEUI": "a81758fffe04d855",
-	"data": "Bw4dDQA=",
-	"objectJSON": {
-		"buildId" : {
-			"id": 51575888,
-			"modified": false
-		}	
-	}
-}`

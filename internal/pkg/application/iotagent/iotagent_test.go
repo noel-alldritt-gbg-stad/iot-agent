@@ -98,7 +98,7 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *events
 			} else if devEUI == "a81758fffe05e6fb" {
 				res.SensorType = "Elsys_Codec"
 				res.Types = []string{"urn:oma:lwm2m:ext:3303", "urn:oma:lwm2m:ext:3428"}
-			} else if devEUI == "a81758fffe04d855" {
+			} else if devEUI == "3489573498573459" {
 				res.SensorType = "presence"
 				res.Types = []string{"urn:oma:lwm2m:ext:3302"}
 			} else {
@@ -190,10 +190,24 @@ const ers string = `
 
 const livboj string = `
 {
-	"deviceName": "sn-elt-livboj-01",
-	"devEUI": "a81758fffe04d855",
-	"data": "Bw4dDQA=",
-	"object": {
-		"present": true
-	}
+    "applicationID": "XYZ",
+    "applicationName": "Livbojar",
+    "deviceName": "Livboj",
+    "deviceProfileName": "Sensative_Codec",
+    "deviceProfileID": "8be301da",    
+	"devEUI": "3489573498573459",
+    "rxInfo": [],
+    "txInfo": {},
+    "adr": true,
+    "fCnt": 128,
+    "fPort": 1,
+    "data": "//8VAQ==",
+    "object": {
+        "closeProximityAlarm": {
+            "value": true
+        },
+        "historySeqNr": 65535,
+        "prevHistSeqNr": 65535
+    }
 }`
+
