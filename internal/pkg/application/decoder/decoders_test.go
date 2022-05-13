@@ -76,7 +76,7 @@ func TestSenlabTBasicDecoderSensorReadingError(t *testing.T) {
 	is.True(err != nil)
 }
 
-func TestPrecenseSensorReading(t *testing.T) {
+func TestPresenceSensorReading(t *testing.T) {
 	is, _ := testSetup(t)
 
 	err := PresenceDecoder(context.Background(), []byte(livboj), func(ctx context.Context, p Payload) error {
