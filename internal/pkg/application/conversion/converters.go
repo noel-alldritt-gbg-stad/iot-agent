@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/decoder"
+	lwm2m "github.com/diwise/iot-core/pkg/lwm2m"
+	measurements "github.com/diwise/iot-core/pkg/measurements"
 	"github.com/farshidtz/senml/v2"
 )
 
@@ -30,7 +32,7 @@ func Temperature(ctx context.Context, deviceID string, payload decoder.Payload) 
 
 	var pack senml.Pack
 	pack = append(pack, senml.Record{
-		BaseName:    "urn:oma:lwm2m:ext:3303",
+		BaseName:    lwm2m.Temperature,
 		BaseTime:    baseTime,
 		Name:        "0",
 		StringValue: deviceID,
@@ -39,7 +41,7 @@ func Temperature(ctx context.Context, deviceID string, payload decoder.Payload) 
 	for _, m := range dm.Measurements {
 		if m.Temp != nil {
 			rec := senml.Record{
-				Name:  "Temperature",
+				Name:  measurements.Temperature,
 				Value: m.Temp,
 			}
 
@@ -69,7 +71,7 @@ func AirQuality(ctx context.Context, deviceID string, payload decoder.Payload) (
 
 	var pack senml.Pack
 	pack = append(pack, senml.Record{
-		BaseName:    "urn:oma:lwm2m:ext:3428",
+		BaseName:    lwm2m.AirQuality,
 		BaseTime:    baseTime,
 		Name:        "0",
 		StringValue: deviceID,
@@ -79,7 +81,7 @@ func AirQuality(ctx context.Context, deviceID string, payload decoder.Payload) (
 		if m.CO2 != nil {
 			co2 := float64(*m.CO2)
 			rec := senml.Record{
-				Name:  "CO2",
+				Name:  measurements.CO2,
 				Value: &co2,
 			}
 
@@ -109,7 +111,7 @@ func Presence(ctx context.Context, deviceID string, payload decoder.Payload) (se
 
 	var pack senml.Pack
 	pack = append(pack, senml.Record{
-		BaseName:    "urn:oma:lwm2m:ext:3302",
+		BaseName:    lwm2m.Presence,
 		BaseTime:    baseTime,
 		Name:        "0",
 		StringValue: deviceID,
@@ -118,7 +120,7 @@ func Presence(ctx context.Context, deviceID string, payload decoder.Payload) (se
 	for _, m := range dm.Measurements {
 		if m.Presence != nil {
 			rec := senml.Record{
-				Name:      "Presence",
+				Name:      measurements.Presence,
 				BoolValue: m.Presence,
 			}
 

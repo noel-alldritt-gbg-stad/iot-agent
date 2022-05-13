@@ -2,6 +2,7 @@ package conversion
 
 import (
 	"context"
+	lwm2m "github.com/diwise/iot-core/pkg/lwm2m"
 )
 
 type ConverterRegistry interface {
@@ -15,9 +16,9 @@ type converterRegistry struct {
 func NewConverterRegistry() ConverterRegistry {
 
 	converters := map[string]MessageConverterFunc{
-		"urn:oma:lwm2m:ext:3303": Temperature,
-		"urn:oma:lwm2m:ext:3428": AirQuality,
-		"urn:oma:lwm2m:ext:3302": Presence,
+		lwm2m.Temperature: Temperature,
+		lwm2m.AirQuality:  AirQuality,
+		lwm2m.Presence:    Presence,
 	}
 
 	return &converterRegistry{
