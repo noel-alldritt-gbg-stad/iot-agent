@@ -7,13 +7,13 @@ import (
 	"time"
 )
 
-func PresenceDecoder(ctx context.Context, msg []byte, fn func(context.Context, Payload) error) error {		
+func PresenceDecoder(ctx context.Context, msg []byte, fn func(context.Context, Payload) error) error {
 	d := struct {
-		DevEUI string `json:"devEUI"`
-		Data   string `json:"data"`
+		DevEUI            string `json:"devEUI"`
+		Data              string `json:"data"`
 		DeviceProfileName string `json:"deviceProfileName"`
-		Object struct {
-			Presence struct{
+		Object            struct {
+			Presence struct {
 				Value *bool `json:"value"`
 			} `json:"closeProximityAlarm,omitempty"`
 		} `json:"object,omitempty"`

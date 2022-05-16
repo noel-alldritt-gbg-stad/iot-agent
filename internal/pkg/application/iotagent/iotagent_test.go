@@ -210,4 +210,3 @@ const livboj string = `
         "prevHistSeqNr": 65535
     }
 }`
-
