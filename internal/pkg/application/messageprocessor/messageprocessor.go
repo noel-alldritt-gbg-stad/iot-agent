@@ -32,13 +32,17 @@ func NewMessageReceivedProcessor(dmc domain.DeviceManagementClient, conReg conve
 }
 
 func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg decoder.Payload) error {
-
 	log := logging.GetFromContext(ctx)
 
 	result, err := mp.dmc.FindDeviceFromDevEUI(ctx, msg.DevEUI)
 	if err != nil {
 		log.Error().Err(err).Msg("device lookup failure")
 		return err
+	}
+
+	err = mp.event.Publish(ctx, events.NewStatusMessage(result.InternalID))
+	if err != nil {
+		log.Error().Err(err).Msg("failed to publish status message")
 	}
 
 	if msg.Error != "" {
@@ -64,11 +68,11 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg decoder.Payload)
 			Pack:      payload,
 		}
 
-		err = mp.event.Send(ctx, m)
+		err = mp.event.Send(ctx, &m)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to send event")
 		}
 	}
 
-	return err
+	return nil
 }

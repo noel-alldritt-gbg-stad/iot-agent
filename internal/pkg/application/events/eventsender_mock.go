@@ -5,7 +5,7 @@ package events
 
 import (
 	"context"
-	iotcore "github.com/diwise/iot-core/pkg/messaging/events"
+	"github.com/diwise/messaging-golang/pkg/messaging"
 	"sync"
 )
 
@@ -19,7 +19,10 @@ var _ EventSender = &EventSenderMock{}
 //
 // 		// make and configure a mocked EventSender
 // 		mockedEventSender := &EventSenderMock{
-// 			SendFunc: func(ctx context.Context, m iotcore.MessageReceived) error {
+// 			PublishFunc: func(ctx context.Context, m messaging.TopicMessage) error {
+// 				panic("mock out the Publish method")
+// 			},
+// 			SendFunc: func(ctx context.Context, m messaging.CommandMessage) error {
 // 				panic("mock out the Send method")
 // 			},
 // 			StartFunc: func() error {
@@ -35,8 +38,11 @@ var _ EventSender = &EventSenderMock{}
 //
 // 	}
 type EventSenderMock struct {
+	// PublishFunc mocks the Publish method.
+	PublishFunc func(ctx context.Context, m messaging.TopicMessage) error
+
 	// SendFunc mocks the Send method.
-	SendFunc func(ctx context.Context, m iotcore.MessageReceived) error
+	SendFunc func(ctx context.Context, m messaging.CommandMessage) error
 
 	// StartFunc mocks the Start method.
 	StartFunc func() error
@@ -46,12 +52,19 @@ type EventSenderMock struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// Publish holds details about calls to the Publish method.
+		Publish []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// M is the m argument value.
+			M messaging.TopicMessage
+		}
 		// Send holds details about calls to the Send method.
 		Send []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// M is the m argument value.
-			M iotcore.MessageReceived
+			M messaging.CommandMessage
 		}
 		// Start holds details about calls to the Start method.
 		Start []struct {
@@ -60,19 +73,55 @@ type EventSenderMock struct {
 		Stop []struct {
 		}
 	}
-	lockSend  sync.RWMutex
-	lockStart sync.RWMutex
-	lockStop  sync.RWMutex
+	lockPublish sync.RWMutex
+	lockSend    sync.RWMutex
+	lockStart   sync.RWMutex
+	lockStop    sync.RWMutex
+}
+
+// Publish calls PublishFunc.
+func (mock *EventSenderMock) Publish(ctx context.Context, m messaging.TopicMessage) error {
+	if mock.PublishFunc == nil {
+		panic("EventSenderMock.PublishFunc: method is nil but EventSender.Publish was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		M   messaging.TopicMessage
+	}{
+		Ctx: ctx,
+		M:   m,
+	}
+	mock.lockPublish.Lock()
+	mock.calls.Publish = append(mock.calls.Publish, callInfo)
+	mock.lockPublish.Unlock()
+	return mock.PublishFunc(ctx, m)
+}
+
+// PublishCalls gets all the calls that were made to Publish.
+// Check the length with:
+//     len(mockedEventSender.PublishCalls())
+func (mock *EventSenderMock) PublishCalls() []struct {
+	Ctx context.Context
+	M   messaging.TopicMessage
+} {
+	var calls []struct {
+		Ctx context.Context
+		M   messaging.TopicMessage
+	}
+	mock.lockPublish.RLock()
+	calls = mock.calls.Publish
+	mock.lockPublish.RUnlock()
+	return calls
 }
 
 // Send calls SendFunc.
-func (mock *EventSenderMock) Send(ctx context.Context, m iotcore.MessageReceived) error {
+func (mock *EventSenderMock) Send(ctx context.Context, m messaging.CommandMessage) error {
 	if mock.SendFunc == nil {
 		panic("EventSenderMock.SendFunc: method is nil but EventSender.Send was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
-		M   iotcore.MessageReceived
+		M   messaging.CommandMessage
 	}{
 		Ctx: ctx,
 		M:   m,
@@ -88,11 +137,11 @@ func (mock *EventSenderMock) Send(ctx context.Context, m iotcore.MessageReceived
 //     len(mockedEventSender.SendCalls())
 func (mock *EventSenderMock) SendCalls() []struct {
 	Ctx context.Context
-	M   iotcore.MessageReceived
+	M   messaging.CommandMessage
 } {
 	var calls []struct {
 		Ctx context.Context
-		M   iotcore.MessageReceived
+		M   messaging.CommandMessage
 	}
 	mock.lockSend.RLock()
 	calls = mock.calls.Send
