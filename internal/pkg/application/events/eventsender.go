@@ -7,7 +7,6 @@ import (
 	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
 	"github.com/rs/zerolog"
 
-	iotcore "github.com/diwise/iot-core/pkg/messaging/events"
 	"github.com/diwise/messaging-golang/pkg/messaging"
 )
 
@@ -15,7 +14,8 @@ import (
 
 type EventSender interface {
 	Start() error
-	Send(ctx context.Context, m iotcore.MessageReceived) error
+	Send(ctx context.Context, m messaging.CommandMessage) error
+	Publish(ctx context.Context, m messaging.TopicMessage) error
 	Stop() error
 }
 
@@ -33,7 +33,7 @@ func NewEventSender(serviceName string, logger zerolog.Logger) EventSender {
 	return sender
 }
 
-func (e *eventSender) Send(ctx context.Context, m iotcore.MessageReceived) error {
+func (e *eventSender) Send(ctx context.Context, m messaging.CommandMessage) error {
 	log := logging.GetFromContext(ctx)
 
 	if !e.started {
@@ -43,7 +43,21 @@ func (e *eventSender) Send(ctx context.Context, m iotcore.MessageReceived) error
 	}
 
 	log.Info().Msg("sending command to iot-core queue")
-	return e.rmqMessenger.SendCommandTo(ctx, &m, "iot-core")
+	return e.rmqMessenger.SendCommandTo(ctx, m, "iot-core")
+}
+
+func (e *eventSender) Publish(ctx context.Context, m messaging.TopicMessage) error {
+	log := logging.GetFromContext(ctx)
+
+	if !e.started {
+		err := fmt.Errorf("attempt to publish before start")
+		log.Error().Err(err).Msg("publish failed")
+		return err
+	}
+
+	log.Info().Msgf("publish event to topic %s", m.TopicName())
+
+	return e.rmqMessenger.PublishOnTopic(ctx, m)
 }
 
 func (e *eventSender) Start() error {

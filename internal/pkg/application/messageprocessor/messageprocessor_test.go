@@ -9,7 +9,7 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/application/decoder"
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
-	iotcore "github.com/diwise/iot-core/pkg/messaging/events"
+	"github.com/diwise/messaging-golang/pkg/messaging"
 	"github.com/farshidtz/senml/v2"
 	"github.com/matryer/is"
 )
@@ -58,7 +58,10 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, convers
 		},
 	}
 	ep := &events.EventSenderMock{
-		SendFunc: func(ctx context.Context, m iotcore.MessageReceived) error {
+		SendFunc: func(ctx context.Context, m messaging.CommandMessage) error {
+			return nil
+		},
+		PublishFunc: func(ctx context.Context, m messaging.TopicMessage) error {
 			return nil
 		},
 	}
