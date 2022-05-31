@@ -20,5 +20,5 @@ func (m *StatusMessage) ContentType() string {
 }
 
 func (m *StatusMessage) TopicName() string {
-	return "Status"
+	return "device-status"
 }
