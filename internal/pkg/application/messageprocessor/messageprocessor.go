@@ -34,13 +34,13 @@ func NewMessageReceivedProcessor(dmc domain.DeviceManagementClient, conReg conve
 func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg decoder.Payload) error {
 	log := logging.GetFromContext(ctx)
 
-	result, err := mp.dmc.FindDeviceFromDevEUI(ctx, msg.DevEUI)
+	device, err := mp.dmc.FindDeviceFromDevEUI(ctx, msg.DevEUI)
 	if err != nil {
 		log.Error().Err(err).Msg("device lookup failure")
 		return err
 	}
 
-	err = mp.event.Publish(ctx, events.NewStatusMessage(result.InternalID))
+	err = mp.event.Publish(ctx, events.NewStatusMessage(device.InternalID))
 	if err != nil {
 		log.Error().Err(err).Msg("failed to publish status message")
 	}
@@ -50,28 +50,34 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg decoder.Payload)
 		return nil
 	}
 
-	messageConverters := mp.conReg.DesignateConverters(ctx, result.Types)
+	messageConverters := mp.conReg.DesignateConverters(ctx, device.Types)
 	if len(messageConverters) == 0 {
 		return fmt.Errorf("no matching converters for device")
 	}
 
 	for _, convert := range messageConverters {
-		payload, err := convert(ctx, result.InternalID, msg)
+		payload, err := convert(ctx, device.InternalID, msg)
 		if err != nil {
 			log.Error().Err(err).Msg("conversion failed")
 			continue
 		}
 
 		m := iotcore.MessageReceived{
-			Device:    result.InternalID,
+			Device:    device.InternalID,
 			Timestamp: time.Now().UTC().Format(time.RFC3339),
 			Pack:      payload,
 		}
 
-		err = mp.event.Send(ctx, &m)
-		if err != nil {
-			log.Error().Err(err).Msg("failed to send event")
+		if device.IsActive {
+			err = mp.event.Send(ctx, &m)
+			if err != nil {
+				log.Error().Err(err).Msg("failed to send event")
+			}
 		}
+	}
+
+	if !device.IsActive {
+		log.Warn().Str("deviceID", device.InternalID).Msg("ignoring message from inactive device")
 	}
 
 	return nil
