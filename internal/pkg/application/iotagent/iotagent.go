@@ -3,13 +3,13 @@ package iotagent
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
 	"github.com/diwise/iot-agent/internal/pkg/application/decoder"
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/application/messageprocessor"
 	"github.com/diwise/iot-agent/internal/pkg/domain"
-	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
 )
 
 //go:generate moq -rm -out iotagent_mock.go . IoTAgent
@@ -37,18 +37,15 @@ func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventSender)
 }
 
 func (a *iotAgent) MessageReceived(ctx context.Context, msg []byte) error {
-	log := logging.GetFromContext(ctx)
 
 	devEUI, err := getDevEUIFromMessage(msg)
 	if err != nil {
-		log.Error().Err(err).Msg("unable to get DevEUI from payload")
-		return err
+		return fmt.Errorf("unable to get DevEUI from payload (%w)", err)
 	}
 
 	device, err := a.dmc.FindDeviceFromDevEUI(ctx, devEUI)
 	if err != nil {
-		log.Error().Err(err).Msg("device lookup failure")
-		return err
+		return fmt.Errorf("device lookup failure (%w)", err)
 	}
 
 	d := a.dr.GetDecoderForSensorType(ctx, device.SensorType)
@@ -56,7 +53,7 @@ func (a *iotAgent) MessageReceived(ctx context.Context, msg []byte) error {
 	err = d(ctx, msg, func(c context.Context, m decoder.Payload) error {
 		err = a.mp.ProcessMessage(c, m)
 		if err != nil {
-			log.Error().Err(err).Msg("failed to process message")
+			err = fmt.Errorf("failed to process message (%w)", err)
 		}
 		return err
 	})
