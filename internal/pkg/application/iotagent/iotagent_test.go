@@ -96,6 +96,7 @@ func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *events
 			res := &domain.Result{
 				InternalID: "internal-id-for-device",
 				Types:      []string{"urn:oma:lwm2m:ext:3303"},
+				Active:     true,
 			}
 
 			if devEUI == "70b3d580a010f260" {
