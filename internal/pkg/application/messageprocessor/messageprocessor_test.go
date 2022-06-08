@@ -36,15 +36,17 @@ func TestProcessMessageWorksWithValidTemperatureInput(t *testing.T) {
 
 	err := mp.ProcessMessage(context.Background(), newPayload())
 	is.NoErr(err)
+	is.Equal(len(ep.SendCalls()), 1) // should have been called once
 }
 
-func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, conversion.ConverterRegistry, events.EventSender) {
+func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, conversion.ConverterRegistry, *events.EventSenderMock) {
 	is := is.New(t)
 	dmc := &domain.DeviceManagementClientMock{
 		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (*domain.Result, error) {
 			return &domain.Result{
 				InternalID: "internalID",
 				Types:      []string{"urn:oma:lwm2m:ext:3303"},
+				IsActive:   true,
 			}, nil
 		},
 	}
