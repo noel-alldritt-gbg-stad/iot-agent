@@ -12,36 +12,36 @@ services:
       - iot-device-mgmt
     environment:
       MQTT_HOST: $MQTT_HOST
-      MQTT_PORT: $MQTT_PORT
       MQTT_TOPIC_0: $MQTT_TOPIC_0
       MQTT_TOPIC_1: $MQTT_TOPIC_1
       MQTT_USER: $MQTT_USER
       MQTT_PASSWORD: $MQTT_PASSWORD
-      RABBITMQ_HOST: 'rabbitmq'
       DEV_MGMT_URL: 'http://iot-device-mgmt:8080'
-      OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4318'
+      MSG_FWD_ENDPOINT: 'http://iot-agent:8080/api/v0/messages'
+      RABBITMQ_HOST: 'rabbitmq'
     ports:
       - '8080'
 
   iot-core:
-    image: 'ghcr.io/diwise/iot-core@sha256:70d53cf8d4ff83dfad58e954163b809d658407aaf9c1d55003a76c4c335b8cd5'
+    image: 'ghcr.io/diwise/iot-core:prod-2c7bde63b1a409d5d773e139f9d81f89cb9af702'
     restart: always
     environment:
+      DEV_MGMT_URL: 'http://iot-device-mgmt:8080'
       RABBITMQ_HOST: 'rabbitmq'
-      OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4318'
 
   iot-device-mgmt:
-    image: 'ghcr.io/diwise/iot-device-mgmt@sha256:00302e43e60323692e1c94d1979cacd2b4f38d44f920e8a232040e7b8d5e002c'
+    image: 'ghcr.io/diwise/iot-device-mgmt:prod-2079682e52692648424604f30478fe4c589c02d6'
     restart: always
     environment:
       RABBITMQ_HOST: 'rabbitmq'
-      OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4318'
+    volumes:
+      - ./configs/diwise/devices.csv:/opt/diwise/config/devices.csv
     ports:
       - '8080'
 
   rabbitmq: 
-    #image: 'bitnami/rabbitmq:3.8'
-    image: 'arm64v8/rabbitmq:3.8'
+    image: 'bitnami/rabbitmq:3.8'
+    #image: 'arm64v8/rabbitmq:3.8'
     environment:
       RABBITMQ_DEFAULT_USER: 'user'
       RABBITMQ_DEFAULT_PASS: 'bitnami'
@@ -53,42 +53,6 @@ services:
     volumes:
       - 'rabbitmq_data:/bitnami'
 
-  otel-collector:
-    image: 'otel/opentelemetry-collector:0.48.0'
-    command: '--config /etc/otel-config.yaml'
-    volumes:
-     - ./configs/otel-config.yaml:/etc/otel-config.yaml
-    restart: always
-    ports:
-      - '4318' 
-
-  tempo:
-    image: grafana/tempo:latest
-    command: [ '-config.file=/etc/tempo.yaml' ]
-    volumes:
-      - ./configs/tempo/tempo-local.yaml:/etc/tempo.yaml
-      - ./tempo-data/:/tmp/tempo
-    ports:
-      - '14268'  # jaeger ingest
-      - '3200'   # tempo
-      - '4317'  # otlp grpc
-      - '4318'  # otlp http
-      - '9411'   # zipkin
-
-  
-  grafana:
-    image: grafana/grafana:8.4.5
-    environment:
-      GF_SECURITY_ADMIN_USER: diwise
-      GF_SECURITY_ADMIN_PASSWORD: diwise
-    volumes:
-      - ./configs/grafana/datasources:/etc/grafana/provisioning/datasources
-      - grafana-data:/var/lib/grafana
-    ports: 
-      - '3000:3000'
-
 volumes:
   rabbitmq_data:
     driver: local
-  grafana-data:
-    
