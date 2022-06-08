@@ -88,5 +88,5 @@ type Result struct {
 	InternalID string   `json:"id"`
 	SensorType string   `json:"sensorType"`
 	Types      []string `json:"types"`
-	Active     bool     `json:"active"`
+	IsActive   bool     `json:"active"`
 }

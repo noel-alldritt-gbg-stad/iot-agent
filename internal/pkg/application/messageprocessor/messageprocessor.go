@@ -68,7 +68,7 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg decoder.Payload)
 			Pack:      payload,
 		}
 
-		if device.Active {
+		if device.IsActive {
 			err = mp.event.Send(ctx, &m)
 			if err != nil {
 				log.Error().Err(err).Msg("failed to send event")
@@ -76,7 +76,7 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg decoder.Payload)
 		}
 	}
 
-	if !device.Active {
+	if !device.IsActive {
 		log.Warn().Str("deviceID", device.InternalID).Msg("ignoring message from inactive device")
 	}
 
