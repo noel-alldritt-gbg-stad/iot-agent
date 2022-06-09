@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/diwise/service-chassis/pkg/infrastructure/o11y"
 	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/tracing"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/rs/zerolog"
@@ -29,14 +30,9 @@ func NewMessageHandler(logger zerolog.Logger, forwardingEndpoint string) func(mq
 		ctx, span := tracer.Start(context.Background(), "forward-message")
 		defer func() { tracing.RecordAnyErrorAndEndSpan(err, span) }()
 
-		log := logger
+		_, ctx, log := o11y.AddTraceIDToLoggerAndStoreInContext(span, logger, ctx)
 
-		traceID := span.SpanContext().TraceID()
-		if traceID.IsValid() {
-			log = logger.With().Str("traceID", traceID.String()).Logger()
-		}
-
-		log.Info().Msgf("received payload %s from topic %s", string(payload), msg.Topic())
+		log.Info().Str("topic", msg.Topic()).Msgf("received payload %s", string(payload))
 
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, forwardingEndpoint, bytes.NewBuffer(payload))
 		if err != nil {
