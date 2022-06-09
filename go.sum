@@ -67,14 +67,6 @@ github.com/coreos/go-systemd/v22 v22.3.2/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSV
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/diwise/iot-core v0.0.0-20220509143755-5e88a24d9bb9 h1:EUsNPrdBt3oeVG3rmcZkvBYe6TiDRWzng7s/jhoZ630=
-github.com/diwise/iot-core v0.0.0-20220509143755-5e88a24d9bb9/go.mod h1:zFUar2gH4ACouVt1Aqe6dpak0F5jfO1aG/kLY5lVtlQ=
-github.com/diwise/iot-core v0.0.0-20220513082543-0af2fcef822e h1:qbigd3bduDv+J48QSmYxzT6a8d6M6F6w8r3AHhic/s4=
-github.com/diwise/iot-core v0.0.0-20220513082543-0af2fcef822e/go.mod h1:zFUar2gH4ACouVt1Aqe6dpak0F5jfO1aG/kLY5lVtlQ=
-github.com/diwise/iot-core v0.0.0-20220513113546-08c0585aa5d5 h1:3fjcw6Dlt5sjV9HdtyL944fCxSRFBWujX0PZsyLUGW0=
-github.com/diwise/iot-core v0.0.0-20220513113546-08c0585aa5d5/go.mod h1:zFUar2gH4ACouVt1Aqe6dpak0F5jfO1aG/kLY5lVtlQ=
-github.com/diwise/iot-core v0.0.0-20220513134354-21cec6d1c1bb h1:zlj6OWciCTxlXGcNtnlURf+Nin+zzFgonfZ0W7W8bdM=
-github.com/diwise/iot-core v0.0.0-20220513134354-21cec6d1c1bb/go.mod h1:zFUar2gH4ACouVt1Aqe6dpak0F5jfO1aG/kLY5lVtlQ=
 github.com/diwise/iot-core v0.0.0-20220516083909-2c7bde63b1a4 h1:+nmVRipxcmhI+zloeHPQAUemCAEAer6h7OeX/DUyo7s=
 github.com/diwise/iot-core v0.0.0-20220516083909-2c7bde63b1a4/go.mod h1:zFUar2gH4ACouVt1Aqe6dpak0F5jfO1aG/kLY5lVtlQ=
 github.com/diwise/messaging-golang v0.0.0-20220413073613-1dcf3cdf0dcd h1:MDJCRtTtVsOPaz5LVoBQxnz75DbHu+xdUo7V00aiBJ8=
