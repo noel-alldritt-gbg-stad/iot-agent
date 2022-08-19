@@ -23,6 +23,20 @@ func TestSenlabTBasicDecoder(t *testing.T) {
 	is.Equal(r.Timestamp, "2022-04-12T05:08:50.301732Z")
 }
 
+/*func TestSenlabTTempDecoder(t *testing.T) {
+	is, _ := testSetup(t)
+
+	r := &Payload{}
+
+	err := SenlabTBasicDecoder(context.Background(), []byte(sensinglabstemp), func(c context.Context, m Payload) error {
+		r = &m
+		return nil
+	})
+
+	is.NoErr(err)
+	is.Equal(r.Timestamp, "2022-04-12T05:08:50.301732Z")
+}*/
+
 func TestElsysTemperatureDecoder(t *testing.T) {
 	is, _ := testSetup(t)
 
@@ -141,6 +155,15 @@ const senlabT_sensorReadingError string = `[{
 	"latitude": 57.806266,
 	"longitude": 12.07727
 }]`
+
+/*const sensinglabstemp string = `{
+	"devEUI":"70b3d580a010c589",
+	"deviceName":"sk-senlab-temp-32",
+	"rxInfo":[],"txInfo":{},
+	"adr":true,"fCnt":1347,"fPort":3,
+	"data":"AdCNeZwQARk=",
+	"object":{"batlevel":81,"logValue":17.5625}
+}`*/
 
 const elsysTemp string = `{
 	"applicationID": "8",

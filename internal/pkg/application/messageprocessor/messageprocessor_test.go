@@ -8,7 +8,8 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
 	"github.com/diwise/iot-agent/internal/pkg/application/decoder"
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
-	"github.com/diwise/iot-agent/internal/pkg/domain"
+	"github.com/diwise/iot-device-mgmt/pkg/client"
+	dmctest "github.com/diwise/iot-device-mgmt/pkg/test"
 	"github.com/diwise/messaging-golang/pkg/messaging"
 	"github.com/farshidtz/senml/v2"
 	"github.com/matryer/is"
@@ -17,9 +18,9 @@ import (
 func TestFailsOnInvalidType(t *testing.T) {
 	is, _, cr, ep := testSetup(t)
 
-	dmc := &domain.DeviceManagementClientMock{
-		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (*domain.Result, error) {
-			return &domain.Result{}, errors.New("devEUI does not belong to a sensor of any valid types")
+	dmc := &dmctest.DeviceManagementClientMock{
+		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (client.Device, error) {
+			return nil, errors.New("devEUI does not belong to a sensor of any valid types")
 		},
 	}
 
@@ -39,15 +40,17 @@ func TestProcessMessageWorksWithValidTemperatureInput(t *testing.T) {
 	is.Equal(len(ep.SendCalls()), 1) // should have been called once
 }
 
-func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, conversion.ConverterRegistry, *events.EventSenderMock) {
+func testSetup(t *testing.T) (*is.I, *dmctest.DeviceManagementClientMock, conversion.ConverterRegistry, *events.EventSenderMock) {
 	is := is.New(t)
-	dmc := &domain.DeviceManagementClientMock{
-		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (*domain.Result, error) {
-			return &domain.Result{
-				InternalID: "internalID",
-				Types:      []string{"urn:oma:lwm2m:ext:3303"},
-				IsActive:   true,
-			}, nil
+	dmc := &dmctest.DeviceManagementClientMock{
+		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (client.Device, error) {
+			res := &dmctest.DeviceMock{
+				IDFunc:       func() string { return "internalID" },
+				TypesFunc:    func() []string { return []string{"urn:oma:lwm2m:ext:3303"} },
+				IsActiveFunc: func() bool { return true },
+			}
+
+			return res, nil
 		},
 	}
 	cr := &conversion.ConverterRegistryMock{

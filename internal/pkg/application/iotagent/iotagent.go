@@ -9,7 +9,7 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/application/decoder"
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/application/messageprocessor"
-	"github.com/diwise/iot-agent/internal/pkg/domain"
+	dmc "github.com/diwise/iot-device-mgmt/pkg/client"
 )
 
 //go:generate moq -rm -out iotagent_mock.go . IoTAgent
@@ -21,10 +21,10 @@ type IoTAgent interface {
 type iotAgent struct {
 	mp  messageprocessor.MessageProcessor
 	dr  decoder.DecoderRegistry
-	dmc domain.DeviceManagementClient
+	dmc dmc.DeviceManagementClient
 }
 
-func NewIoTAgent(dmc domain.DeviceManagementClient, eventPub events.EventSender) IoTAgent {
+func NewIoTAgent(dmc dmc.DeviceManagementClient, eventPub events.EventSender) IoTAgent {
 	conreg := conversion.NewConverterRegistry()
 	decreg := decoder.NewDecoderRegistry()
 	msgprcs := messageprocessor.NewMessageReceivedProcessor(dmc, conreg, eventPub)
@@ -48,7 +48,7 @@ func (a *iotAgent) MessageReceived(ctx context.Context, msg []byte) error {
 		return fmt.Errorf("device lookup failure (%w)", err)
 	}
 
-	d := a.dr.GetDecoderForSensorType(ctx, device.SensorType)
+	d := a.dr.GetDecoderForSensorType(ctx, device.SensorType())
 
 	err = d(ctx, msg, func(c context.Context, m decoder.Payload) error {
 		err = a.mp.ProcessMessage(c, m)

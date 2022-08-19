@@ -5,8 +5,9 @@ import (
 	"testing"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
-	"github.com/diwise/iot-agent/internal/pkg/domain"
 	iotcore "github.com/diwise/iot-core/pkg/messaging/events"
+	"github.com/diwise/iot-device-mgmt/pkg/client"
+	dmctest "github.com/diwise/iot-device-mgmt/pkg/test"
 	"github.com/diwise/messaging-golang/pkg/messaging"
 	"github.com/farshidtz/senml/v2"
 	"github.com/matryer/is"
@@ -88,29 +89,31 @@ func getPackFromSendCalls(e *events.EventSenderMock, i int) senml.Pack {
 	return m.Pack
 }
 
-func testSetup(t *testing.T) (*is.I, *domain.DeviceManagementClientMock, *events.EventSenderMock) {
+func testSetup(t *testing.T) (*is.I, *dmctest.DeviceManagementClientMock, *events.EventSenderMock) {
 	is := is.New(t)
-	dmc := &domain.DeviceManagementClientMock{
-		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (*domain.Result, error) {
+	dmc := &dmctest.DeviceManagementClientMock{
+		FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (client.Device, error) {
 
-			res := &domain.Result{
-				InternalID: "internal-id-for-device",
-				Types:      []string{"urn:oma:lwm2m:ext:3303"},
-				IsActive:   true,
-			}
+			types := []string{"urn:oma:lwm2m:ext:3303"}
+			sensorType := "Elsys_Codec"
 
 			if devEUI == "70b3d580a010f260" {
-				res.SensorType = "tem_lab_14ns"
+				sensorType = "tem_lab_14ns"
 			} else if devEUI == "70b3d52c00019193" {
-				res.SensorType = "strips_lora_ms_h"
+				sensorType = "strips_lora_ms_h"
 			} else if devEUI == "a81758fffe05e6fb" {
-				res.SensorType = "Elsys_Codec"
-				res.Types = []string{"urn:oma:lwm2m:ext:3303", "urn:oma:lwm2m:ext:3428"}
+				sensorType = "Elsys_Codec"
+				types = []string{"urn:oma:lwm2m:ext:3303", "urn:oma:lwm2m:ext:3428"}
 			} else if devEUI == "3489573498573459" {
-				res.SensorType = "presence"
-				res.Types = []string{"urn:oma:lwm2m:ext:3302"}
-			} else {
-				res.SensorType = "Elsys_Codec"
+				sensorType = "presence"
+				types = []string{"urn:oma:lwm2m:ext:3302"}
+			}
+
+			res := &dmctest.DeviceMock{
+				IDFunc:         func() string { return "internal-id-for-device" },
+				SensorTypeFunc: func() string { return sensorType },
+				TypesFunc:      func() []string { return types },
+				IsActiveFunc:   func() bool { return true },
 			}
 
 			return res, nil
