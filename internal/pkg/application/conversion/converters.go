@@ -131,6 +131,46 @@ func Presence(ctx context.Context, deviceID string, payload decoder.Payload) (se
 	return pack, nil
 }
 
+func Watermeter(ctx context.Context, deviceID string, payload decoder.Payload) (senml.Pack, error) {
+	dm := struct {
+		Timestamp    string `json:"timestamp"`
+		Measurements []struct {
+			CurrentVolume   *float64 `json:"curVol"`
+			CurrentDateTime string   `json:"curDateTime"`
+		} `json:"measurements"`
+	}{}
+
+	if err := payload.ConvertToStruct(&dm); err != nil {
+		return nil, fmt.Errorf("failed to convert payload: %s", err.Error())
+	}
+
+	baseTime, err := parseTime(dm.Timestamp)
+	if err != nil {
+		return nil, err
+	}
+
+	var pack senml.Pack
+	pack = append(pack, senml.Record{
+		BaseName:    lwm2m.Watermeter,
+		BaseTime:    baseTime,
+		Name:        "0",
+		StringValue: deviceID,
+	})
+
+	for _, m := range dm.Measurements {
+		if m.CurrentVolume != nil {
+			rec := senml.Record{
+				Name:  measurements.CumulatedWaterVolume,
+				Value: m.CurrentVolume,
+			}
+
+			pack = append(pack, rec)
+		}
+	}
+
+	return pack, nil
+}
+
 func parseTime(t string) (float64, error) {
 	baseTime, err := time.Parse(time.RFC3339, t)
 	if err != nil {

@@ -19,6 +19,7 @@ func NewConverterRegistry() ConverterRegistry {
 		lwm2m.Temperature: Temperature,
 		lwm2m.AirQuality:  AirQuality,
 		lwm2m.Presence:    Presence,
+		lwm2m.Watermeter : Watermeter,
 	}
 
 	return &converterRegistry{
