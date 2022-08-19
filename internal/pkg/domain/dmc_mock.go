@@ -14,19 +14,19 @@ var _ DeviceManagementClient = &DeviceManagementClientMock{}
 
 // DeviceManagementClientMock is a mock implementation of DeviceManagementClient.
 //
-// 	func TestSomethingThatUsesDeviceManagementClient(t *testing.T) {
+//	func TestSomethingThatUsesDeviceManagementClient(t *testing.T) {
 //
-// 		// make and configure a mocked DeviceManagementClient
-// 		mockedDeviceManagementClient := &DeviceManagementClientMock{
-// 			FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (Result, error) {
-// 				panic("mock out the FindDeviceFromDevEUI method")
-// 			},
-// 		}
+//		// make and configure a mocked DeviceManagementClient
+//		mockedDeviceManagementClient := &DeviceManagementClientMock{
+//			FindDeviceFromDevEUIFunc: func(ctx context.Context, devEUI string) (Result, error) {
+//				panic("mock out the FindDeviceFromDevEUI method")
+//			},
+//		}
 //
-// 		// use mockedDeviceManagementClient in code that requires DeviceManagementClient
-// 		// and then make assertions.
+//		// use mockedDeviceManagementClient in code that requires DeviceManagementClient
+//		// and then make assertions.
 //
-// 	}
+//	}
 type DeviceManagementClientMock struct {
 	// FindDeviceFromDevEUIFunc mocks the FindDeviceFromDevEUI method.
 	FindDeviceFromDevEUIFunc func(ctx context.Context, devEUI string) (*Result, error)
@@ -64,7 +64,8 @@ func (mock *DeviceManagementClientMock) FindDeviceFromDevEUI(ctx context.Context
 
 // FindDeviceFromDevEUICalls gets all the calls that were made to FindDeviceFromDevEUI.
 // Check the length with:
-//     len(mockedDeviceManagementClient.FindDeviceFromDevEUICalls())
+//
+//	len(mockedDeviceManagementClient.FindDeviceFromDevEUICalls())
 func (mock *DeviceManagementClientMock) FindDeviceFromDevEUICalls() []struct {
 	Ctx    context.Context
 	DevEUI string

@@ -9,7 +9,6 @@ import (
 )
 
 func WatermeteringDecoder(ctx context.Context, msg []byte, fn func(context.Context, Payload) error) error {
-
 	d := struct {
 		DevEUI     string `json:"devEUI"`
 		FPort      int    `json:"fPort"`

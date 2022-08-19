@@ -14,19 +14,19 @@ var _ ConverterRegistry = &ConverterRegistryMock{}
 
 // ConverterRegistryMock is a mock implementation of ConverterRegistry.
 //
-// 	func TestSomethingThatUsesConverterRegistry(t *testing.T) {
+//	func TestSomethingThatUsesConverterRegistry(t *testing.T) {
 //
-// 		// make and configure a mocked ConverterRegistry
-// 		mockedConverterRegistry := &ConverterRegistryMock{
-// 			DesignateConvertersFunc: func(ctx context.Context, types []string) []MessageConverterFunc {
-// 				panic("mock out the DesignateConverters method")
-// 			},
-// 		}
+//		// make and configure a mocked ConverterRegistry
+//		mockedConverterRegistry := &ConverterRegistryMock{
+//			DesignateConvertersFunc: func(ctx context.Context, types []string) []MessageConverterFunc {
+//				panic("mock out the DesignateConverters method")
+//			},
+//		}
 //
-// 		// use mockedConverterRegistry in code that requires ConverterRegistry
-// 		// and then make assertions.
+//		// use mockedConverterRegistry in code that requires ConverterRegistry
+//		// and then make assertions.
 //
-// 	}
+//	}
 type ConverterRegistryMock struct {
 	// DesignateConvertersFunc mocks the DesignateConverters method.
 	DesignateConvertersFunc func(ctx context.Context, types []string) []MessageConverterFunc
@@ -64,7 +64,8 @@ func (mock *ConverterRegistryMock) DesignateConverters(ctx context.Context, type
 
 // DesignateConvertersCalls gets all the calls that were made to DesignateConverters.
 // Check the length with:
-//     len(mockedConverterRegistry.DesignateConvertersCalls())
+//
+//	len(mockedConverterRegistry.DesignateConvertersCalls())
 func (mock *ConverterRegistryMock) DesignateConvertersCalls() []struct {
 	Ctx   context.Context
 	Types []string

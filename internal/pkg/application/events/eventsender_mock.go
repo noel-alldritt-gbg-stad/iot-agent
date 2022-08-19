@@ -15,28 +15,28 @@ var _ EventSender = &EventSenderMock{}
 
 // EventSenderMock is a mock implementation of EventSender.
 //
-// 	func TestSomethingThatUsesEventSender(t *testing.T) {
+//	func TestSomethingThatUsesEventSender(t *testing.T) {
 //
-// 		// make and configure a mocked EventSender
-// 		mockedEventSender := &EventSenderMock{
-// 			PublishFunc: func(ctx context.Context, m messaging.TopicMessage) error {
-// 				panic("mock out the Publish method")
-// 			},
-// 			SendFunc: func(ctx context.Context, m messaging.CommandMessage) error {
-// 				panic("mock out the Send method")
-// 			},
-// 			StartFunc: func() error {
-// 				panic("mock out the Start method")
-// 			},
-// 			StopFunc: func() error {
-// 				panic("mock out the Stop method")
-// 			},
-// 		}
+//		// make and configure a mocked EventSender
+//		mockedEventSender := &EventSenderMock{
+//			PublishFunc: func(ctx context.Context, m messaging.TopicMessage) error {
+//				panic("mock out the Publish method")
+//			},
+//			SendFunc: func(ctx context.Context, m messaging.CommandMessage) error {
+//				panic("mock out the Send method")
+//			},
+//			StartFunc: func() error {
+//				panic("mock out the Start method")
+//			},
+//			StopFunc: func() error {
+//				panic("mock out the Stop method")
+//			},
+//		}
 //
-// 		// use mockedEventSender in code that requires EventSender
-// 		// and then make assertions.
+//		// use mockedEventSender in code that requires EventSender
+//		// and then make assertions.
 //
-// 	}
+//	}
 type EventSenderMock struct {
 	// PublishFunc mocks the Publish method.
 	PublishFunc func(ctx context.Context, m messaging.TopicMessage) error
@@ -99,7 +99,8 @@ func (mock *EventSenderMock) Publish(ctx context.Context, m messaging.TopicMessa
 
 // PublishCalls gets all the calls that were made to Publish.
 // Check the length with:
-//     len(mockedEventSender.PublishCalls())
+//
+//	len(mockedEventSender.PublishCalls())
 func (mock *EventSenderMock) PublishCalls() []struct {
 	Ctx context.Context
 	M   messaging.TopicMessage
@@ -134,7 +135,8 @@ func (mock *EventSenderMock) Send(ctx context.Context, m messaging.CommandMessag
 
 // SendCalls gets all the calls that were made to Send.
 // Check the length with:
-//     len(mockedEventSender.SendCalls())
+//
+//	len(mockedEventSender.SendCalls())
 func (mock *EventSenderMock) SendCalls() []struct {
 	Ctx context.Context
 	M   messaging.CommandMessage
@@ -164,7 +166,8 @@ func (mock *EventSenderMock) Start() error {
 
 // StartCalls gets all the calls that were made to Start.
 // Check the length with:
-//     len(mockedEventSender.StartCalls())
+//
+//	len(mockedEventSender.StartCalls())
 func (mock *EventSenderMock) StartCalls() []struct {
 } {
 	var calls []struct {
@@ -190,7 +193,8 @@ func (mock *EventSenderMock) Stop() error {
 
 // StopCalls gets all the calls that were made to Stop.
 // Check the length with:
-//     len(mockedEventSender.StopCalls())
+//
+//	len(mockedEventSender.StopCalls())
 func (mock *EventSenderMock) StopCalls() []struct {
 } {
 	var calls []struct {
