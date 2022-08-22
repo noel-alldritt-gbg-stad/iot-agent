@@ -134,6 +134,7 @@ func Presence(ctx context.Context, deviceID string, payload decoder.Payload) (se
 func Watermeter(ctx context.Context, deviceID string, payload decoder.Payload) (senml.Pack, error) {
 	dm := struct {
 		Timestamp    string `json:"timestamp"`
+		DeviceName   string `json:"deviceName"`
 		Measurements []struct {
 			CurrentVolume   *float64 `json:"curVol,omitempty"`
 			CurrentDateTime *string  `json:"curDateTime,omitempty"`
@@ -155,6 +156,9 @@ func Watermeter(ctx context.Context, deviceID string, payload decoder.Payload) (
 		BaseTime:    baseTime,
 		Name:        "0",
 		StringValue: deviceID,
+	}, senml.Record{
+		Name:        "DeviceName",
+		StringValue: dm.DeviceName,
 	})
 
 	for _, m := range dm.Measurements {

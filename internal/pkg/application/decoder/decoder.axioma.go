@@ -11,6 +11,7 @@ import (
 func WatermeteringDecoder(ctx context.Context, msg []byte, fn func(context.Context, Payload) error) error {
 	d := struct {
 		DevEUI     string `json:"devEUI"`
+		DeviceName string `json:"deviceName"`
 		FPort      int    `json:"fPort"`
 		SensorType string `json:"deviceProfileName"`
 		Data       string `json:"data"`
@@ -27,6 +28,7 @@ func WatermeteringDecoder(ctx context.Context, msg []byte, fn func(context.Conte
 
 	pp := &Payload{
 		DevEUI:     d.DevEUI,
+		DeviceName: d.DeviceName,
 		FPort:      strconv.Itoa(d.FPort),
 		SensorType: d.SensorType,
 		Timestamp:  time.Now().Format(time.RFC3339),

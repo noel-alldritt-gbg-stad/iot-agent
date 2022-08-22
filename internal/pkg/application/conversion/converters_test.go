@@ -71,8 +71,9 @@ func TestThatWatermeterDecodesValuesCorrectly(t *testing.T) {
 	is, ctx := mcmTestSetup(t)
 
 	payload := decoder.Payload{
-		DevEUI:    "3489573498573459",
-		Timestamp: time.Now().Format(time.RFC3339),
+		DevEUI:     "3489573498573459",
+		DeviceName: "deviceName",
+		Timestamp:  time.Now().Format(time.RFC3339),
 	}
 	curDateTime := struct {
 		CurrentDateTime string `json:"curDateTime"`
