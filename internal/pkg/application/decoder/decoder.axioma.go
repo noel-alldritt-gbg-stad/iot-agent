@@ -16,8 +16,9 @@ func WatermeteringDecoder(ctx context.Context, msg []byte, fn func(context.Conte
 		SensorType string `json:"deviceProfileName"`
 		Data       string `json:"data"`
 		Object     struct {
-			CurrentDateTime string   `json:"curDateTime"`
+			CurrentDateTime *string  `json:"curDateTime,omitempty"`
 			CurrentVolume   *float32 `json:"curVol,omitempty"`
+			StatusCode      *int     `json:"statusCode,omitempty"`
 		} `json:"object"`
 	}{}
 
@@ -34,22 +35,24 @@ func WatermeteringDecoder(ctx context.Context, msg []byte, fn func(context.Conte
 		Timestamp:  time.Now().Format(time.RFC3339),
 	}
 
-	if d.Object.CurrentDateTime != "" {
-		curDateTime := struct {
-			CurrentDateTime string `json:"curDateTime"`
-		}{
-			d.Object.CurrentDateTime,
+	if d.Object.StatusCode != nil {
+		if d.Object.CurrentDateTime != nil {
+			curDateTime := struct {
+				CurrentDateTime string `json:"curDateTime"`
+			}{
+				*d.Object.CurrentDateTime,
+			}
+			pp.Measurements = append(pp.Measurements, curDateTime)
 		}
-		pp.Measurements = append(pp.Measurements, curDateTime)
-	}
 
-	if d.Object.CurrentVolume != nil {
-		curVol := struct {
-			CurrentVolume float32 `json:"curVol"`
-		}{
-			*d.Object.CurrentVolume,
+		if d.Object.CurrentVolume != nil {
+			curVol := struct {
+				CurrentVolume float32 `json:"curVol"`
+			}{
+				*d.Object.CurrentVolume,
+			}
+			pp.Measurements = append(pp.Measurements, curVol)
 		}
-		pp.Measurements = append(pp.Measurements, curVol)
 	}
 
 	err = fn(ctx, *pp)
