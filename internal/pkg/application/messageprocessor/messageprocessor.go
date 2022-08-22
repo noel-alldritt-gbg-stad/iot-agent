@@ -8,8 +8,8 @@ import (
 	"github.com/diwise/iot-agent/internal/pkg/application/conversion"
 	"github.com/diwise/iot-agent/internal/pkg/application/decoder"
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
-	"github.com/diwise/iot-agent/internal/pkg/domain"
 	iotcore "github.com/diwise/iot-core/pkg/messaging/events"
+	dmc "github.com/diwise/iot-device-mgmt/pkg/client"
 	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
 )
 
@@ -18,12 +18,12 @@ type MessageProcessor interface {
 }
 
 type msgProcessor struct {
-	dmc    domain.DeviceManagementClient
+	dmc    dmc.DeviceManagementClient
 	conReg conversion.ConverterRegistry
 	event  events.EventSender
 }
 
-func NewMessageReceivedProcessor(dmc domain.DeviceManagementClient, conReg conversion.ConverterRegistry, event events.EventSender) MessageProcessor {
+func NewMessageReceivedProcessor(dmc dmc.DeviceManagementClient, conReg conversion.ConverterRegistry, event events.EventSender) MessageProcessor {
 	return &msgProcessor{
 		dmc:    dmc,
 		conReg: conReg,
@@ -40,7 +40,7 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg decoder.Payload)
 		return err
 	}
 
-	err = mp.event.Publish(ctx, events.NewStatusMessage(device.InternalID))
+	err = mp.event.Publish(ctx, events.NewStatusMessage(device.ID()))
 	if err != nil {
 		log.Error().Err(err).Msg("failed to publish status message")
 	}
@@ -50,25 +50,25 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg decoder.Payload)
 		return nil
 	}
 
-	messageConverters := mp.conReg.DesignateConverters(ctx, device.Types)
+	messageConverters := mp.conReg.DesignateConverters(ctx, device.Types())
 	if len(messageConverters) == 0 {
 		return fmt.Errorf("no matching converters for device")
 	}
 
 	for _, convert := range messageConverters {
-		payload, err := convert(ctx, device.InternalID, msg)
+		payload, err := convert(ctx, device.ID(), msg)
 		if err != nil {
 			log.Error().Err(err).Msg("conversion failed")
 			continue
 		}
 
 		m := iotcore.MessageReceived{
-			Device:    device.InternalID,
+			Device:    device.ID(),
 			Timestamp: time.Now().UTC().Format(time.RFC3339),
 			Pack:      payload,
 		}
 
-		if device.IsActive {
+		if device.IsActive() {
 			err = mp.event.Send(ctx, &m)
 			if err != nil {
 				log.Error().Err(err).Msg("failed to send event")
@@ -76,8 +76,8 @@ func (mp *msgProcessor) ProcessMessage(ctx context.Context, msg decoder.Payload)
 		}
 	}
 
-	if !device.IsActive {
-		log.Warn().Str("deviceID", device.InternalID).Msg("ignoring message from inactive device")
+	if !device.IsActive() {
+		log.Warn().Str("deviceID", device.ID()).Msg("ignoring message from inactive device")
 	}
 
 	return nil

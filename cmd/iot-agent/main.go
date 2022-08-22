@@ -5,9 +5,9 @@ import (
 
 	"github.com/diwise/iot-agent/internal/pkg/application/events"
 	"github.com/diwise/iot-agent/internal/pkg/application/iotagent"
-	"github.com/diwise/iot-agent/internal/pkg/domain"
 	"github.com/diwise/iot-agent/internal/pkg/infrastructure/services/mqtt"
 	"github.com/diwise/iot-agent/internal/pkg/presentation/api"
+	devicemgmtclient "github.com/diwise/iot-device-mgmt/pkg/client"
 	"github.com/diwise/service-chassis/pkg/infrastructure/buildinfo"
 	"github.com/diwise/service-chassis/pkg/infrastructure/env"
 	"github.com/diwise/service-chassis/pkg/infrastructure/o11y"
@@ -21,7 +21,7 @@ const serviceName string = "iot-agent"
 func main() {
 
 	serviceVersion := buildinfo.SourceVersion()
-	_, logger, cleanup := o11y.Init(context.Background(), serviceName, serviceVersion)
+	ctx, logger, cleanup := o11y.Init(context.Background(), serviceName, serviceVersion)
 	defer cleanup()
 
 	forwardingEndpoint := env.GetVariableOrDie(logger, "MSG_FWD_ENDPOINT", "endpoint that incoming packages should be forwarded to")
@@ -29,7 +29,14 @@ func main() {
 
 	apiPort := env.GetVariableOrDefault(logger, "SERVICE_PORT", "8080")
 
-	app := SetupIoTAgent(logger, serviceName, deviceMgmtClientURL)
+	tokenURL := env.GetVariableOrDie(logger, "OAUTH2_TOKEN_URL", "a valid oauth2 token URL")
+	clientID := env.GetVariableOrDie(logger, "OAUTH2_CLIENT_ID", "a valid oauth2 client id")
+	clientSecret := env.GetVariableOrDie(logger, "OAUTH2_CLIENT_SECRET", "a valid oauth2 client secret")
+
+	app, err := SetupIoTAgent(ctx, logger, serviceName, deviceMgmtClientURL, tokenURL, clientID, clientSecret)
+	if err != nil {
+		logger.Fatal().Err(err).Msg("failed to serup iot agent")
+	}
 
 	mqttConfig, err := mqtt.NewConfigFromEnvironment()
 	if err != nil {
@@ -46,12 +53,16 @@ func main() {
 	SetupAndRunApi(logger, app, apiPort)
 }
 
-func SetupIoTAgent(logger zerolog.Logger, serviceName, deviceMgmtClientURL string) iotagent.IoTAgent {
-	dmc := domain.NewDeviceManagementClient(deviceMgmtClientURL)
+func SetupIoTAgent(ctx context.Context, logger zerolog.Logger, serviceName, deviceMgmtClientURL, oauth2TokenURL, oauth2ClientID, oauth2ClientSecret string) (iotagent.IoTAgent, error) {
+	dmc, err := devicemgmtclient.New(ctx, deviceMgmtClientURL, oauth2TokenURL, oauth2ClientID, oauth2ClientSecret)
+	if err != nil {
+		return nil, err
+	}
+
 	event := events.NewEventSender(serviceName, logger)
 	event.Start()
 
-	return iotagent.NewIoTAgent(dmc, event)
+	return iotagent.NewIoTAgent(dmc, event), nil
 }
 
 func SetupAndRunApi(logger zerolog.Logger, app iotagent.IoTAgent, port string) {
