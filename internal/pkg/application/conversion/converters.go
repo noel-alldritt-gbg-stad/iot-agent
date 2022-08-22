@@ -135,8 +135,8 @@ func Watermeter(ctx context.Context, deviceID string, payload decoder.Payload) (
 	dm := struct {
 		Timestamp    string `json:"timestamp"`
 		Measurements []struct {
-			CurrentVolume   *float64 `json:"curVol"`
-			CurrentDateTime string   `json:"curDateTime"`
+			CurrentVolume   *float64 `json:"curVol,omitempty"`
+			CurrentDateTime *string  `json:"curDateTime,omitempty"`
 		} `json:"measurements"`
 	}{}
 
@@ -162,6 +162,15 @@ func Watermeter(ctx context.Context, deviceID string, payload decoder.Payload) (
 			rec := senml.Record{
 				Name:  measurements.CumulatedWaterVolume,
 				Value: m.CurrentVolume,
+			}
+
+			pack = append(pack, rec)
+		}
+
+		if m.CurrentDateTime != nil {
+			rec := senml.Record{
+				Name:        "CurrentDateTime",
+				StringValue: *m.CurrentDateTime,
 			}
 
 			pack = append(pack, rec)

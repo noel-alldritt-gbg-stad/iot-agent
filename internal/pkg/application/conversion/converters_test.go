@@ -81,7 +81,7 @@ func TestThatWatermeterDecodesValuesCorrectly(t *testing.T) {
 	}
 	payload.Measurements = append(payload.Measurements, curDateTime)
 	curVol := struct {
-		CurrentVolume float32 `json:"curVol"`
+		CurrentVolume float64 `json:"curVol"`
 	}{
 		1009,
 	}
