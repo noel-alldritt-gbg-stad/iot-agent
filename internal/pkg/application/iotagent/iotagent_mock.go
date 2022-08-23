@@ -14,19 +14,19 @@ var _ IoTAgent = &IoTAgentMock{}
 
 // IoTAgentMock is a mock implementation of IoTAgent.
 //
-// 	func TestSomethingThatUsesIoTAgent(t *testing.T) {
+//	func TestSomethingThatUsesIoTAgent(t *testing.T) {
 //
-// 		// make and configure a mocked IoTAgent
-// 		mockedIoTAgent := &IoTAgentMock{
-// 			MessageReceivedFunc: func(ctx context.Context, msg []byte) error {
-// 				panic("mock out the MessageReceived method")
-// 			},
-// 		}
+//		// make and configure a mocked IoTAgent
+//		mockedIoTAgent := &IoTAgentMock{
+//			MessageReceivedFunc: func(ctx context.Context, msg []byte) error {
+//				panic("mock out the MessageReceived method")
+//			},
+//		}
 //
-// 		// use mockedIoTAgent in code that requires IoTAgent
-// 		// and then make assertions.
+//		// use mockedIoTAgent in code that requires IoTAgent
+//		// and then make assertions.
 //
-// 	}
+//	}
 type IoTAgentMock struct {
 	// MessageReceivedFunc mocks the MessageReceived method.
 	MessageReceivedFunc func(ctx context.Context, msg []byte) error
@@ -64,7 +64,8 @@ func (mock *IoTAgentMock) MessageReceived(ctx context.Context, msg []byte) error
 
 // MessageReceivedCalls gets all the calls that were made to MessageReceived.
 // Check the length with:
-//     len(mockedIoTAgent.MessageReceivedCalls())
+//
+//	len(mockedIoTAgent.MessageReceivedCalls())
 func (mock *IoTAgentMock) MessageReceivedCalls() []struct {
 	Ctx context.Context
 	Msg []byte

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/iotagent"
@@ -81,7 +81,7 @@ func (a *api) incomingMessageHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx = logging.NewContextWithLogger(ctx, log)
 
-	msg, _ := ioutil.ReadAll(r.Body)
+	msg, _ := io.ReadAll(r.Body)
 	defer r.Body.Close()
 
 	log.Info().Msg("attempting to process message")

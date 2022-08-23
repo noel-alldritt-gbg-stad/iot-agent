@@ -3,6 +3,7 @@ package conversion
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/diwise/iot-agent/internal/pkg/application/decoder"
 	"github.com/diwise/service-chassis/pkg/infrastructure/o11y/logging"
@@ -64,6 +65,33 @@ func TestThatPresenceDecodesValueCorrectly(t *testing.T) {
 
 	is.NoErr(err)
 	is.True(*msg[1].BoolValue)
+}
+
+func TestThatWatermeterDecodesValuesCorrectly(t *testing.T) {
+	is, ctx := mcmTestSetup(t)
+
+	payload := decoder.Payload{
+		DevEUI:     "3489573498573459",
+		DeviceName: "deviceName",
+		Timestamp:  time.Now().Format(time.RFC3339),
+	}
+	curDateTime := struct {
+		CurrentDateTime string `json:"curDateTime"`
+	}{
+		"2006-01-02T15:04:05Z",
+	}
+	payload.Measurements = append(payload.Measurements, curDateTime)
+	curVol := struct {
+		CurrentVolume float64 `json:"curVol"`
+	}{
+		1009,
+	}
+	payload.Measurements = append(payload.Measurements, curVol)
+
+	msg, err := Watermeter(ctx, "internalID", payload)
+
+	is.NoErr(err)
+	is.True(msg != nil)
 }
 
 func mcmTestSetup(t *testing.T) (*is.I, context.Context) {

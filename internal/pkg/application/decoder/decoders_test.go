@@ -122,6 +122,20 @@ func TestDefaultDecoder(t *testing.T) {
 	is.True(r.DevEUI == "xxxxxxxxxxxxxx")
 }
 
+func TestWatermeteringDecoder(t *testing.T) {
+	is, _ := testSetup(t)
+
+	r := &Payload{}
+
+	err := WatermeteringDecoder(context.Background(), []byte(watermetering), func(c context.Context, m Payload) error {
+		r = &m
+		return nil
+	})
+
+	is.NoErr(err)
+	is.True(r.DevEUI == "3489573498573459")
+}
+
 func testSetup(t *testing.T) (*is.I, zerolog.Logger) {
 	is := is.New(t)
 	return is, zerolog.Logger{}
@@ -249,7 +263,7 @@ const livboj string = `
     "applicationName": "Livbojar",
     "deviceName": "Livboj",
     "deviceProfileName": "Sensative_Codec",
-    "deviceProfileID": "8be301da",    
+    "deviceProfileID": "8be301da",
 	"devEUI": "3489573498573459",
     "rxInfo": [],
     "txInfo": {},
@@ -265,3 +279,51 @@ const livboj string = `
         "prevHistSeqNr": 65535
     }
 }`
+
+const watermetering string = `
+{
+  "applicationID": "2",
+  "applicationName": "Watermetering",
+  "deviceName": "05394167",
+  "deviceProfileName": "Axioma_Universal_Codec",
+  "deviceProfileID": "8be301da",
+  "devEUI": "3489573498573459",
+  "txInfo": { "frequency": 867100000, "dr": 0 },
+  "adr": true,
+  "fCnt": 182,
+  "fPort": 100,
+  "data": "//8VAQ==",
+  "object": {
+    "curDateTime": "2022-02-10 15:13:57",
+    "curVol": 1009,
+    "deltaVol": {
+      "id1": 0,
+      "id10": 13,
+      "id11": 10,
+      "id12": 2,
+      "id13": 0,
+      "id14": 1,
+      "id15": 0,
+      "id16": 5,
+      "id17": 0,
+      "id18": 0,
+      "id19": 0,
+      "id2": 8,
+      "id20": 2,
+      "id21": 0,
+      "id22": 0,
+      "id23": 0,
+      "id3": 0,
+      "id4": 0,
+      "id5": 0,
+      "id6": 0,
+      "id7": 0,
+      "id8": 5,
+      "id9": 6
+    },
+    "frameVersion": 1,
+    "statusCode": 0
+  },
+  "tags": { "Location": "UnSet", "SerialNo": "05394167" }
+}
+`

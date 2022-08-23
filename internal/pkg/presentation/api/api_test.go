@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -54,7 +53,7 @@ func testSetup(t *testing.T) (*is.I, *api, *iotagent.IoTAgentMock) {
 func testRequest(is *is.I, ts *httptest.Server, method, path string, body io.Reader) (*http.Response, string) {
 	req, _ := http.NewRequest(method, ts.URL+path, body)
 	resp, _ := http.DefaultClient.Do(req)
-	respBody, _ := ioutil.ReadAll(resp.Body)
+	respBody, _ := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 
 	return resp, string(respBody)
