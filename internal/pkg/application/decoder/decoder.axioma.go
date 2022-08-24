@@ -24,7 +24,7 @@ func WatermeteringDecoder(ctx context.Context, msg []byte, fn func(context.Conte
 
 	err := json.Unmarshal(msg, &d)
 	if err != nil {
-		return fmt.Errorf("failed to unmarshal elsys payload: %s", err.Error())
+		return fmt.Errorf("failed to unmarshal payload: %s", err.Error())
 	}
 
 	pp := &Payload{

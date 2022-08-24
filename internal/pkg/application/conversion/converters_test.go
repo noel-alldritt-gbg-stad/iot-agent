@@ -92,6 +92,15 @@ func TestThatWatermeterDecodesValuesCorrectly(t *testing.T) {
 
 	is.NoErr(err)
 	is.True(msg != nil)
+
+	is.Equal(msg[1].Name, "DeviceName")
+	is.Equal(msg[1].StringValue, "deviceName")
+
+	is.Equal(msg[2].Name, "CurrentDateTime")
+	is.Equal(msg[2].StringValue, "2006-01-02T15:04:05Z")
+
+	is.Equal(msg[3].Name, "CumulatedWaterVolume")
+	is.Equal(*msg[3].Value, 1009.0)
 }
 
 func mcmTestSetup(t *testing.T) (*is.I, context.Context) {
