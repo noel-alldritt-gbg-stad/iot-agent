@@ -21,6 +21,7 @@ func NewDecoderRegistry() DecoderRegistry {
 		"strips_lora_ms_h": SensativeDecoder,
 		"enviot":           EnviotDecoder,
 		"presence":         PresenceDecoder,
+		"qualcosonic":      WatermeteringDecoder,
 	}
 
 	return &decoderRegistry{
